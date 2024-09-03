@@ -1,0 +1,32 @@
+name: Build
+description: Install and build the repo
+
+inputs:
+  node_version:
+    description: Pnpm version to use
+    required: true
+    default: 22.x
+  pnpm_version:
+    description: Node version to use
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: 🏗️ Setup pnpm ${{ inputs.pnpm_version }}
+      uses: pnpm/action-setup@v4
+      with:
+        version: ${{ inputs.pnpm_version }}
+
+    - name: 🏗️ Setup Node.js ${{ inputs.node_version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ inputs.node_version }}
+        registry-url: 'https://registry.npmjs.org'
+        cache: pnpm
+
+    - name: 🧱 Install dependencies
+      shell: bash
+      run: |
+        # ================= 🧱 Install =================
+        pnpm install

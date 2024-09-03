@@ -1,0 +1,55 @@
+name: 🚧 Build
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: 🚧 Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⛙ Checkout branch ${{ github.ref }}
+        uses: actions/checkout@v4
+
+      - name: 🚧 Build
+        uses: ./.github/actions/build
+
+  test:
+    name: 🧪 Unit Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⛙ Checkout branch ${{ github.ref }}
+        uses: actions/checkout@v4
+
+      - name: 🧱 Install
+        uses: ./.github/actions/install
+
+      - name: 🧪 Unit tests
+        run: |
+          # ================= 🧪 Unit tests =================
+          pnpm run test:unit
+
+  lint:
+    name: 🧹 Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⛙ Checkout branch ${{ github.ref }}
+        uses: actions/checkout@v4
+
+      - name: 🧱 Install
+        uses: ./.github/actions/install
+
+      - name: 🧹 Lint
+        run: |
+          # =================  🧹 Lint  =================
+          pnpm run lint

@@ -1,0 +1,87 @@
+{
+  "name": "@dvcol/typescript-lib-template",
+  "type": "module",
+  "version": "1.0.0",
+  "packageManager": "pnpm@9.9.0",
+  "description": "<description>",
+  "homepage": "https://github.com/dvcol/typescript-lib-template",
+  "bugs": "https://github.com/dvcol/typescript-lib-template/issues",
+  "keywords": [
+    "typescript",
+    "library",
+    "typescript-lib-template"
+  ],
+  "license": "MIT",
+  "author": "dvcol",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dvcol/typescript-lib-template.git"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">= 8"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.cjs",
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "*.md",
+    "LICENSE",
+    "dist"
+  ],
+  "scripts": {
+    "prepare": "husky",
+    "build": "tsup",
+    "watch": "npm run build -- --watch lib",
+    "lint": "eslint lib",
+    "lint:fix": "eslint lib --fix",
+    "test:unit": "vitest --run --coverage",
+    "test:watch": "vitest",
+    "release": "standard-version",
+    "release:changelog": "extract-changelog-release > RELEASE.md"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "peerDependencies": {},
+  "dependencies": {},
+  "devDependencies": {
+    "@commitlint/cli": "^19.4.1",
+    "@commitlint/config-conventional": "^19.4.1",
+    "@dvcol/eslint-plugin-presets": "^1.3.11",
+    "@typescript-eslint/eslint-plugin": "^7.18.0",
+    "@typescript-eslint/parser": "^7.18.0",
+    "@vitest/coverage-v8": "^2.0.5",
+    "eslint": "^8.57.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-eslint-comments": "^3.2.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-jsonc": "^2.16.0",
+    "eslint-plugin-markdown": "^3.0.1",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-vitest": "^0.4.1",
+    "eslint-plugin-yml": "^1.14.0",
+    "extract-changelog-release": "^1.0.2",
+    "husky": "^9.1.5",
+    "jsonc-eslint-parser": "^2.4.0",
+    "lint-staged": "^15.2.10",
+    "prettier": "^3.3.3",
+    "standard-version": "^9.5.0",
+    "tsup": "^8.2.4",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx,vue,svelte,json,md}": [
+      "eslint --fix"
+    ]
+  }
+}

@@ -1,0 +1,29 @@
+name: Build
+description: Install and build the repo
+
+inputs:
+  script:
+    description: Build script
+    default: build
+
+  node_version:
+    description: Pnpm version to use
+    required: true
+  pnpm_version:
+    description: Node version to use
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: 🧱 Install
+      uses: ./.github/actions/install
+      with:
+        node_version: ${{ inputs.node_version }}
+        pnpm_version: ${{ inputs.pnpm_version }}
+
+    - name: 🚧 Build sources
+      shell: bash
+      run: |
+        # =================  🚧 Build  =================
+        pnpm run ${{ inputs.script }}

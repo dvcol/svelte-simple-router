@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "target": "esNext",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "rootDir": "lib",
+    "outDir": "dist",
+    "baseUrl": "lib",
+    "declaration": true,
+    "noEmit": true,
+    "paths": {
+      "~/*": ["./*"]
+    }
+  },
+  "include": ["lib", ".eslintrc.cjs"],
+  "exclude": ["**/*.spec.ts", "**/*.spec.tsx", "**/*.test.ts", "**/*.test.tsx", "dist", "node_modules"]
+}

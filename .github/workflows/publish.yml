@@ -1,0 +1,50 @@
+name: ☁️ Publish
+
+on:
+  workflow_call:
+    inputs:
+      commit-hash:
+        description: Commit to checkout
+        required: false
+        type: string
+      tag-name:
+        description: Tag name
+        required: false
+        type: string
+  workflow_dispatch:
+    inputs:
+      commit-hash:
+        description: Commit to checkout
+        required: false
+        type: string
+      tag-name:
+        description: Tag name
+        required: false
+        type: string
+
+jobs:
+  publish-npm:
+    name: ☁️ Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ⛙ Checkout branch ${{ github.ref }}
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.commit-hash || 'main' }}
+          fetch-depth: 0
+
+      - name: 🚧 Build
+        uses: ./.github/actions/build
+
+      - name: ☁️ Publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          # =================  ☁️ Publish =================
+          # Check status
+          git status
+          git diff --color -U0 | cat
+          
+          # Publish
+          pnpm publish
