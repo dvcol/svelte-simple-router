@@ -1,23 +1,13 @@
-import { resolve } from 'path';
 import { fileURLToPath, URL } from 'url';
 
-import { svelte } from '@sveltejs/vite-plugin-svelte';
-import { sveltePreprocess } from 'svelte-preprocess';
+import { sveltekit } from '@sveltejs/kit/vite';
 
-import { defineConfig } from 'vite';
 import { checker } from 'vite-plugin-checker';
-import dtsPlugin from 'vite-plugin-dts';
+import { defineConfig } from 'vitest/config';
 
 import type { PluginOption } from 'vite';
 
-const plugins: PluginOption[] = [
-  svelte({
-    preprocess: sveltePreprocess({
-      typescript: true,
-    }),
-    emitCss: false,
-  }),
-];
+const plugins: PluginOption[] = [sveltekit()];
 
 if (process.env.NODE_ENV === 'development') {
   plugins.push(
@@ -27,11 +17,8 @@ if (process.env.NODE_ENV === 'development') {
       },
     }),
   );
-} else {
-  plugins.push(dtsPlugin());
 }
 
-// https://vitejs.dev/config/
 export default defineConfig({
   plugins,
   resolve: {
@@ -39,26 +26,10 @@ export default defineConfig({
       '~': fileURLToPath(new URL('./lib', import.meta.url)),
     },
   },
-  build: {
-    outDir: resolve(__dirname, 'dist'),
-    emptyOutDir: true,
-    minify: true,
-    target: 'esnext',
-    lib: {
-      entry: resolve(__dirname, 'lib/index.ts'),
-      formats: ['es', 'cjs'],
-      name: 'svelte-simple-router',
-      fileName: (format, fileName) => `${fileName}.${format === 'es' ? 'js' : format}`,
-    },
-    rollupOptions: {
-      external: ['svelte'],
-      output: {
-        preserveModules: true,
-        preserveModulesRoot: 'lib',
-        globals: {
-          svelte: 'svelte',
-        },
-      },
+  test: {
+    include: ['**/*.{test,spec}.{js,ts}'],
+    alias: {
+      '~/': fileURLToPath(new URL('./lib', import.meta.url)),
     },
   },
 });
