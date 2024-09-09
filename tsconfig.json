@@ -1,23 +1,29 @@
 {
+  "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.tsbuildinfo",
+  "extends": "@tsconfig/svelte/tsconfig.json",
   "compilerOptions": {
-    "target": "esNext",
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "module": "esnext",
-    "moduleResolution": "node",
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
     "resolveJsonModule": true,
-    "sourceMap": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "allowSyntheticDefaultImports": true,
-    "rootDir": "lib",
     "outDir": "dist",
-    "baseUrl": "lib",
+    "noEmit": false,
     "declaration": true,
-    "noEmit": true,
+    /**
+     * Typecheck JS in `.svelte` and `.js` files by default.
+     * Disable checkJs if you'd like to use dynamic types in JS.
+     * Note that setting allowJs false does not prevent the use
+     * of JS in `.svelte` files.
+     */
+    "allowJs": true,
+    "checkJs": true,
+    "isolatedModules": false,
+    "verbatimModuleSyntax": false,
+    "moduleDetection": "force",
     "paths": {
-      "~/*": ["./*"]
+      "~/*": ["./lib/*"]
     }
   },
-  "include": ["lib", ".eslintrc.cjs"],
-  "exclude": ["**/*.spec.ts", "**/*.spec.tsx", "**/*.test.ts", "**/*.test.tsx", "dist", "node_modules"]
+  "include": ["env.d.ts", "lib/**/*.ts", "lib/**/*.js", "lib/**/*.svelte", "lib/*.js", "lib/*.ts", "lib/*.svelte"],
+  "exclude": ["**/*.spec.ts", "**/*.test.ts"]
 }

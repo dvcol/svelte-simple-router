@@ -53,3 +53,8 @@ jobs:
         run: |
           # =================  🧹 Lint  =================
           pnpm run lint
+
+      - name: 🧹 Lint
+        run: |
+          # =================  🧹 Lint  =================
+          pnpm run style

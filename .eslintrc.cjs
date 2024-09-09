@@ -1,17 +1,19 @@
 module.exports = {
   root: true,
-  plugins: ["@dvcol/presets"],
-  extends: [
-    "plugin:@dvcol/presets/typescript",
-    "plugin:@dvcol/presets/vitest",
-    "plugin:@dvcol/presets/prettier",
-  ],
-  rules: {
-    "import/no-extraneous-dependencies": [
-      "error",
-      {
-        packageDir: __dirname,
-      },
-    ],
+  extends: ['plugin:@dvcol/presets/svelte', 'plugin:@dvcol/presets/vitest'],
+  plugins: ['@dvcol/presets'],
+  parserOptions: {
+    project: ['./tsconfig.json', './tsconfig.vite.json'],
   },
+  rules: {
+    'import/no-extraneous-dependencies': ['error', { devDependencies: ['**/*.test.*', '**/*.spec.*', '**/*.config.*', 'scripts/*.*'] }],
+  },
+  overrides: [
+    {
+      files: ['*.json', '*.json5'],
+      rules: {
+        '@typescript-eslint/consistent-type-imports': 'off',
+      },
+    },
+  ],
 };

@@ -1,21 +1,21 @@
 {
-  "name": "@dvcol/typescript-lib-template",
+  "name": "@dvcol/svelte-simple-router",
   "type": "module",
   "version": "1.0.0",
   "packageManager": "pnpm@9.9.0",
-  "description": "<description>",
-  "homepage": "https://github.com/dvcol/typescript-lib-template",
-  "bugs": "https://github.com/dvcol/typescript-lib-template/issues",
+  "description": "Simple svelte SPA router",
+  "homepage": "https://github.com/dvcol/svelte-simple-router",
+  "bugs": "https://github.com/dvcol/svelte-simple-router/issues",
   "keywords": [
     "typescript",
     "library",
-    "typescript-lib-template"
+    "svelte-simple-router"
   ],
   "license": "MIT",
   "author": "dvcol",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dvcol/typescript-lib-template.git"
+    "url": "https://github.com/dvcol/svelte-simple-router.git"
   },
   "engines": {
     "node": ">=20",
@@ -28,7 +28,25 @@
     ".": {
       "require": "./dist/index.cjs",
       "import": "./dist/index.js",
+      "svetle": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./service": {
+      "require": "./dist/service/router.service.cjs",
+      "import": "./dist/service/router.service.js",
+      "types": "./dist/services/index.d.ts"
+    },
+    "./router": {
+      "require": "./dist/components/Router.svelte.cjs",
+      "import": "./dist/components/Router.svelte.js",
+      "svetle": "./dist/components/Router.svelte.js",
+      "types": "./dist/components/Router.svelte.d.ts"
+    },
+    "./link": {
+      "require": "./dist/components/Link.svelte.cjs",
+      "import": "./dist/components/Link.svelte.js",
+      "svetle": "./dist/components/Link.svelte.js",
+      "types": "./dist/components/Link.svelte.d.ts"
     }
   },
   "files": [
@@ -38,10 +56,18 @@
   ],
   "scripts": {
     "prepare": "husky",
-    "build": "tsup",
-    "watch": "npm run build -- --watch lib",
+    "vite:serve": "vite --host",
+    "vite:build": "vite build",
+    "vite:watch": "vite build --watch",
+    "svelte:check": "svelte-check --tsconfig ./tsconfig.json",
+    "type:check": "tsc -p tsconfig.vite.json",
+    "check": "run-s svelte:check type:check",
+    "build": "run-s check vite:build",
+    "watch": "run-p check vite:watch",
     "lint": "eslint lib",
     "lint:fix": "eslint lib --fix",
+    "style": "stylelint **/*.{svelte,css,scss,less,html} --go '{\"gitignore\":true}'",
+    "style:fix": "pnpm run style --fix",
     "test:unit": "vitest --run --coverage",
     "test:watch": "vitest",
     "release": "standard-version",
@@ -50,12 +76,19 @@
   "publishConfig": {
     "access": "public"
   },
-  "peerDependencies": {},
-  "dependencies": {},
+  "dependencies": {
+    "svelte": "next",
+    "vite": "^5.4.3"
+  },
   "devDependencies": {
     "@commitlint/cli": "^19.4.1",
     "@commitlint/config-conventional": "^19.4.1",
     "@dvcol/eslint-plugin-presets": "^1.3.11",
+    "@dvcol/stylelint-plugin-presets": "^2.1.2",
+    "@sveltejs/vite-plugin-svelte": "next",
+    "@tsconfig/node22": "^22.0.0",
+    "@tsconfig/svelte": "^5.0.4",
+    "@types/node": "^22.5.1",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "@vitest/coverage-v8": "^2.0.5",
@@ -67,21 +100,35 @@
     "eslint-plugin-jsonc": "^2.16.0",
     "eslint-plugin-markdown": "^3.0.1",
     "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-svelte": "^2.43.0",
     "eslint-plugin-vitest": "^0.4.1",
     "eslint-plugin-yml": "^1.14.0",
     "extract-changelog-release": "^1.0.2",
     "husky": "^9.1.5",
     "jsonc-eslint-parser": "^2.4.0",
     "lint-staged": "^15.2.10",
+    "npm-run-all2": "^6.2.2",
+    "postcss": "^8.4.45",
+    "postcss-syntax": "^0.36.2",
     "prettier": "^3.3.3",
+    "prettier-plugin-svelte": "^3.2.6",
+    "sass": "^1.77.8",
     "standard-version": "^9.5.0",
-    "tsup": "^8.2.4",
+    "stylelint": "^16.9.0",
+    "svelte-check": "^4.0.1",
+    "svelte-preprocess": "^6.0.2",
     "typescript": "^5.5.4",
+    "vite": "^5.4.2",
+    "vite-plugin-checker": "^0.7.2",
+    "vite-plugin-dts": "^4.2.1",
     "vitest": "^2.0.5"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,vue,svelte,json,md}": [
       "eslint --fix"
+    ],
+    "*.{css,scss,less,vue,svelte}": [
+      "stylelint --fix"
     ]
   }
 }
