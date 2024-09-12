@@ -23,13 +23,13 @@ export default defineConfig({
   plugins,
   resolve: {
     alias: {
-      '~': fileURLToPath(new URL('./lib', import.meta.url)),
+      '~': fileURLToPath(new URL('./src/lib', import.meta.url)),
     },
   },
   test: {
     include: ['**/*.{test,spec}.{js,ts}'],
     alias: {
-      '~/': fileURLToPath(new URL('./lib', import.meta.url)),
+      '~/': fileURLToPath(new URL('./src/lib', import.meta.url)),
     },
   },
 });
