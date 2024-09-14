@@ -31,6 +31,14 @@ export const enum ErrorTypes {
    * The route path and name do not match.
    */
   ROUTER_CONFIG_NAME_PATH_MISMATCH = 'ROUTER_CONFIG_NAME_PATH_MISMATCH',
+  /**
+   * The provided path for a route is invalid and cannot be compiled into a valid regex.
+   */
+  MATCHER_INVALID_PATH = 'MATCHER_INVALID_PATH',
+  /**
+   * Parsing errors are thrown when the router cannot compute a relative path.
+   */
+  PARSING_RELATIVE_PATH_ERROR = 'PARSING_RELATIVE_PATH_ERROR',
 }
 
 type NavigationErrors = ErrorTypes.NAVIGATION_CANCELLED | ErrorTypes.NAVIGATION_ABORTED | ErrorTypes.NAVIGATION_NOT_FOUND;
@@ -152,5 +160,45 @@ export class RouterNamePathMismatchError<Name extends RouteName = string> extend
     message = `Route path "${path}" with name "${String(name)}" does not match registered${registeredName ? ` name "${String(registeredName)}"` : ''}${registeredPath ? ` path "${registeredPath}"` : ''}`,
   ) {
     super(ErrorTypes.ROUTER_CONFIG_NAME_PATH_MISMATCH, { message, error: { name, path, registeredName, registeredPath } });
+  }
+}
+
+type MatcherErrorTypes = ErrorTypes.MATCHER_INVALID_PATH;
+export class MatcherError<E = unknown> extends Error {
+  readonly type: MatcherErrorTypes;
+  readonly error?: E;
+  constructor(type: MatcherErrorTypes, error: E, message = `Matcher error: ${type}`) {
+    super(message);
+    this.type = type;
+    this.error = error;
+  }
+}
+
+export class MatcherInvalidPathError extends MatcherError<string> {
+  declare readonly type: ErrorTypes.MATCHER_INVALID_PATH;
+  constructor(path: string, message = `Invalid path "${path}"`) {
+    super(ErrorTypes.MATCHER_INVALID_PATH, path, message);
+  }
+}
+
+type ParsingErrorTypes = ErrorTypes.PARSING_RELATIVE_PATH_ERROR;
+export class ParsingError<E = unknown> extends Error {
+  readonly type: ParsingErrorTypes;
+  readonly error?: E;
+  constructor(type: ParsingErrorTypes, error: E, message = `Parsing error: ${type}`) {
+    super(message);
+    this.type = type;
+    this.error = error;
+  }
+}
+
+type ParsingRelativePathErrorPayload = { parent?: string; relative?: string };
+export class ParsingRelativePathError extends ParsingError<ParsingRelativePathErrorPayload> {
+  declare readonly type: ErrorTypes.PARSING_RELATIVE_PATH_ERROR;
+  constructor(
+    { parent, relative }: ParsingRelativePathErrorPayload,
+    message = `Error parsing relative path "${relative}" from parent path "${parent}"`,
+  ) {
+    super(ErrorTypes.PARSING_RELATIVE_PATH_ERROR, { parent, relative }, message);
   }
 }

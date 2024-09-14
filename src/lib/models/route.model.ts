@@ -17,26 +17,8 @@ export type HistoryState = {
 };
 
 export type RouteParamValue = string | number | boolean;
-export type RouteParams = Record<string, RouteParamValue | RouteParamValue[]>;
-export type RouteQuery = Record<string, RouteParamValue | RouteParamValue[] | undefined>;
-
-/**
- * Common options for all navigation methods.
- */
-export type RouteNavigateOptions = {
-  /**
-   * Replace the entry in the history instead of pushing a new entry
-   */
-  replace?: boolean;
-  /**
-   * Triggers the navigation even if the location is the same as the current one.
-   * Note this will also add a new entry to the history unless `replace: true`
-   * is passed.
-   *
-   * @todo This is not yet implemented.
-   */
-  force?: boolean;
-};
+export type RouteParams = Record<string, RouteParamValue>;
+export type RouteQuery = Record<string, RouteParamValue>;
 
 export type CommonRouteNavigation = {
   /**
@@ -64,6 +46,10 @@ export type RouteLocationNavigation = CommonRouteNavigation & {
    * Path of the location.
    */
   path: string;
+  /**
+   * Name is forbidden in this case.
+   */
+  name?: never;
 };
 
 export type RouteName = string | number | symbol;
@@ -73,6 +59,10 @@ export type RouteNameNavigation<Name extends RouteName = string> = CommonRouteNa
    * Name of the route.
    */
   name: Name;
+  /**
+   * Path is forbidden in this case.
+   */
+  path?: never;
 };
 
 export type RouteNavigation<Name extends RouteName = string> = RouteLocationNavigation | RouteNameNavigation<Name>;
@@ -86,6 +76,14 @@ export type RouteComponent = {
    */
   component: ComponentOrLazy;
   /**
+   * Loading component to display while the component is being loaded.
+   */
+  loading?: Component;
+  /**
+   * Error component to display if the component fails to load.
+   */
+  error?: Component;
+  /**
    * Allow passing down params as props to the component rendered by `router`.
    */
   props?: ComponentProps;
@@ -97,13 +95,29 @@ export type RouteComponent = {
    * Components are forbidden in this case.
    */
   components?: never;
+  /**
+   * Loading components are forbidden in this case.
+   */
+  loadings?: never;
+  /**
+   * Error components are forbidden in this case.
+   */
+  errors?: never;
 };
 
 export type RouteComponents<Name extends RouteName = string> = {
   /**
    * Components to display when the URL matches this route.
    */
-  components: Record<Name, RouteComponent>;
+  components: Record<Name, ComponentOrLazy>;
+  /**
+   * Loading components to display while the components are being loaded.
+   */
+  loadings?: Record<Name, Component>;
+  /**
+   * Error components to display if the components fail to load.
+   */
+  errors?: Record<Name, Component>;
   /**
    * Allow passing down params as props to the component rendered by `router`.
    */
@@ -116,6 +130,14 @@ export type RouteComponents<Name extends RouteName = string> = {
    * Component is forbidden in this case.
    */
   component?: never;
+  /**
+   * Loading component is forbidden in this case.
+   */
+  loading?: never;
+  /**
+   * Error component is forbidden in this case.
+   */
+  error?: never;
 };
 
 export type RouteRedirect = {
@@ -126,6 +148,10 @@ export type RouteRedirect = {
    */
   redirect?: RouteNavigation;
   /**
+   * Props are forbidden in this case.
+   */
+  props?: never;
+  /**
    * Component is forbidden in this case.
    */
   component?: never;
@@ -134,9 +160,21 @@ export type RouteRedirect = {
    */
   components?: never;
   /**
-   * Props are forbidden in this case.
+   * Loading component is forbidden in this case.
    */
-  props?: never;
+  loading?: never;
+  /**
+   * Loading components are forbidden in this case.
+   */
+  loadings?: never;
+  /**
+   * Error component is forbidden in this case.
+   */
+  error?: never;
+  /**
+   * Error components is forbidden in this case.
+   */
+  errors?: never;
 };
 
 export type NavigationGuardReturn<Name extends RouteName = string> = void | boolean | Error | RouteNavigation<Name>;
@@ -188,11 +226,23 @@ export type ResolvedRoute<Name extends RouteName = string> = {
    */
   route?: Route<Name>;
   /**
+   * Name of the resolved route record.
+   */
+  name?: Name;
+  /**
    * Resolved path with query and params.
    */
   path: string;
   /**
    * Full matched path including parents and base.
    */
-  href: string;
+  href: URL;
+  /**
+   * Query parameters of the location.
+   */
+  query: RouteQuery;
+  /**
+   * Params of the location.
+   */
+  params: RouteParams;
 };
