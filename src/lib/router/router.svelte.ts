@@ -1,29 +1,50 @@
 /// <reference types="navigation-api-types" />
 
-import type { NavigationGuard, NavigationListener, ResolvedRoute, Route, RouteName, RouteNavigation } from '~/models/route.model.js';
+import { randomHex } from '@dvcol/common-utils';
 
-import type { IRouter, ResolvedRouterLocation, RouterLocation, RouterNavigationOptions, RouterOptions } from '~/models/router.model.js';
+import type { NavigationGuard, NavigationListener, ParsedRoute, ResolvedRoute, Route, RouteName, RouteNavigation } from '~/models/route.model.js';
+
+import type {
+  IHistory,
+  IRouter,
+  ResolvedRouterLocation,
+  RouterLocation,
+  RouterNavigationOptions,
+  RouterOptions,
+  RouterStateLocation,
+} from '~/models/router.model.js';
 
 import { NavigationNotFoundError, RouterNameConflictError, RouterNamePathMismatchError, RouterPathConflictError } from '~/models/error.model.js';
-import { Matcher, replacePathParams } from '~/models/matcher.model.js';
-import { RouterStateSymbol } from '~/models/router.model.js';
+import { Matcher, replaceTemplateParams } from '~/models/matcher.model.js';
+import { RouterStateConstant } from '~/models/router.model.js';
 
-import { Logger } from '~/utils/logger.utils.js';
+import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 import { computeAbsolutePath, resolveNewHref, routeToHistoryState } from '~/utils/navigation.utils.js';
+import { toPathSegment } from '~/utils/string.utils.js';
 
-type InternalRoute<Name extends RouteName = string> = Route<Name> & { matcher: Matcher<Name> };
+export class Router<Name extends RouteName = RouteName> implements IRouter<Name> {
+  /**
+   * Unique identifier for the router instance.
+   * @private
+   */
+  readonly id = randomHex(4);
 
-export class Router<Name extends RouteName = string> implements IRouter<Name> {
+  /**
+   * Logger prefix for the router instance.
+   * @private
+   */
+  readonly #log = `[${LoggerKey} - ${this.id}]`;
+
   /**
    * Original options object passed to create the Router
    */
-  readonly #options: RouterOptions<Name> & { history: History };
+  readonly #options: RouterOptions<Name> & { history: IHistory<Name> };
 
   /**
    * Map of all the routes added to the router.
    * @private
    */
-  #routes: Map<string, InternalRoute<Name>> = $state(new Map());
+  #routes: Map<string, ParsedRoute<Name>> = $state(new Map());
 
   /**
    * Map of all the named routes added to the router.
@@ -35,7 +56,7 @@ export class Router<Name extends RouteName = string> implements IRouter<Name> {
    * List of all the routes matchers.
    * @private
    */
-  #internalRoutes = $derived(Array.from(this.#routes.values()));
+  #parsedRoutes = $derived(Array.from(this.#routes.values()));
 
   /**
    * Current {@link RouterLocation}
@@ -84,47 +105,36 @@ export class Router<Name extends RouteName = string> implements IRouter<Name> {
   #onErrorListeners: Set<NavigationListener<Name>> = $state(new Set());
 
   /**
-   * If the router is listening to the `popstate` and 'beforeunload' events.
+   * If the router is listening to `popstate` or `navigate`  events.
    * @private
    */
-  #listening = false;
+  #listening: 'popstate' | 'navigate' | false = false;
 
   /**
-   * Event listener for the `beforeunload` event.
+   * Event listener for the `navigate` or `popstate` event.
    * @private
    */
-  #beforeUnloadListener: (event?: BeforeUnloadEvent) => void = () => {
-    if (this.#history.state?.[RouterStateSymbol]) return;
-    const { state, title } = routeToHistoryState({ route: this.route, location: this.location }, this.#options);
-    this.#history.replaceState(state, title ?? '');
-  };
-
-  /**
-   * Event listener for the `popstate` event.
-   * @param event
-   * @private
-   */
-  #popStateListener: (event: PopStateEvent) => void = (event: PopStateEvent) => {
-    console.info('popstate', { isInternalEvent: event.state?.[RouterStateSymbol], event }, this.routes);
-    // Todo listen to popstate
-  };
-
-  /**
-   * Event listener for the `navigate` event.
-   * @param event
-   * @private
-   */
-  #navigateListener: (event: NavigationCurrentEntryChangeEvent) => void = (event: NavigationCurrentEntryChangeEvent) => {
-    console.info('navigate', { event }, this.routes);
-    // Todo listen to navigate
+  #navigateListener: (event: PopStateEvent | NavigationCurrentEntryChangeEvent) => void = () => {
+    const routerState: RouterStateLocation<Name> = this.#history.state?.[RouterStateConstant];
+    if (routerState && this.#location?.href?.toString() === routerState.href?.toString()) return;
+    this.#sync();
+    Logger.debug(this.#log, 'Navigate listener', { route: this.route, location: this.location });
   };
 
   /**
    * History instance to use.
    * @private
    */
-  get #history(): History {
+  get #history(): IHistory<Name> {
     return this.#options.history ?? window.history;
+  }
+
+  /**
+   * If the router should use the hash portion of the URL for routing.
+   * @private
+   */
+  get #hash(): boolean {
+    return this.#options.hash ?? false;
   }
 
   /**
@@ -147,28 +157,27 @@ export class Router<Name extends RouteName = string> implements IRouter<Name> {
     return Array.from(this.#routes.values());
   }
 
-  constructor(options: RouterOptions<Name>) {
-    this.#options = { history: window.history, listen: true, ...options };
-    this.#options.routes?.forEach(this.addRoute);
+  constructor(options: RouterOptions<Name> = {}) {
+    this.#options = { history: window.history, listen: true, ...options, base: toPathSegment(options.base) };
+    this.#options.routes?.forEach(this.addRoute.bind(this));
     if (this.#options.listen) this.init();
-    Logger.debug('Router created', { options: this.#options });
+    Logger.debug(this.#log, 'Router created', { options: this.#options });
+    this.#sync();
   }
 
   init() {
     if (this.#listening) return;
-    window.addEventListener('popstate', this.#popStateListener);
-    window.addEventListener('beforeunload', this.#beforeUnloadListener);
-    window.navigation?.addEventListener('currententrychange', this.#navigateListener);
-    this.#listening = true;
-    Logger.debug('Router init', { listening: this.#listening });
+    if (window.navigation) window.navigation.addEventListener('currententrychange', this.#navigateListener);
+    else window.addEventListener('popstate', this.#navigateListener);
+    this.#listening = window.navigation ? 'navigate' : 'popstate';
+    Logger.debug(this.#log, 'Router init', { listening: this.#listening }, window.navigation);
   }
 
   destroy() {
-    window.removeEventListener('popstate', this.#popStateListener);
-    window.removeEventListener('beforeunload', this.#beforeUnloadListener);
+    window.removeEventListener('popstate', this.#navigateListener);
     window.navigation?.removeEventListener('currententrychange', this.#navigateListener);
     this.#listening = false;
-    Logger.debug('Router destroy', { listening: this.#listening });
+    Logger.debug(this.#log, 'Router destroy', { listening: this.#listening });
   }
 
   /**
@@ -209,11 +218,19 @@ export class Router<Name extends RouteName = string> implements IRouter<Name> {
   addRoute(route: Route<Name>): Router<Name> {
     if (route.name && this.hasRouteName(route.name)) throw new RouterNameConflictError(route.name);
     if (route.path && this.hasRoutePath(route.path)) throw new RouterPathConflictError(route.path);
-    const _route = route as InternalRoute<Name>;
+    const _route = route as ParsedRoute<Name>;
     _route.matcher = new Matcher(route);
     this.#routes.set(route.path, _route);
     if (route.name) this.#namedRoutes.set(route.name, route.path);
-    Logger.debug('Route added', { route, routes: this.routes, names: this.#namedRoutes });
+    Logger.debug(this.#log, 'Route added', { route, routes: this.routes, names: this.#namedRoutes });
+    route.children?.forEach(child => {
+      const _child: Route<Name> = {
+        ...child,
+        path: [route.path, child.path].map(p => toPathSegment(p)).join(''),
+        parent: route,
+      };
+      this.addRoute(_child);
+    });
     return this;
   }
 
@@ -224,10 +241,10 @@ export class Router<Name extends RouteName = string> implements IRouter<Name> {
    * @param path - Path of the route to remove
    */
   removeRoute({ path, name }: { name: Name; path?: Route<Name>['path'] } | { name?: Name; path: Route<Name>['path'] }): boolean {
-    // If no name or path is provided, return false
+    //  If no name or path is provided, return false
     if (!name && !path) return false;
 
-    // Check if the name or path provided matches the registered name or path when both are provided
+    //  Check if the name or path provided matches the registered name or path when both are provided
     const registeredPath = name ? this.#namedRoutes.get(name) : undefined;
     const registeredName = path ? this.#routes.get(path)?.name : undefined;
     if (name && path) {
@@ -237,7 +254,7 @@ export class Router<Name extends RouteName = string> implements IRouter<Name> {
 
     const _path = path || registeredPath;
     const _name = name || registeredName;
-    Logger.debug('Removing route', { name: _name, path: _path, routes: this.routes, names: this.#namedRoutes });
+    Logger.debug(this.#log, 'Removing route', { name: _name, path: _path, routes: this.routes, names: this.#namedRoutes });
     if (_name && !_path) return this.#namedRoutes.delete(_name);
     if (_path && !_name) return this.#routes.delete(_path);
     if (_name && _path) return this.#routes.delete(_path) || this.#namedRoutes.delete(_name);
@@ -330,39 +347,51 @@ export class Router<Name extends RouteName = string> implements IRouter<Name> {
     const { query, params, path, name } = to;
 
     let _path: string | undefined = path;
-    // if 'name' is present, use namedRoutes to resolve path
+    //  if 'name' is present, use namedRoutes to resolve path
     if (!path && name) _path = this.#namedRoutes.get(name);
     if (!_path) throw new NavigationNotFoundError({ to, from }, { message: 'No path could be resolved from the provided location' });
 
-    // if relative path, use from and compute absolute path
+    // strip hash from path
+    if (hash) {
+      if (_path.startsWith('/#')) _path = _path.slice(2);
+      if (_path.startsWith('#')) _path = _path.slice(1);
+    }
+    //  if relative path, use from and compute absolute path
     if (_path?.startsWith('.')) {
       if (!from) throw new NavigationNotFoundError({ to, from }, { message: 'Relative path provided but no current location could be found' });
       _path = computeAbsolutePath(from?.path ?? '', _path);
     }
+    if (!_path.startsWith('/')) _path = `/${_path}`;
 
-    // inject params into path
-    if (params && _path) _path = replacePathParams(_path, params);
+    // Attempt to find route by path
+    let route: ParsedRoute<Name> | undefined = this.#routes.get(_path);
 
-    // Find exact match
-    let route: Route<Name> | undefined = this.#internalRoutes.find(r => r.matcher.match(_path, { strict: true, base }));
+    //  inject params into path
+    if (_path) _path = replaceTemplateParams(_path, { ...route?.params, ...params });
 
-    // If no route found, find first match (if strict is false)
-    if (!route && !strict) route = this.#internalRoutes.find(r => r.matcher.match(_path, { base }));
+    //  Find exact match
+    route = this.#parsedRoutes.find(r => r.matcher.match(_path, true));
 
-    // if no route found and failOnNotFound is true, throw NavigationNotFoundError
+    //  If no route found, find first match (if strict is false)
+    if (!route && !strict) route = this.#parsedRoutes.find(r => r.matcher.match(_path));
+
+    //  if no route found and failOnNotFound is true, throw NavigationNotFoundError
     if (!route && failOnNotFound) throw new NavigationNotFoundError({ to, from });
 
-    // use hash, path, and query to resolve new href
-    const { href, search } = resolveNewHref(_path, { hash, query });
+    const { wildcards, params: _params } = route?.matcher.extract(_path) ?? {};
 
-    // return resolved route
+    //  use hash, path, and query to resolve new href
+    const { href, search } = resolveNewHref(_path, { hash, query: { ...from?.query, ...query }, base });
+
+    //  return resolved route
     return {
       route,
       path: _path,
       name: route?.name,
       href,
       query: Object.fromEntries(search),
-      params: params ?? {},
+      params: { ...params, ..._params },
+      wildcards: { ...wildcards },
     } satisfies ResolvedRoute<Name>;
   }
 
@@ -385,6 +414,25 @@ export class Router<Name extends RouteName = string> implements IRouter<Name> {
       base: options.base,
       ...to,
     };
+    Logger.debug(this.#log, 'Navigating', { to, route: this.#route, location: this.#location });
+    return { route: this.#route, location: this.#location };
+  }
+
+  /**
+   * Sync the router with the current location.
+   * @private
+   */
+  #sync(): ResolvedRouterLocation<Name> {
+    const path = this.#hash ? window.location.hash?.split('?')?.at(0) : window.location.pathname;
+    if (!path) {
+      return Logger.warn(this.#log, 'Navigate listener could not parse path, router may be out of sync.', {
+        path,
+        route: this.#route,
+        location: this.#location,
+      });
+    }
+    const resolve = this.resolve({ path });
+    this.#navigate(resolve);
     return { route: this.#route, location: this.#location };
   }
 
@@ -405,12 +453,11 @@ export class Router<Name extends RouteName = string> implements IRouter<Name> {
     { strict, failOnNotFound, metaAsState, nameAsTitle }: RouterNavigationOptions = this.#options,
   ): ResolvedRouterLocation<Name> {
     const resolved = this.resolve(to, { strict, failOnNotFound });
-    if (resolved?.route) {
-      const { state, title } = routeToHistoryState(resolved, { metaAsState, nameAsTitle, state: to.state });
-      this.#history.pushState(state, title ?? '', resolved.href);
-      Logger.debug('Route pushed', { resolved, state, title });
-    }
-    return this.#navigate(resolved);
+    const { state, title } = routeToHistoryState(resolved, { metaAsState, nameAsTitle, state: to.state });
+    this.#history.pushState(state, title ?? '', resolved.href);
+    Logger.debug(this.#log, 'Pushed state', { resolved, state, title });
+    if (this.#listening !== 'navigate') return this.#navigate(resolved);
+    return { route: this.#route, location: this.#location };
   }
 
   /**
@@ -428,12 +475,11 @@ export class Router<Name extends RouteName = string> implements IRouter<Name> {
     { strict, failOnNotFound, metaAsState, nameAsTitle }: RouterNavigationOptions = this.#options,
   ): ResolvedRouterLocation<Name> {
     const resolved = this.resolve(to, { strict, failOnNotFound });
-    if (resolved?.route) {
-      const { state, title } = routeToHistoryState(resolved, { metaAsState, nameAsTitle, state: to.state });
-      this.#history.replaceState(state, title ?? '', resolved.href);
-      Logger.debug('Route replaced', { resolved, state, title });
-    }
-    return this.#navigate(resolved);
+    const { state, title } = routeToHistoryState(resolved, { metaAsState, nameAsTitle, state: to.state });
+    this.#history.replaceState(state, title ?? '', resolved.href);
+    Logger.debug(this.#log, 'Replaced state', { resolved, state, title });
+    if (this.#listening !== 'navigate') return this.#navigate(resolved);
+    return { route: this.#route, location: this.#location };
   }
 
   /**

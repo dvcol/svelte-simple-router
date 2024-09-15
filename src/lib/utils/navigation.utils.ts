@@ -1,15 +1,14 @@
-import { type HistoryState, ParsingRelativePathError, type ResolvedRouterLocation, type RouteQuery } from '../models/index.js';
+import type { HistoryState, ResolvedRoute, RouteName, RouteQuery } from '~/models/route.model.js';
+import type { RouterState } from '~/models/router.model.js';
 
-import type { RouteName } from '~/models/route.model.js';
+import { ParsingRelativePathError } from '~/models/error.model.js';
+import { RouterScrollConstant, RouterStateConstant } from '~/models/router.model.js';
 
-import { RouterStateScrollSymbol, RouterStateSymbol } from '~/models/router.model.js';
-
-export const routeToHistoryState = <Name extends RouteName = string>(
-  { route, location }: ResolvedRouterLocation<Name> = {},
+export const routeToHistoryState = <Name extends RouteName = RouteName>(
+  { route, href, query, params, name, path }: Partial<ResolvedRoute<Name>>,
   {
     metaAsState,
     nameAsTitle,
-    restoreScroll,
     state,
   }: {
     metaAsState?: boolean;
@@ -17,17 +16,27 @@ export const routeToHistoryState = <Name extends RouteName = string>(
     restoreScroll?: boolean;
     state?: HistoryState;
   } = {},
-) => {
+): {
+  state: RouterState<Name>;
+  title?: string;
+} => {
   const title: string | undefined = route?.title ?? (nameAsTitle ? route?.name?.toString() : undefined);
   const routerState: History['state'] = {};
-  if (restoreScroll) routerState[RouterStateScrollSymbol] = { x: window.scrollX, y: window.scrollY };
   if (metaAsState && route?.meta) routerState.meta = route.meta;
-  if (route?.name) routerState.name = route.name;
-  if (route?.path) routerState.path = route.path;
-  if (location?.href) routerState.href = location.href;
-  if (location?.query) routerState.query = location.query;
-  if (location?.params) routerState.params = location.params;
-  return { state: { ...state, [RouterStateSymbol]: routerState }, title };
+  if (name) routerState.name = name;
+  if (path) routerState.path = path;
+  if (href) routerState.href = href.toString();
+  if (query) routerState.query = query;
+  if (params) routerState.params = params;
+
+  return {
+    state: {
+      ...state,
+      [RouterStateConstant]: routerState,
+      [RouterScrollConstant]: { x: window.scrollX, y: window.scrollY },
+    },
+    title,
+  };
 };
 
 export const computeAbsolutePath = (parent: string, relative: string) => {
@@ -44,10 +53,12 @@ export const computeAbsolutePath = (parent: string, relative: string) => {
 export const resolveNewHref = (
   target: string,
   {
+    base,
     hash,
     query,
     current = window.location.href,
   }: {
+    base?: string;
     hash?: boolean;
     query?: RouteQuery;
     current?: string;
@@ -64,7 +75,7 @@ export const resolveNewHref = (
     const strSearch = search.toString();
     if (strSearch) href.hash += `?${strSearch}`;
   } else {
-    href.pathname = target;
+    href.pathname = [base, target].filter(Boolean).join('/');
   }
   return { href, search };
 };

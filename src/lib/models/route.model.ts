@@ -1,4 +1,5 @@
-import type { Component } from 'svelte';
+import type { Matcher } from '~/models/matcher.model.js';
+import type { AnyComponent, ComponentOrLazy } from '~/utils/svelte.utils.js';
 
 /**
  * Allowed variables in HTML5 history state. Note that pushState clones the state
@@ -17,8 +18,9 @@ export type HistoryState = {
 };
 
 export type RouteParamValue = string | number | boolean;
-export type RouteParams = Record<string, RouteParamValue>;
 export type RouteQuery = Record<string, RouteParamValue>;
+export type RouteParams = Record<string, RouteParamValue>;
+export type RouteWildcards = Record<string, string>;
 
 export type CommonRouteNavigation = {
   /**
@@ -54,7 +56,7 @@ export type RouteLocationNavigation = CommonRouteNavigation & {
 
 export type RouteName = string | number | symbol;
 
-export type RouteNameNavigation<Name extends RouteName = string> = CommonRouteNavigation & {
+export type RouteNameNavigation<Name extends RouteName = RouteName> = CommonRouteNavigation & {
   /**
    * Name of the route.
    */
@@ -65,9 +67,8 @@ export type RouteNameNavigation<Name extends RouteName = string> = CommonRouteNa
   path?: never;
 };
 
-export type RouteNavigation<Name extends RouteName = string> = RouteLocationNavigation | RouteNameNavigation<Name>;
+export type RouteNavigation<Name extends RouteName = RouteName> = RouteLocationNavigation | RouteNameNavigation<Name>;
 
-export type ComponentOrLazy = Component | (() => Promise<{ default: Component }>);
 export type ComponentProps = Record<RouteName, unknown>;
 
 export type RouteComponent = {
@@ -78,11 +79,11 @@ export type RouteComponent = {
   /**
    * Loading component to display while the component is being loaded.
    */
-  loading?: Component;
+  loading?: AnyComponent;
   /**
    * Error component to display if the component fails to load.
    */
-  error?: Component;
+  error?: AnyComponent;
   /**
    * Allow passing down params as props to the component rendered by `router`.
    */
@@ -105,23 +106,23 @@ export type RouteComponent = {
   errors?: never;
 };
 
-export type RouteComponents<Name extends RouteName = string> = {
+export type RouteComponents<Name extends RouteName = RouteName> = {
   /**
    * Components to display when the URL matches this route.
    */
-  components: Record<Name, ComponentOrLazy>;
+  components: Partial<Record<Name | 'default', ComponentOrLazy>>;
   /**
    * Loading components to display while the components are being loaded.
    */
-  loadings?: Record<Name, Component>;
+  loadings?: Partial<Record<Name | 'default', AnyComponent>>;
   /**
    * Error components to display if the components fail to load.
    */
-  errors?: Record<Name, Component>;
+  errors?: Partial<Record<Name | 'default', AnyComponent>>;
   /**
    * Allow passing down params as props to the component rendered by `router`.
    */
-  props?: Record<Name, ComponentProps>;
+  props?: Partial<Record<Name | 'default', ComponentProps>>;
   /**
    * Redirect is forbidden in this case.
    */
@@ -140,13 +141,13 @@ export type RouteComponents<Name extends RouteName = string> = {
   error?: never;
 };
 
-export type RouteRedirect = {
+export type RouteRedirect<Name extends RouteName = RouteName> = {
   /**
    * Where to redirect if the route is directly matched. The redirection happens
    * before any navigation guard and triggers a new navigation with the new
    * target location.
    */
-  redirect?: RouteNavigation;
+  redirect?: RouteNavigation<Name>;
   /**
    * Props are forbidden in this case.
    */
@@ -177,16 +178,16 @@ export type RouteRedirect = {
   errors?: never;
 };
 
-export type NavigationGuardReturn<Name extends RouteName = string> = void | boolean | Error | RouteNavigation<Name>;
+export type NavigationGuardReturn<Name extends RouteName = RouteName> = void | boolean | Error | RouteNavigation<Name>;
 
-export type NavigationGuard<Name extends RouteName = string> = (
+export type NavigationGuard<Name extends RouteName = RouteName> = (
   from: Route<Name>,
   to: Route<Name>,
 ) => NavigationGuardReturn<Name> | Promise<NavigationGuardReturn<Name>>;
 
-export type NavigationListener<Name extends RouteName = string> = (from: Route<Name>, to: Route<Name>) => void;
+export type NavigationListener<Name extends RouteName = RouteName> = (from: Route<Name>, to: Route<Name>) => void;
 
-export type Route<Name extends RouteName = string> = (RouteRedirect | RouteComponent | RouteComponents<Name>) & {
+export type Route<Name extends RouteName = RouteName> = (RouteRedirect | RouteComponent | RouteComponents<Name>) & {
   /**
    * Path of the record. Should start with `/` unless the record is the child of
    * another record.
@@ -215,16 +216,32 @@ export type Route<Name extends RouteName = string> = (RouteRedirect | RouteCompo
    */
   meta?: Record<RouteName, unknown>;
   /**
+   * Default, query parameters to inject in the url when navigating to this route.
+   * Note that query passed in navigation events will override these.
+   */
+  query?: RouteQuery;
+  /**
+   * Default, params to inject in the url when navigating to this route.
+   * Note that params passed in navigation events will override these.
+   */
+  params?: RouteParams;
+  /**
    * Array of nested routes.
    */
-  children?: Route[];
+  children?: Route<Name>[];
+  /**
+   * Parent route record.
+   */
+  parent?: Route<Name>;
 };
 
-export type ResolvedRoute<Name extends RouteName = string> = {
+export type ParsedRoute<Name extends RouteName = RouteName> = Route<Name> & { matcher: Matcher<Name> };
+
+export type ResolvedRoute<Name extends RouteName = RouteName> = {
   /**
    * Matched route record if any.
    */
-  route?: Route<Name>;
+  route?: ParsedRoute<Name>;
   /**
    * Name of the resolved route record.
    */
@@ -245,4 +262,8 @@ export type ResolvedRoute<Name extends RouteName = string> = {
    * Params of the location.
    */
   params: RouteParams;
+  /**
+   * Wildcards parsed from the path.
+   */
+  wildcards: RouteWildcards;
 };

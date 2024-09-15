@@ -36,13 +36,17 @@ export const enum ErrorTypes {
    */
   MATCHER_INVALID_PATH = 'MATCHER_INVALID_PATH',
   /**
+   * A required parameter is missing when parsing a path.
+   */
+  PARSING_MISSING_REQUIRED_PARAM = 'PARSING_MISSING_REQUIRED_PARAM',
+  /**
    * Parsing errors are thrown when the router cannot compute a relative path.
    */
   PARSING_RELATIVE_PATH_ERROR = 'PARSING_RELATIVE_PATH_ERROR',
 }
 
 type NavigationErrors = ErrorTypes.NAVIGATION_CANCELLED | ErrorTypes.NAVIGATION_ABORTED | ErrorTypes.NAVIGATION_NOT_FOUND;
-export interface NavigationFailureType<Name extends RouteName = string> {
+export interface NavigationFailureType<Name extends RouteName = RouteName> {
   /**
    * Type of the navigation. One of {@link ErrorTypes}
    */
@@ -67,7 +71,7 @@ export interface ErrorPayload<E = unknown> {
 /**
  * Extended Error that contains extra information regarding a failed navigation.
  */
-export class NavigationFailure<Name extends RouteName = string> extends Error implements NavigationFailureType<Name> {
+export class NavigationFailure<Name extends RouteName = RouteName> extends Error implements NavigationFailureType<Name> {
   readonly type: NavigationErrors;
   readonly to: RouteNavigation<Name>;
   readonly from?: Route<Name>;
@@ -85,7 +89,7 @@ export class NavigationFailure<Name extends RouteName = string> extends Error im
 /**
  * Error when a navigation is aborted (a navigation guard returned `false` or threw an error)
  */
-export class NavigationAbortedError<Name extends RouteName = string, Error = unknown> extends NavigationFailure<Name> {
+export class NavigationAbortedError<Name extends RouteName = RouteName, Error = unknown> extends NavigationFailure<Name> {
   declare readonly type: ErrorTypes.NAVIGATION_ABORTED;
   constructor(failure: Omit<NavigationFailureType<Name>, 'type'>, payload: ErrorPayload<Error> = {}) {
     super({ ...failure, type: ErrorTypes.NAVIGATION_ABORTED }, payload);
@@ -95,7 +99,7 @@ export class NavigationAbortedError<Name extends RouteName = string, Error = unk
 /**
  * Error when a navigation is cancelled (a more recent navigation happened before the current one)
  */
-export class NavigationCancelledError<Name extends RouteName = string, Error = unknown> extends NavigationFailure<Name> {
+export class NavigationCancelledError<Name extends RouteName = RouteName, Error = unknown> extends NavigationFailure<Name> {
   declare readonly type: ErrorTypes.NAVIGATION_CANCELLED;
   constructor(failure: Omit<NavigationFailureType<Name>, 'type'>, payload: ErrorPayload<Error> = {}) {
     super({ ...failure, type: ErrorTypes.NAVIGATION_CANCELLED }, payload);
@@ -105,7 +109,7 @@ export class NavigationCancelledError<Name extends RouteName = string, Error = u
 /**
  * Error when a navigation is not found (no matching route)
  */
-export class NavigationNotFoundError<Name extends RouteName = string, Error = unknown> extends NavigationFailure<Name> {
+export class NavigationNotFoundError<Name extends RouteName = RouteName, Error = unknown> extends NavigationFailure<Name> {
   declare readonly type: ErrorTypes.NAVIGATION_NOT_FOUND;
   constructor(failure: Omit<NavigationFailureType<Name>, 'type'>, payload: ErrorPayload<Error> = {}) {
     super({ ...failure, type: ErrorTypes.NAVIGATION_NOT_FOUND }, payload);
@@ -130,7 +134,7 @@ export class RouterConfigurationError<E = unknown> extends Error {
 /**
  * Error when a route with the same name already exists
  */
-export class RouterNameConflictError<Name extends RouteName = string> extends RouterConfigurationError<Name> {
+export class RouterNameConflictError<Name extends RouteName = RouteName> extends RouterConfigurationError<Name> {
   declare readonly type: ErrorTypes.ROUTER_CONFIG_NAME_CONFLICT;
   constructor(name: Name, message = `Route with name "${String(name)}" already exists`) {
     super(ErrorTypes.ROUTER_CONFIG_NAME_CONFLICT, { message, error: name });
@@ -147,13 +151,13 @@ export class RouterPathConflictError<Path extends Route['path'] = string> extend
   }
 }
 
-type MisMatchErrorPayload<Name extends RouteName = string> = {
+type MisMatchErrorPayload<Name extends RouteName = RouteName> = {
   name: Name;
   path: Route<Name>['path'];
   registeredName?: Name;
   registeredPath?: Route<Name>['path'];
 };
-export class RouterNamePathMismatchError<Name extends RouteName = string> extends RouterConfigurationError<MisMatchErrorPayload<Name>> {
+export class RouterNamePathMismatchError<Name extends RouteName = RouteName> extends RouterConfigurationError<MisMatchErrorPayload<Name>> {
   declare readonly type: ErrorTypes.ROUTER_CONFIG_NAME_PATH_MISMATCH;
   constructor(
     { name, path, registeredName, registeredPath }: MisMatchErrorPayload<Name>,
@@ -181,7 +185,7 @@ export class MatcherInvalidPathError extends MatcherError<string> {
   }
 }
 
-type ParsingErrorTypes = ErrorTypes.PARSING_RELATIVE_PATH_ERROR;
+type ParsingErrorTypes = ErrorTypes.PARSING_RELATIVE_PATH_ERROR | ErrorTypes.PARSING_MISSING_REQUIRED_PARAM;
 export class ParsingError<E = unknown> extends Error {
   readonly type: ParsingErrorTypes;
   readonly error?: E;
@@ -200,5 +204,16 @@ export class ParsingRelativePathError extends ParsingError<ParsingRelativePathEr
     message = `Error parsing relative path "${relative}" from parent path "${parent}"`,
   ) {
     super(ErrorTypes.PARSING_RELATIVE_PATH_ERROR, { parent, relative }, message);
+  }
+}
+
+type ParsingMissingRequiredParamPayload = { template: string; missing: string; params: Record<string, unknown> };
+export class ParsingMissingRequiredParamError extends ParsingError<ParsingMissingRequiredParamPayload> {
+  declare readonly type: ErrorTypes.PARSING_MISSING_REQUIRED_PARAM;
+  constructor(
+    { template, missing, params }: ParsingMissingRequiredParamPayload,
+    message = `Missing required param "${missing}" while parsing path "${template}" .`,
+  ) {
+    super(ErrorTypes.PARSING_MISSING_REQUIRED_PARAM, { template, missing, params }, message);
   }
 }

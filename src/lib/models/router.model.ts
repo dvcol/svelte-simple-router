@@ -1,5 +1,6 @@
 import type { Snippet } from 'svelte';
 import type {
+  HistoryState,
   NavigationGuard,
   NavigationListener,
   ResolvedRoute,
@@ -8,9 +9,10 @@ import type {
   RouteNavigation,
   RouteParams,
   RouteQuery,
+  RouteWildcards,
 } from '~/models/route.model.js';
 
-export type RouterLocation<Name extends RouteName = string> = {
+export type RouterLocation<Name extends RouteName = RouteName> = {
   origin: string;
   base?: string;
   name?: Name;
@@ -18,11 +20,47 @@ export type RouterLocation<Name extends RouteName = string> = {
   href: URL;
   query: RouteQuery;
   params: RouteParams;
+  wildcards: RouteWildcards;
 };
 
-export type ResolvedRouterLocation<Name extends RouteName = string> = {
+export type ResolvedRouterLocation<Name extends RouteName = RouteName> = {
   route?: Route<Name>;
   location?: RouterLocation<Name>;
+};
+
+export const RouterContextSymbol = Symbol('SvelteSimpleRouterContext');
+
+export const RouterStateConstant = '__SVELTE_SIMPLE_ROUTER_STATE__' as const;
+export const RouterScrollConstant = '__SVELTE_SIMPLE_ROUTER_SCROLL__' as const;
+export const RouterDebuggerConstant = '__SVELTE_SIMPLE_ROUTER_DEBUGGER__' as const;
+
+export type RouterContextProps<Name extends RouteName = any> = { router?: IRouter<Name>; options?: RouterOptions<Name> } & {
+  children?: Snippet<[IRouter<Name>]>;
+};
+export type RouterViewProps = RouterContextProps & {
+  name?: string;
+  loading?: Snippet<[unknown]>;
+  error?: Snippet<[unknown]>;
+};
+
+export type RouterScrollPosition = { x: number; y: number };
+export type RouterStateLocation<Name extends RouteName = RouteName> = {
+  meta?: Route<Name>['meta'];
+  name?: Route<Name>['name'];
+  path?: Route<Name>['path'];
+  href?: RouterLocation<Name>['href'];
+  query?: RouterLocation<Name>['query'];
+  params?: RouterLocation<Name>['params'];
+};
+export type RouterState<Name extends RouteName = RouteName> = HistoryState & {
+  [RouterStateConstant]?: RouterStateLocation<Name>;
+  [RouterScrollConstant]?: RouterScrollPosition;
+};
+
+export type IHistory<Name extends RouteName = RouteName, T extends RouterState<Name> = RouterState<Name>> = History & {
+  state: T;
+  pushState: (state: T, title: string, url?: string | null) => void;
+  replaceState: (state: T, title: string, url?: string | null) => void;
 };
 
 /**
@@ -63,20 +101,19 @@ export type RouterNavigationOptions = {
 /**
  * Options to initialize a {@link Router} instance.
  */
-export type RouterOptions<Name extends RouteName = string> = {
+export type RouterOptions<Name extends RouteName = RouteName> = {
   /**
    * History instance to use.
    * Defaults to global `window.history`.
    * @see [MDN for more information](https://developer.mozilla.org/docs/Web/API/History)
    */
-  history?: History;
+  history?: IHistory<Name>;
   /**
    * Initial list of routes that should be added to the router.
    */
-  routes: Readonly<Route<Name>[]>;
+  routes?: Readonly<Route<Name>[]>;
   /**
    * If `true`, the router will listen to events when instantiated.
-   * - 'beforeunload' event for saving scroll position.
    * - 'currententrychange' for external navigation events (if available).
    * - 'popstate' event for external history navigation.
    * @see [Navigation API](https://developer.mozilla.org/docs/Web/API/Navigation)
@@ -89,7 +126,11 @@ export type RouterOptions<Name extends RouteName = string> = {
   restoreScroll?: boolean;
 } & RouterNavigationOptions;
 
-export interface IRouter<Name extends RouteName = string> {
+export interface IRouter<Name extends RouteName = RouteName> {
+  /**
+   * Unique identifier of the router instance.
+   */
+  id: string;
   /**
    * Current {@link RouterLocation}
    */
@@ -204,7 +245,7 @@ export interface IRouter<Name extends RouteName = string> {
    */
   resolve(
     to: RouteNavigation<Name>,
-    { from, strict, failOnNotFound }: Omit<RouterNavigationOptions, 'metaAsState' | 'nameAsTitle'> & { from?: Route<Name> },
+    { from, strict, failOnNotFound }?: Omit<RouterNavigationOptions, 'metaAsState' | 'nameAsTitle'> & { from?: Route<Name> },
   ): ResolvedRoute<Name>;
 
   /**
@@ -221,7 +262,7 @@ export interface IRouter<Name extends RouteName = string> {
    */
   push(
     to: RouteNavigation<Name>,
-    { strict, failOnNotFound, metaAsState, nameAsTitle }: RouterNavigationOptions,
+    { strict, failOnNotFound, metaAsState, nameAsTitle }?: RouterNavigationOptions,
   ): ResolvedRouterLocation<Name> | Promise<ResolvedRouterLocation<Name>>;
 
   /**
@@ -236,7 +277,7 @@ export interface IRouter<Name extends RouteName = string> {
    */
   replace(
     to: RouteNavigation<Name>,
-    { strict, failOnNotFound, metaAsState, nameAsTitle }: RouterNavigationOptions,
+    { strict, failOnNotFound, metaAsState, nameAsTitle }?: RouterNavigationOptions,
   ): ResolvedRouterLocation<Name> | Promise<ResolvedRouterLocation<Name>>;
 
   /**
@@ -259,10 +300,3 @@ export interface IRouter<Name extends RouteName = string> {
    */
   go(delta: number): void;
 }
-
-export const RouterContextSymbol = Symbol('SvelteSimpleRouterContext');
-
-export const RouterStateSymbol = Symbol('SvelteSimpleRouterState');
-export const RouterStateScrollSymbol = Symbol('SvelteSimpleRouterStateScroll');
-
-export type RouterContextProps = ({ router: IRouter; options?: never } | { router?: never; options: RouterOptions }) & { children?: Snippet };

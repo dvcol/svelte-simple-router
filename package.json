@@ -65,6 +65,7 @@
     "dev": "run-s vite:serve",
     "build": "run-s vite:build package",
     "build:web": "VITE_MODE=WEB run-s vite:build",
+    "serve:web": "VITE_MODE=WEB run-p vite:watch vite:preview",
     "package": "svelte-kit sync && svelte-package && publint",
     "prepublishOnly": "npm run package",
     "check:type": "tsc -p tsconfig.json",
