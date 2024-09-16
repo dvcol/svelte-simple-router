@@ -4,6 +4,7 @@
   const router = useRouter();
   const route = $derived(router?.route);
   const location = $derived(router?.location);
+  const error = $derived<any>(router?.error);
 </script>
 
 <div>Router - {router?.id}</div>
@@ -22,3 +23,13 @@
     2,
   )}
 </div>
+<br />
+{#if error}
+  <div>
+    <h1>Navigation Error</h1>
+    <p style="color: red">{error?.message ?? error}</p>
+    {#if error?.stack}
+      <p style="color: red">{error.stack}</p>
+    {/if}
+  </div>
+{/if}

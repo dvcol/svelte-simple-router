@@ -1,6 +1,9 @@
 import type { Snippet } from 'svelte';
 import type {
+  BaseRoute,
   HistoryState,
+  NavigationEndListener,
+  NavigationErrorListener,
   NavigationGuard,
   NavigationListener,
   ResolvedRoute,
@@ -23,9 +26,26 @@ export type RouterLocation<Name extends RouteName = RouteName> = {
   wildcards: RouteWildcards;
 };
 
+export type BasicRouterLocation<Name extends RouteName = RouteName> = Omit<RouterLocation<Name>, 'href'> & { href: string };
+export const toBasicRouterLocation = <Name extends RouteName = RouteName>(loc?: RouterLocation<Name>): BasicRouterLocation<Name> | undefined => {
+  if (!loc) return loc;
+  return {
+    ...loc,
+    href: loc.href.toString(),
+    query: { ...loc.query },
+    params: { ...loc.params },
+    wildcards: { ...loc.wildcards },
+  };
+};
+
 export type ResolvedRouterLocation<Name extends RouteName = RouteName> = {
   route?: Route<Name>;
   location?: RouterLocation<Name>;
+};
+
+export type ResolvedRouterLocationSnapshot<Name extends RouteName = RouteName> = {
+  route?: BaseRoute<Name>;
+  location?: BasicRouterLocation<Name>;
 };
 
 export const RouterContextSymbol = Symbol('SvelteSimpleRouterContext');
@@ -74,18 +94,22 @@ export type RouterNavigationOptions = {
   base?: string;
   /**
    * If `true`, the router will use the hash portion of the URL for routing.
+   * Defaults to `false`.
    */
   hash?: boolean;
   /**
    * If `true`, the router will match the routes strictly.
+   * Defaults to `false`.
    */
   strict?: boolean;
   /**
    * If `true`, the router will throw an error if the route is not found during navigation, resolve, push or replace state.
+   * Defaults to `false`.
    */
   failOnNotFound?: boolean;
   /**
    * If `true`, the router will push the `meta` property of the route to the state.
+   * Defaults to `false`.
    *
    * Warning: Depending on the history implementation, the state may not hold any reactive values and some primitives like Symbols are forbidden.
    *
@@ -94,8 +118,14 @@ export type RouterNavigationOptions = {
   metaAsState?: boolean;
   /**
    * If `true`, the router will use the name of the route as the title of the page.
+   * Defaults to `false`.
    */
   nameAsTitle?: boolean;
+  /**
+   * If `true`, the router will follow redirects when executing guards.
+   * Defaults to `true`.
+   */
+  followGuardRedirects?: boolean;
 };
 
 /**
@@ -124,6 +154,22 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
    * If `true`, the router will restore the scroll position when navigating back.
    */
   restoreScroll?: boolean;
+  /**
+   * A route guard that executes before any navigation.
+   */
+  beforeEach?: NavigationGuard<Name>;
+  /**
+   * A navigation listener that is executed when the navigation is triggered but before the route is resolved.
+   */
+  onStart?: NavigationListener<Name>;
+  /**
+   * A navigation listener that is executed when the navigation is triggered and the route is resolved.
+   */
+  onEnd?: NavigationEndListener<Name>;
+  /**
+   * A navigation listener that is executed when an error occurs during navigation.
+   */
+  onError?: NavigationErrorListener<Name>;
 } & RouterNavigationOptions;
 
 export interface IRouter<Name extends RouteName = RouteName> {
@@ -131,6 +177,17 @@ export interface IRouter<Name extends RouteName = RouteName> {
    * Unique identifier of the router instance.
    */
   id: string;
+
+  /**
+   * Last navigation error that occurred.
+   */
+  error?: unknown;
+
+  /**
+   * Current {@link ResolvedRoute}
+   */
+  current?: ResolvedRouterLocation<Name>;
+
   /**
    * Current {@link RouterLocation}
    */
@@ -195,22 +252,13 @@ export interface IRouter<Name extends RouteName = RouteName> {
   beforeEach(guard: NavigationGuard<Name>): () => void;
 
   /**
-   * Add a navigation hook that is executed after every navigation.
-   *
-   * @param guard - navigation hook to add
-   *
-   * @returns a function that removes the registered hook
-   */
-  afterEach(guard: NavigationGuard<Name>): () => void;
-
-  /**
    * Add a navigation listener that is executed when the navigation is triggered but before the route is resolved.
    *
    * @param listener - navigation listener to add
    *
    * @returns a function that removes the registered listener
    */
-  onLoading(listener: NavigationListener<Name>): () => void;
+  onStart(listener: NavigationListener<Name>): () => void;
 
   /**
    * Add a navigation listener that is executed when the navigation is triggered and the route is resolved.
@@ -219,7 +267,7 @@ export interface IRouter<Name extends RouteName = RouteName> {
    *
    * @returns a function that removes the registered listener
    */
-  onLoaded(listener: NavigationListener<Name>): () => void;
+  onEnd(listener: NavigationEndListener<Name>): () => void;
 
   /**
    * Add a navigation listener that is executed when an error occurs during navigation.
@@ -228,7 +276,7 @@ export interface IRouter<Name extends RouteName = RouteName> {
    *
    * @returns a function that removes the registered listener
    */
-  onError(listener: NavigationListener<Name>): () => void;
+  onError(listener: NavigationErrorListener<Name>): () => void;
 
   /**
    * Returns the {@link ResolvedRoute} from a {@link RouteNavigation} and current route {@link Route}.
@@ -245,7 +293,7 @@ export interface IRouter<Name extends RouteName = RouteName> {
    */
   resolve(
     to: RouteNavigation<Name>,
-    { from, strict, failOnNotFound }?: Omit<RouterNavigationOptions, 'metaAsState' | 'nameAsTitle'> & { from?: Route<Name> },
+    options?: Omit<RouterNavigationOptions, 'metaAsState' | 'nameAsTitle'> & { from?: Route<Name> },
   ): ResolvedRoute<Name>;
 
   /**
@@ -260,10 +308,7 @@ export interface IRouter<Name extends RouteName = RouteName> {
    *
    * @throws {@link NavigationFailure} if the navigation is not found.
    */
-  push(
-    to: RouteNavigation<Name>,
-    { strict, failOnNotFound, metaAsState, nameAsTitle }?: RouterNavigationOptions,
-  ): ResolvedRouterLocation<Name> | Promise<ResolvedRouterLocation<Name>>;
+  push(to: RouteNavigation<Name>, options?: RouterNavigationOptions): ResolvedRouterLocation<Name> | Promise<ResolvedRouterLocation<Name>>;
 
   /**
    * Programmatically navigate to a new URL by replacing the current entry in the history stack.
@@ -275,10 +320,7 @@ export interface IRouter<Name extends RouteName = RouteName> {
    *
    * @throws {@link NavigationNotFoundError} if the navigation is not found.
    */
-  replace(
-    to: RouteNavigation<Name>,
-    { strict, failOnNotFound, metaAsState, nameAsTitle }?: RouterNavigationOptions,
-  ): ResolvedRouterLocation<Name> | Promise<ResolvedRouterLocation<Name>>;
+  replace(to: RouteNavigation<Name>, option?: RouterNavigationOptions): ResolvedRouterLocation<Name> | Promise<ResolvedRouterLocation<Name>>;
 
   /**
    * Go back in history if possible by calling `history.back()`.

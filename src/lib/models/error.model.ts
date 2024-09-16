@@ -1,4 +1,5 @@
-import type { Route, RouteName, RouteNavigation } from '~/models/route.model.js';
+import type { ResolvedRoute, Route, RouteName, RouteNavigation } from '~/models/route.model.js';
+import type { ResolvedRouterLocationSnapshot } from '~/models/router.model.js';
 
 /**
  * Flags so we can combine them when checking for multiple errors. This is the internal version of
@@ -48,19 +49,13 @@ export const enum ErrorTypes {
 type NavigationErrors = ErrorTypes.NAVIGATION_CANCELLED | ErrorTypes.NAVIGATION_ABORTED | ErrorTypes.NAVIGATION_NOT_FOUND;
 export interface NavigationFailureType<Name extends RouteName = RouteName> {
   /**
-   * Type of the navigation. One of {@link ErrorTypes}
-   */
-  type: NavigationErrors;
-
-  /**
    * Route location we were navigating to
    */
-  to: RouteNavigation<Name>;
-
+  to: RouteNavigation<Name> | ResolvedRoute<Name>;
   /**
    * Route location we were navigating from
    */
-  from?: Route<Name>;
+  from?: Route<Name> | ResolvedRouterLocationSnapshot<Name>;
 }
 
 export interface ErrorPayload<E = unknown> {
@@ -73,11 +68,14 @@ export interface ErrorPayload<E = unknown> {
  */
 export class NavigationFailure<Name extends RouteName = RouteName> extends Error implements NavigationFailureType<Name> {
   readonly type: NavigationErrors;
-  readonly to: RouteNavigation<Name>;
-  readonly from?: Route<Name>;
+  readonly to: NavigationFailureType<Name>['to'];
+  readonly from?: NavigationFailureType<Name>['from'];
   readonly error?: unknown;
 
-  constructor({ type, from, to }: NavigationFailureType<Name>, { message = `Navigation failed: ${type}`, error }: ErrorPayload = {}) {
+  constructor(
+    { type, from, to }: NavigationFailureType<Name> & { type: NavigationErrors },
+    { message = `Navigation failed: ${type}`, error }: ErrorPayload = {},
+  ) {
     super(message);
     this.error = error;
     this.type = type;
@@ -91,7 +89,7 @@ export class NavigationFailure<Name extends RouteName = RouteName> extends Error
  */
 export class NavigationAbortedError<Name extends RouteName = RouteName, Error = unknown> extends NavigationFailure<Name> {
   declare readonly type: ErrorTypes.NAVIGATION_ABORTED;
-  constructor(failure: Omit<NavigationFailureType<Name>, 'type'>, payload: ErrorPayload<Error> = {}) {
+  constructor(failure: NavigationFailureType<Name>, payload: ErrorPayload<Error> = {}) {
     super({ ...failure, type: ErrorTypes.NAVIGATION_ABORTED }, payload);
   }
 }
@@ -101,7 +99,7 @@ export class NavigationAbortedError<Name extends RouteName = RouteName, Error = 
  */
 export class NavigationCancelledError<Name extends RouteName = RouteName, Error = unknown> extends NavigationFailure<Name> {
   declare readonly type: ErrorTypes.NAVIGATION_CANCELLED;
-  constructor(failure: Omit<NavigationFailureType<Name>, 'type'>, payload: ErrorPayload<Error> = {}) {
+  constructor(failure: NavigationFailureType<Name>, payload: ErrorPayload<Error> = {}) {
     super({ ...failure, type: ErrorTypes.NAVIGATION_CANCELLED }, payload);
   }
 }
@@ -111,7 +109,7 @@ export class NavigationCancelledError<Name extends RouteName = RouteName, Error 
  */
 export class NavigationNotFoundError<Name extends RouteName = RouteName, Error = unknown> extends NavigationFailure<Name> {
   declare readonly type: ErrorTypes.NAVIGATION_NOT_FOUND;
-  constructor(failure: Omit<NavigationFailureType<Name>, 'type'>, payload: ErrorPayload<Error> = {}) {
+  constructor(failure: NavigationFailureType<Name>, payload: ErrorPayload<Error> = {}) {
     super({ ...failure, type: ErrorTypes.NAVIGATION_NOT_FOUND }, payload);
   }
 }

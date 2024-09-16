@@ -87,7 +87,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@dvcol/common-utils": "^1.14.2",
+    "@dvcol/common-utils": "^1.15.1",
     "svelte": "^5.0.0-next.244",
     "vite": "^5.4.3"
   },

@@ -2,24 +2,37 @@
 
 import { randomHex } from '@dvcol/common-utils';
 
-import type { NavigationGuard, NavigationListener, ParsedRoute, ResolvedRoute, Route, RouteName, RouteNavigation } from '~/models/route.model.js';
-
-import type {
-  IHistory,
-  IRouter,
-  ResolvedRouterLocation,
-  RouterLocation,
-  RouterNavigationOptions,
-  RouterOptions,
-  RouterStateLocation,
-} from '~/models/router.model.js';
+import { raceUntil } from '@dvcol/common-utils/common/promise';
 
 import { NavigationNotFoundError, RouterNameConflictError, RouterNamePathMismatchError, RouterPathConflictError } from '~/models/error.model.js';
 import { Matcher, replaceTemplateParams } from '~/models/matcher.model.js';
-import { RouterStateConstant } from '~/models/router.model.js';
+import {
+  type NavigationEndListener,
+  type NavigationErrorListener,
+  type NavigationGuard,
+  type NavigationListener,
+  type ParsedRoute,
+  type ResolvedRoute,
+  type Route,
+  type RouteName,
+  type RouteNavigation,
+  toBasicRoute,
+} from '~/models/route.model.js';
+import {
+  type IHistory,
+  type IRouter,
+  type ResolvedRouterLocation,
+  type ResolvedRouterLocationSnapshot,
+  type RouterLocation,
+  type RouterNavigationOptions,
+  type RouterOptions,
+  RouterStateConstant,
+  type RouterStateLocation,
+  toBasicRouterLocation,
+} from '~/models/router.model.js';
 
 import { Logger, LoggerKey } from '~/utils/logger.utils.js';
-import { computeAbsolutePath, resolveNewHref, routeToHistoryState } from '~/utils/navigation.utils.js';
+import { computeAbsolutePath, preventNavigation, resolveNewHref, routeToHistoryState } from '~/utils/navigation.utils.js';
 import { toPathSegment } from '~/utils/string.utils.js';
 
 export class Router<Name extends RouteName = RouteName> implements IRouter<Name> {
@@ -69,10 +82,16 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   #route?: Route<Name> = $state();
 
   /**
+   * Last error that occurred during navigation.
+   * @private
+   */
+  #error?: unknown = $state();
+
+  /**
    * Promise that resolves when the router is done loading the current route.
    * @private
    */
-  #loading?: Promise<ResolvedRoute<Name>> = $state();
+  #navigating?: Promise<ResolvedRoute<Name>> = $state();
 
   /**
    * List of navigation guards that should be executed before each navigation.
@@ -81,28 +100,22 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   #beforeEachGuards: Set<NavigationGuard<Name>> = $state(new Set());
 
   /**
-   * List of navigation guards that should be executed after each navigation.
-   * @private
-   */
-  #afterEachGuards: Set<NavigationGuard<Name>> = $state(new Set());
-
-  /**
    * List of navigation listeners that should be executed when the navigation is triggered but before the route is resolved.
    * @private
    */
-  #onLoadingListeners: Set<NavigationListener<Name>> = $state(new Set());
+  #onStartListeners: Set<NavigationListener<Name>> = $state(new Set());
 
   /**
    * List of navigation listeners that should be executed when the navigation is triggered and the route is resolved.
    * @private
    */
-  #onLoadedListeners: Set<NavigationListener<Name>> = $state(new Set());
+  #onEndListeners: Set<NavigationEndListener<Name>> = $state(new Set());
 
   /**
    * List of navigation listeners that should be executed when an error occurs during navigation.
    * @private
    */
-  #onErrorListeners: Set<NavigationListener<Name>> = $state(new Set());
+  #onErrorListeners: Set<NavigationErrorListener<Name>> = $state(new Set());
 
   /**
    * If the router is listening to `popstate` or `navigate`  events.
@@ -114,10 +127,10 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * Event listener for the `navigate` or `popstate` event.
    * @private
    */
-  #navigateListener: (event: PopStateEvent | NavigationCurrentEntryChangeEvent) => void = () => {
+  #navigateListener: (event: PopStateEvent | NavigationCurrentEntryChangeEvent) => void = async () => {
     const routerState: RouterStateLocation<Name> = this.#history.state?.[RouterStateConstant];
     if (routerState && this.#location?.href?.toString() === routerState.href?.toString()) return;
-    this.#sync();
+    await this.#sync();
     Logger.debug(this.#log, 'Navigate listener', { route: this.route, location: this.location });
   };
 
@@ -138,6 +151,34 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   }
 
   /**
+   * The last error that occurred during navigation.
+   */
+  get error(): unknown {
+    return this.#error;
+  }
+
+  /**
+   * This is a reactive state of the router.
+   * To get a snapshot of the router state, use {@link snapshot} instead.
+   * Current {@link ResolvedRouterLocation}
+   */
+  get current(): ResolvedRouterLocation<Name> {
+    return { route: this.route, location: this.location };
+  }
+
+  /**
+   * This is a snapshot of the router state.
+   * To get a reactive state, use {@link current} instead.
+   * Current {@link ResolvedRouterLocation}
+   */
+  get snapshot(): ResolvedRouterLocationSnapshot<Name> {
+    return {
+      route: toBasicRoute(this.#route),
+      location: toBasicRouterLocation(this.#location),
+    };
+  }
+
+  /**
    * Current {@link RouterLocation}
    */
   get location(): RouterLocation<Name> | undefined {
@@ -150,6 +191,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   get route(): Route<Name> | undefined {
     return this.#route;
   }
+
   /**
    * Get a full list of all the {@link Route}.
    */
@@ -158,10 +200,14 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   }
 
   constructor(options: RouterOptions<Name> = {}) {
-    this.#options = { history: window.history, listen: true, ...options, base: toPathSegment(options.base) };
+    this.#options = { history: window.history, listen: true, followGuardRedirects: true, ...options, base: toPathSegment(options.base) };
     this.#options.routes?.forEach(this.addRoute.bind(this));
     if (this.#options.listen) this.init();
     Logger.debug(this.#log, 'Router created', { options: this.#options });
+    if (this.#options.beforeEach) this.#beforeEachGuards.add(this.#options.beforeEach);
+    if (this.#options.onStart) this.#onStartListeners.add(this.#options.onStart);
+    if (this.#options.onEnd) this.#onEndListeners.add(this.#options.onEnd);
+    if (this.#options.onError) this.#onErrorListeners.add(this.#options.onError);
     this.#sync();
   }
 
@@ -274,27 +320,15 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   }
 
   /**
-   * Add a navigation hook that is executed after every navigation.
-   *
-   * @param guard - navigation hook to add
-   *
-   * @returns a function that removes the registered hook
-   */
-  afterEach(guard: NavigationGuard<Name>): () => void {
-    this.#afterEachGuards.add(guard);
-    return () => this.#afterEachGuards.delete(guard);
-  }
-
-  /**
    * Add a navigation listener that is executed when the navigation is triggered but before the route is resolved.
    *
    * @param listener - navigation listener to add
    *
    * @returns a function that removes the registered listener
    */
-  onLoading(listener: NavigationListener<Name>): () => void {
-    this.#onLoadingListeners.add(listener);
-    return () => this.#onLoadingListeners.delete(listener);
+  onStart(listener: NavigationListener<Name>): () => void {
+    this.#onStartListeners.add(listener);
+    return () => this.#onStartListeners.delete(listener);
   }
 
   /**
@@ -304,9 +338,9 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    *
    * @returns a function that removes the registered listener
    */
-  onLoaded(listener: NavigationListener<Name>): () => void {
-    this.#onLoadedListeners.add(listener);
-    return () => this.#onLoadedListeners.delete(listener);
+  onEnd(listener: NavigationEndListener<Name>): () => void {
+    this.#onEndListeners.add(listener);
+    return () => this.#onEndListeners.delete(listener);
   }
 
   /**
@@ -316,7 +350,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    *
    * @returns a function that removes the registered listener
    */
-  onError(listener: NavigationListener<Name>): () => void {
+  onError(listener: NavigationErrorListener<Name>): () => void {
     this.#onErrorListeners.add(listener);
     return () => this.#onErrorListeners.delete(listener);
   }
@@ -396,33 +430,68 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   }
 
   /**
+   * Execute all the navigation guards before navigating to a new route.
+   *
+   * @param from - Route location to navigate from
+   * @param to - Route location to navigate to
+   * @private
+   */
+  async #navigationGuards(from = this.snapshot, to: ResolvedRoute<Name>): Promise<false | RouteNavigation<Name>> {
+    let result: null | boolean | RouteNavigation<Name>;
+    result = preventNavigation(await this.#route?.beforeLeave?.(from, to), { from, to });
+    if (result) return result;
+    result = preventNavigation(await to.route?.beforeEnter?.(from, to), { from, to });
+    if (result) return result;
+    result = await raceUntil(
+      Array.from(this.#beforeEachGuards).map(async guard => preventNavigation(await guard(from, to), { from, to })),
+      (_result: boolean | RouteNavigation<Name>) => !!_result,
+    ).outer;
+    return result ?? false;
+  }
+
+  /**
    * Navigate to a new URL by updating the current location and route.
    *
    * @param to - Route location to navigate to
    * @param options - Additional options to pass to the resolver
-   * @param options.strict - If `true`, will only match exact routes
-   * @param options.failOnNotFound - If `true`, will throw an error if the route is not found
-   * @param options.metaAsState - If `true`, will push the `meta` property of the route to the state
-   * @param options.nameAsTitle - If `true`, will use the name of the route as the title of the page
    *
    * @throws {@link NavigationFailure} if the navigation is aborted, cancelled, or not found.
    */
-  #navigate(to: ResolvedRoute<Name>, options: RouterNavigationOptions = this.#options): ResolvedRouterLocation<Name> {
-    this.#route = to.route;
-    this.#location = {
-      origin: to.href.origin,
-      base: options.base,
-      ...to,
-    };
-    Logger.debug(this.#log, 'Navigating', { to, route: this.#route, location: this.#location });
-    return { route: this.#route, location: this.#location };
+  async #navigate(to: ResolvedRoute<Name>, options: RouterNavigationOptions = this.#options): Promise<ResolvedRouterLocation<Name>> {
+    this.#error = undefined;
+    const start = this.snapshot;
+    try {
+      const blockOrRedirect = await this.#navigationGuards(start, to);
+      if (typeof blockOrRedirect === 'object' && options.followGuardRedirects) {
+        return this.replace(blockOrRedirect, { ...options, followGuardRedirects: false });
+      }
+
+      if (to.route?.redirect) return this.replace(to.route.redirect, options);
+
+      this.#onStartListeners.forEach(listener => listener(start, to));
+      this.#route = to.route;
+      this.#location = {
+        origin: to.href.origin,
+        base: options.base,
+        ...to,
+      };
+      Logger.debug(this.#log, 'Navigating', { to, route: this.#route, location: this.#location });
+      this.#onEndListeners.forEach(listener => listener(start, this.snapshot));
+      return this.current;
+    } catch (error) {
+      Logger.error(this.#log, 'Navigation error', { to, route: this.#route, location: this.#location, error });
+      this.#error = error;
+      this.#onErrorListeners.forEach(listener => listener(start, to, error));
+      this.#onEndListeners.forEach(listener => listener(start, this.snapshot));
+      throw error;
+    }
   }
 
   /**
    * Sync the router with the current location.
    * @private
    */
-  #sync(): ResolvedRouterLocation<Name> {
+  async #sync(): Promise<ResolvedRouterLocation<Name>> {
     const path = this.#hash ? window.location.hash?.split('?')?.at(0) : window.location.pathname;
     if (!path) {
       return Logger.warn(this.#log, 'Navigate listener could not parse path, router may be out of sync.', {
@@ -432,8 +501,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       });
     }
     const resolve = this.resolve({ path });
-    this.#navigate(resolve);
-    return { route: this.#route, location: this.#location };
+    return this.#navigate(resolve);
   }
 
   /**
@@ -448,16 +516,15 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    *
    * @throws {@link NavigationFailure} if the navigation is not found.
    */
-  push(
+  async push(
     to: RouteNavigation<Name>,
     { strict, failOnNotFound, metaAsState, nameAsTitle }: RouterNavigationOptions = this.#options,
-  ): ResolvedRouterLocation<Name> {
+  ): Promise<ResolvedRouterLocation<Name>> {
     const resolved = this.resolve(to, { strict, failOnNotFound });
     const { state, title } = routeToHistoryState(resolved, { metaAsState, nameAsTitle, state: to.state });
     this.#history.pushState(state, title ?? '', resolved.href);
     Logger.debug(this.#log, 'Pushed state', { resolved, state, title });
-    if (this.#listening !== 'navigate') return this.#navigate(resolved);
-    return { route: this.#route, location: this.#location };
+    return this.#navigate(resolved);
   }
 
   /**
@@ -470,16 +537,15 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    *
    * @throws {@link NavigationNotFoundError} if the navigation is not found.
    */
-  replace(
+  async replace(
     to: RouteNavigation<Name>,
     { strict, failOnNotFound, metaAsState, nameAsTitle }: RouterNavigationOptions = this.#options,
-  ): ResolvedRouterLocation<Name> {
+  ): Promise<ResolvedRouterLocation<Name>> {
     const resolved = this.resolve(to, { strict, failOnNotFound });
     const { state, title } = routeToHistoryState(resolved, { metaAsState, nameAsTitle, state: to.state });
     this.#history.replaceState(state, title ?? '', resolved.href);
     Logger.debug(this.#log, 'Replaced state', { resolved, state, title });
-    if (this.#listening !== 'navigate') return this.#navigate(resolved);
-    return { route: this.#route, location: this.#location };
+    return this.#navigate(resolved);
   }
 
   /**
@@ -488,6 +554,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    */
   back(): ReturnType<Router['go']> {
     this.#history.back();
+    if (!this.#listening) this.#sync();
   }
 
   /**
@@ -496,6 +563,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    */
   forward(): ReturnType<Router['go']> {
     this.#history.forward();
+    if (!this.#listening) this.#sync();
   }
 
   /**
@@ -506,5 +574,6 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    */
   go(delta: number): void {
     this.#history.go(delta);
+    if (!this.#listening) this.#sync();
   }
 }

@@ -50,6 +50,11 @@ describe('router.model', () => {
       it.todo('should resolve a route from a name with param parameters');
       it.todo('should resolve a route from a name with query parameters');
       it.todo('should resolve a route from a name with both param and query parameters');
+
+      it.todo('should resolve a route from a name and default parameters');
+      it.todo('should resolve a route from a name and override default parameters');
+      it.todo('should resolve a route and inject query parameters');
+      it.todo('should resolve a route and override query parameters');
     });
 
     describe('location', () => {
@@ -58,6 +63,11 @@ describe('router.model', () => {
       it.todo('should resolve a route from a location with param parameters');
       it.todo('should resolve a route from a location with query parameters');
       it.todo('should resolve a route from a location with both param and query parameters');
+
+      it.todo('should resolve a route from a name and default parameters');
+      it.todo('should resolve a route from a name and override default parameters');
+      it.todo('should resolve a route and inject query parameters');
+      it.todo('should resolve a route and override query parameters');
     });
 
     describe('matching', () => {
@@ -75,6 +85,7 @@ describe('router.model', () => {
       it.todo('should push a new entry to the history with a title');
       it.todo('should push a new entry to the history with a state');
       it.todo('should push a new entry to the history with a title and state');
+      it.todo('should call #navigate when push is called');
     });
 
     describe('replace', () => {
@@ -83,16 +94,43 @@ describe('router.model', () => {
       it.todo('should replace the current entry in the history with a title');
       it.todo('should replace the current entry in the history with a state');
       it.todo('should replace the current entry in the history with a title and state');
+      it.todo('should call #navigate when replace is called');
     });
 
-    describe('navigate', () => {
-      it.todo('should push a new entry to the history for a location');
-      it.todo('should push a new entry to the history for a name');
-      it.todo('should replace the current entry in the history with a location');
-      it.todo('should replace the current entry in the history with a name');
-      it.todo('should do nothing if the location is the same as the current one and force is not true');
-      it.todo('should push a new entry to the history if the location is the same as the current one and force is true');
-      it.todo('should replace the current entry in the history if the location is the same as the current one and force is true and replace is true');
+    describe('resolve', () => {
+      describe('path mode', () => {
+        it.todo('should resolve a route from a name');
+        it.todo('should resolve a route from a path');
+        it.todo('should resolve a route from a hash path');
+        it.todo('should resolve a route from a sub-path');
+        it.todo('should resolve a route from a name in strict mode');
+        it.todo('should resolve a route from a path in strict mode');
+        it.todo('should not resolve a route from a sub-path in strict mode');
+        it.todo('should resolve a route from a relative location');
+        it.todo('should resolve a route from a location with param parameters');
+        it.todo('should resolve a route from a location with query parameters');
+        it.todo('should resolve a route from a location with both param and query parameters');
+        it.todo('should fail with a NavigationNotFoundError if no path can be resolved');
+        it.todo('should fail with a NavigationNotFoundError if a relative path could not be resolved');
+        it.todo('should fail with a NavigationNotFoundError if the route does not exist and failOnNotFound is true');
+      });
+
+      describe('hash mode', () => {
+        it.todo('should resolve a route from a name');
+        it.todo('should resolve a route from a path');
+        it.todo('should resolve a route from a hash path');
+        it.todo('should resolve a route from a sub-path');
+        it.todo('should resolve a route from a name in strict mode');
+        it.todo('should resolve a route from a path in strict mode');
+        it.todo('should not resolve a route from a sub-path in strict mode');
+        it.todo('should resolve a route from a relative location');
+        it.todo('should resolve a route from a location with param parameters');
+        it.todo('should resolve a route from a location with query parameters');
+        it.todo('should resolve a route from a location with both param and query parameters');
+        it.todo('should fail with a NavigationNotFoundError if no path can be resolved');
+        it.todo('should fail with a NavigationNotFoundError if a relative path could not be resolved');
+        it.todo('should fail with a NavigationNotFoundError if the route does not exist and failOnNotFound is true');
+      });
     });
 
     describe('go', () => {
@@ -110,6 +148,21 @@ describe('router.model', () => {
 
     describe('listeners', () => {
       it.todo('should store scroll position when unloading a page');
+      it.todo('should restore scroll position when loading a page');
+
+      it.todo('should update state when unloading a page');
+      it.todo('should update state when unloading a page when the state is different');
+      it.todo('should not update state when unloading a page if the state is the same');
+
+      it.todo('should call navigation listeners when popstate is triggered and window.navigation is undefined');
+      it.todo('should call #navigate when popstate is triggered and a route is resolved from the hash in hash mode');
+      it.todo('should call #navigate when popstate is triggered and a route is resolved from the path in path mode');
+      it.todo('should call not call #navigate when popstate is triggered and a route is not resolved');
+
+      it.todo('should call navigation listeners when navigate is triggered and window.navigation is defined');
+      it.todo('should call #navigate when navigate is triggered and a route is resolved from the hash in hash mode');
+      it.todo('should call #navigate when navigate is triggered and a route is resolved from the path in path mode');
+      it.todo('should call not call #navigate when navigate is triggered and a route is not resolved');
     });
   });
 });

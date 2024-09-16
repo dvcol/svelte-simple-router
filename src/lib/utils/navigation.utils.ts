@@ -1,7 +1,7 @@
-import type { HistoryState, ResolvedRoute, RouteName, RouteQuery } from '~/models/route.model.js';
+import type { HistoryState, NavigationGuardReturn, ResolvedRoute, RouteName, RouteNavigation, RouteQuery } from '~/models/route.model.js';
 import type { RouterState } from '~/models/router.model.js';
 
-import { ParsingRelativePathError } from '~/models/error.model.js';
+import { NavigationAbortedError, type NavigationFailureType, ParsingRelativePathError } from '~/models/error.model.js';
 import { RouterScrollConstant, RouterStateConstant } from '~/models/router.model.js';
 
 export const routeToHistoryState = <Name extends RouteName = RouteName>(
@@ -78,4 +78,20 @@ export const resolveNewHref = (
     href.pathname = [base, target].filter(Boolean).join('/');
   }
   return { href, search };
+};
+
+const isRouteNavigation = <Name extends RouteName = RouteName>(navigation: unknown): navigation is RouteNavigation<Name> => {
+  if (!navigation) return false;
+  if (typeof navigation !== 'object') return false;
+  return !!(('name' in navigation && navigation?.name) || ('path' in navigation && navigation?.path));
+};
+
+export const preventNavigation = <Name extends RouteName = RouteName>(
+  result: NavigationGuardReturn<Name>,
+  failure: NavigationFailureType<Name>,
+): false | RouteNavigation<Name> => {
+  if (result instanceof Error) throw new NavigationAbortedError(failure, { error: result });
+  if (result === false) throw new NavigationAbortedError(failure);
+  if (isRouteNavigation(result)) return result;
+  return false;
 };

@@ -1,4 +1,5 @@
 import type { Matcher } from '~/models/matcher.model.js';
+import type { ResolvedRouterLocationSnapshot } from '~/models/router.model.js';
 import type { AnyComponent, ComponentOrLazy } from '~/utils/svelte.utils.js';
 
 /**
@@ -178,16 +179,25 @@ export type RouteRedirect<Name extends RouteName = RouteName> = {
   errors?: never;
 };
 
-export type NavigationGuardReturn<Name extends RouteName = RouteName> = void | boolean | Error | RouteNavigation<Name>;
+export type NavigationGuardReturn<Name extends RouteName = RouteName> = void | undefined | null | boolean | Error | RouteNavigation<Name>;
 
 export type NavigationGuard<Name extends RouteName = RouteName> = (
-  from: Route<Name>,
-  to: Route<Name>,
+  from: ResolvedRouterLocationSnapshot<Name>,
+  to: ResolvedRoute<Name>,
 ) => NavigationGuardReturn<Name> | Promise<NavigationGuardReturn<Name>>;
 
-export type NavigationListener<Name extends RouteName = RouteName> = (from: Route<Name>, to: Route<Name>) => void;
+export type NavigationListener<Name extends RouteName = RouteName> = (from: ResolvedRouterLocationSnapshot<Name>, to: ResolvedRoute<Name>) => void;
+export type NavigationEndListener<Name extends RouteName = RouteName> = (
+  from: ResolvedRouterLocationSnapshot<Name>,
+  to: ResolvedRouterLocationSnapshot<Name>,
+) => void;
+export type NavigationErrorListener<Name extends RouteName = RouteName> = (
+  from: ResolvedRouterLocationSnapshot<Name>,
+  to: ResolvedRoute<Name>,
+  error: Error | unknown,
+) => void;
 
-export type Route<Name extends RouteName = RouteName> = (RouteRedirect | RouteComponent | RouteComponents<Name>) & {
+export type BaseRoute<Name extends RouteName = RouteName> = {
   /**
    * Path of the record. Should start with `/` unless the record is the child of
    * another record.
@@ -204,14 +214,6 @@ export type Route<Name extends RouteName = RouteName> = (RouteRedirect | RouteCo
    */
   title?: string;
   /**
-   * Before Enter guard specific to this record.
-   */
-  beforeEnter?: NavigationGuard<Name>;
-  /**
-   * Before Leave guard specific to this record.
-   */
-  beforeLeave?: NavigationGuard<Name>;
-  /**
    * Arbitrary data attached to the record.
    */
   meta?: Record<RouteName, unknown>;
@@ -225,14 +227,38 @@ export type Route<Name extends RouteName = RouteName> = (RouteRedirect | RouteCo
    * Note that params passed in navigation events will override these.
    */
   params?: RouteParams;
-  /**
-   * Array of nested routes.
-   */
-  children?: Route<Name>[];
-  /**
-   * Parent route record.
-   */
-  parent?: Route<Name>;
+};
+
+export type Route<Name extends RouteName = RouteName> = BaseRoute<Name> &
+  (RouteRedirect<Name> | RouteComponent | RouteComponents<Name>) & {
+    /**
+     * Array of nested routes.
+     */
+    children?: Route<Name>[];
+    /**
+     * Parent route record.
+     */
+    parent?: Route<Name>;
+    /**
+     * Before Enter guard specific to this record.
+     */
+    beforeEnter?: NavigationGuard<Name>;
+    /**
+     * Before Leave guard specific to this record.
+     */
+    beforeLeave?: NavigationGuard<Name>;
+  };
+
+export const toBasicRoute = <Name extends RouteName = RouteName>(route?: Route<Name>): BaseRoute<Name> | undefined => {
+  if (!route) return route;
+  return {
+    path: route.path,
+    name: route.name,
+    title: route.title,
+    meta: { ...route.meta },
+    query: { ...route.query },
+    params: { ...route.params },
+  };
 };
 
 export type ParsedRoute<Name extends RouteName = RouteName> = Route<Name> & { matcher: Matcher<Name> };
