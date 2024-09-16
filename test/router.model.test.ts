@@ -86,6 +86,8 @@ describe('router.model', () => {
       it.todo('should push a new entry to the history with a state');
       it.todo('should push a new entry to the history with a title and state');
       it.todo('should call #navigate when push is called');
+      it.todo('should throw a NavigationCancelledError if the navigation is cancelled by new navigation');
+      it.todo('should throw a NavigationAbortedError if the navigation is aborted by a navigation guard');
     });
 
     describe('replace', () => {
@@ -95,6 +97,8 @@ describe('router.model', () => {
       it.todo('should replace the current entry in the history with a state');
       it.todo('should replace the current entry in the history with a title and state');
       it.todo('should call #navigate when replace is called');
+      it.todo('should throw a NavigationCancelledError if the navigation is cancelled by new navigation');
+      it.todo('should throw a NavigationAbortedError if the navigation is aborted by a navigation guard');
     });
 
     describe('resolve', () => {

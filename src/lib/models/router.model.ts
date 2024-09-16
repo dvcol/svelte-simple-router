@@ -144,12 +144,15 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
   routes?: Readonly<Route<Name>[]>;
   /**
    * If `true`, the router will listen to events when instantiated.
-   * - 'currententrychange' for external navigation events (if available).
-   * - 'popstate' event for external history navigation.
+   * - 'currententrychange' for external navigation events (navigation API if available).
+   * - 'popstate' event for external history navigation (history API).
+   *
+   * Note: If set to 'navigation' and navigation API is not available, it will fallback to 'history'.
+   *
    * @see [Navigation API](https://developer.mozilla.org/docs/Web/API/Navigation)
    * @see [History API](https://developer.mozilla.org/docs/Web/API/History)
    */
-  listen?: boolean;
+  listen?: boolean | 'navigation' | 'history';
   /**
    * If `true`, the router will restore the scroll position when navigating back.
    */
@@ -308,7 +311,10 @@ export interface IRouter<Name extends RouteName = RouteName> {
    *
    * @throws {@link NavigationFailure} if the navigation is not found.
    */
-  push(to: RouteNavigation<Name>, options?: RouterNavigationOptions): ResolvedRouterLocation<Name> | Promise<ResolvedRouterLocation<Name>>;
+  push(
+    to: RouteNavigation<Name>,
+    options?: RouterNavigationOptions,
+  ): ResolvedRouterLocationSnapshot<Name> | Promise<ResolvedRouterLocationSnapshot<Name>>;
 
   /**
    * Programmatically navigate to a new URL by replacing the current entry in the history stack.
@@ -320,7 +326,10 @@ export interface IRouter<Name extends RouteName = RouteName> {
    *
    * @throws {@link NavigationNotFoundError} if the navigation is not found.
    */
-  replace(to: RouteNavigation<Name>, option?: RouterNavigationOptions): ResolvedRouterLocation<Name> | Promise<ResolvedRouterLocation<Name>>;
+  replace(
+    to: RouteNavigation<Name>,
+    options?: RouterNavigationOptions,
+  ): ResolvedRouterLocationSnapshot<Name> | Promise<ResolvedRouterLocationSnapshot<Name>>;
 
   /**
    * Go back in history if possible by calling `history.back()`.
