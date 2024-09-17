@@ -130,10 +130,20 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   #listening: 'navigation' | 'history' | false = false;
 
   /**
+   * Mark if the current navigation is internal for navigation listeners.
+   * @private
+   */
+  #internalEvent = $state(false);
+
+  /**
    * Event listener for the `navigate` or `popstate` event.
    * @private
    */
   #navigateListener: (event: PopStateEvent | NavigationCurrentEntryChangeEvent) => void = async () => {
+    if (this.#internalEvent) {
+      this.#internalEvent = false;
+      return;
+    }
     const routerState: RouterStateLocation<Name> = this.#history.state?.[RouterStateConstant];
     if (routerState && this.#location?.href?.toString() === routerState.href?.toString()) return;
     await this.#sync();
@@ -232,9 +242,9 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
 
   init() {
     if (this.#listening) return;
-    if (this.#useNavigationApi && window.navigation) window.navigation.addEventListener('currententrychange', this.#navigateListener);
+    if (this.#useNavigationApi) window.navigation?.addEventListener('currententrychange', this.#navigateListener);
     else window.addEventListener('popstate', this.#navigateListener);
-    this.#listening = window.navigation ? 'navigation' : 'history';
+    this.#listening = this.#useNavigationApi ? 'navigation' : 'history';
     Logger.debug(this.#log, 'Router init', { listening: this.#listening }, window.navigation);
   }
 
@@ -567,23 +577,51 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   }
 
   /**
+   * Internal method to update the history state and navigate to a new URL.
+   *
+   * @param method - History method to use (pushState or replaceState)
+   * @param to - Route location to navigate to
+   * @param options - Additional options to pass to the resolver
+   *
+   * @throws {@link NavigationNotFoundError} if the route is not found.
+   * @throws {@link NavigationCancelledError} if the navigation is cancelled before completion.
+   * @throws {@link NavigationAbortedError} if the navigation is aborted by a navigation guard.
+   * @throws {@link ParsingError} if the URL cannot be parsed.
+   *
+   * @private
+   */
+  #historyWrapper(
+    method: 'pushState' | 'replaceState',
+    to: RouteNavigation<Name>,
+    options: RouterNavigationOptions = this.#options,
+  ): Promise<ResolvedRouterLocationSnapshot<Name>> {
+    const resolved = this.resolve(to, options);
+    const { state, title } = routeToHistoryState(resolved, { ...options, state: to.state });
+    if (this.#listening === 'navigation') this.#internalEvent = true;
+    try {
+      this.#history[method](state, title ?? '', resolved.href);
+      Logger.debug(this.#log, 'State change', { method, resolved, state, title });
+      return this.#navigate(resolved);
+    } catch (error) {
+      Logger.error(this.#log, 'History error', { method, resolved, state, title, error });
+      if (this.#listening === 'navigation') this.#internalEvent = false;
+      throw error;
+    }
+  }
+
+  /**
    * Programmatically navigate to a new URL by pushing an entry in the history stack.
    *
    * @param to - Route location to navigate to
    * @param options - Additional options to pass to the resolver
-   * @param options.strict - If `true`, will only match exact routes
-   * @param options.failOnNotFound - If `true`, will throw an error if the route is not found
-   * @param options.metaAsState - If `true`, will push the `meta` property of the route to the state
-   * @param options.nameAsTitle - If `true`, will use the name of the route as the title of the page
    *
-   * @throws {@link NavigationFailure} if the navigation is not found.
+   * @throws {@link NavigationNotFoundError} if the route is not found.
+   * @throws {@link NavigationCancelledError} if the navigation is cancelled before completion.
+   * @throws {@link NavigationAbortedError} if the navigation is aborted by a navigation guard.
+   * @throws {@link ParsingError} if the URL cannot be parsed.
    */
   async push(to: RouteNavigation<Name>, options: RouterNavigationOptions = this.#options): Promise<ResolvedRouterLocationSnapshot<Name>> {
-    const resolved = this.resolve(to, options);
-    const { state, title } = routeToHistoryState(resolved, { ...options, state: to.state });
-    this.#history.pushState(state, title ?? '', resolved.href);
-    Logger.debug(this.#log, 'Pushed state', { resolved, state, title });
-    return this.#navigate(resolved);
+    return this.#historyWrapper('pushState', to, options);
   }
 
   /**
@@ -591,17 +629,15 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    *
    * @param to - Route location to navigate to
    * @param options - Additional options to pass to the resolver
-   * @param options.strict - If `true`, will only match exact routes
-   * @param options.failOnNotFound - If `true`, will throw an error if the route is not found
    *
-   * @throws {@link NavigationNotFoundError} if the navigation is not found.
+   * @throws {@link NavigationNotFoundError} if the route is not found.
+   * @throws {@link NavigationCancelledError} if the navigation is cancelled before completion.
+   * @throws {@link NavigationAbortedError} if the navigation is aborted by a navigation guard.
+   * @throws {@link ParsingError} if the URL cannot be parsed.
+   *
    */
   async replace(to: RouteNavigation<Name>, options: RouterNavigationOptions = this.#options): Promise<ResolvedRouterLocationSnapshot<Name>> {
-    const resolved = this.resolve(to, options);
-    const { state, title } = routeToHistoryState(resolved, { ...options, state: to.state });
-    this.#history.replaceState(state, title ?? '', resolved.href);
-    Logger.debug(this.#log, 'Replaced state', { resolved, state, title });
-    return this.#navigate(resolved);
+    return this.#historyWrapper('replaceState', to, options);
   }
 
   /**

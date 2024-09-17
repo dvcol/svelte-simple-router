@@ -148,6 +148,7 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
    * - 'popstate' event for external history navigation (history API).
    *
    * Note: If set to 'navigation' and navigation API is not available, it will fallback to 'history'.
+   * This is useful to sync a router instance with another or with native navigation events.
    *
    * @see [Navigation API](https://developer.mozilla.org/docs/Web/API/Navigation)
    * @see [History API](https://developer.mozilla.org/docs/Web/API/History)
@@ -286,13 +287,11 @@ export interface IRouter<Name extends RouteName = RouteName> {
    *
    * By default, the `currentLocation` used is `router.currentRoute` and should only be overridden in advanced use cases.
    *
-   * @param to - Route name or location to resolve
+   * @param to - Route location to navigate to
    * @param options - Additional options to pass to the resolver
-   * @param options.from - Optional current location to resolve against
-   * @param options.strict - If `true`, will only match exact routes
-   * @param options.failOnNotFound - If `true`, will throw an error if the route is not found
    *
    * @throws {@link NavigationNotFoundError} if the navigation is not found.
+   * @throws {@link ParsingError} if the URL cannot be parsed.
    */
   resolve(
     to: RouteNavigation<Name>,
@@ -304,12 +303,11 @@ export interface IRouter<Name extends RouteName = RouteName> {
    *
    * @param to - Route location to navigate to
    * @param options - Additional options to pass to the resolver
-   * @param options.strict - If `true`, will only match exact routes
-   * @param options.failOnNotFound - If `true`, will throw an error if the route is not found
-   * @param options.metaAsState - If `true`, will push the `meta` property of the route to the state
-   * @param options.nameAsTitle - If `true`, will use the name of the route as the title of the page
    *
-   * @throws {@link NavigationFailure} if the navigation is not found.
+   * @throws {@link NavigationNotFoundError} if the route is not found.
+   * @throws {@link NavigationCancelledError} if the navigation is cancelled before completion.
+   * @throws {@link NavigationAbortedError} if the navigation is aborted by a navigation guard.
+   * @throws {@link ParsingError} if the URL cannot be parsed.
    */
   push(
     to: RouteNavigation<Name>,
@@ -321,10 +319,11 @@ export interface IRouter<Name extends RouteName = RouteName> {
    *
    * @param to - Route location to navigate to
    * @param options - Additional options to pass to the resolver
-   * @param options.strict - If `true`, will only match exact routes
-   * @param options.failOnNotFound - If `true`, will throw an error if the route is not found
    *
-   * @throws {@link NavigationNotFoundError} if the navigation is not found.
+   * @throws {@link NavigationNotFoundError} if the route is not found.
+   * @throws {@link NavigationCancelledError} if the navigation is cancelled before completion.
+   * @throws {@link NavigationAbortedError} if the navigation is aborted by a navigation guard.
+   * @throws {@link ParsingError} if the URL cannot be parsed.
    */
   replace(
     to: RouteNavigation<Name>,
