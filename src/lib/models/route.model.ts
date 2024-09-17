@@ -39,6 +39,10 @@ export type CommonRouteNavigation = {
    * @see [MDN for more information](https://developer.mozilla.org/en-US/docs/Web/API/History/state)
    */
   state?: HistoryState;
+  /**
+   * Strip current query parameters when navigating.
+   */
+  stripQuery?: boolean;
 };
 
 /**

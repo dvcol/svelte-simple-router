@@ -4,6 +4,8 @@ import type { RouterState } from '~/models/router.model.js';
 import { NavigationAbortedError, type NavigationFailureType, ParsingRelativePathError } from '~/models/error.model.js';
 import { RouterScrollConstant, RouterStateConstant } from '~/models/router.model.js';
 
+import { toPathSegment } from '~/utils/string.utils.js';
+
 export const routeToHistoryState = <Name extends RouteName = RouteName>(
   { route, href, query, params, name, path }: Partial<ResolvedRoute<Name>>,
   {
@@ -56,17 +58,23 @@ export const resolveNewHref = (
     base,
     hash,
     query,
+    stripQuery,
     current = window.location.href,
   }: {
     base?: string;
     hash?: boolean;
     query?: RouteQuery;
     current?: string;
+    stripQuery?: boolean;
   },
 ): { href: URL; search: URLSearchParams } => {
   const href = new URL(current);
   // In hash mode, we extract the query from the hash, else we use the search params
-  const search = hash ? new URLSearchParams(href.hash?.split('?')?.at(1)) : href.searchParams;
+  let search: URLSearchParams;
+  if (stripQuery) search = new URLSearchParams();
+  else if (hash) search = new URLSearchParams(href.hash?.split('?')?.at(1));
+  else search = href.searchParams;
+
   // If we have a query params, we override the current query params
   if (query) Object.entries(query).forEach(([key, value]) => search.set(key, String(value)));
   // if we have a hash, we override the current hash
@@ -74,9 +82,11 @@ export const resolveNewHref = (
     href.hash = `#${target}`;
     const strSearch = search.toString();
     if (strSearch) href.hash += `?${strSearch}`;
+    if (base) href.pathname = toPathSegment(base, true);
   } else {
     href.pathname = [base, target].filter(Boolean).join('/');
   }
+  console.info('Resolved new href:', { target, base, hash, query, current, href });
   return { href, search };
 };
 

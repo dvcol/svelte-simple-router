@@ -133,13 +133,12 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * Event listener for the `navigate` or `popstate` event.
    * @private
    */
-  #navigateListener: (event: PopStateEvent | NavigationCurrentEntryChangeEvent) => void = () =>
-    setTimeout(async () => {
-      const routerState: RouterStateLocation<Name> = this.#history.state?.[RouterStateConstant];
-      if (routerState && this.#location?.href?.toString() === routerState.href?.toString()) return;
-      await this.#sync();
-      Logger.debug(this.#log, 'Navigate listener', this.snapshot, routerState);
-    });
+  #navigateListener: (event: PopStateEvent | NavigationCurrentEntryChangeEvent) => void = async () => {
+    const routerState: RouterStateLocation<Name> = this.#history.state?.[RouterStateConstant];
+    if (routerState && this.#location?.href?.toString() === routerState.href?.toString()) return;
+    await this.#sync();
+    Logger.debug(this.#log, 'Navigate listener', this.snapshot, routerState);
+  };
 
   /**
    * History instance to use.
@@ -155,6 +154,10 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    */
   get #hash(): boolean {
     return this.#options.hash ?? false;
+  }
+
+  get #base(): string | undefined {
+    return this.#options.base;
   }
 
   /**
@@ -396,7 +399,8 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       hash,
     }: Omit<RouterNavigationOptions, 'metaAsState' | 'nameAsTitle'> & { from?: Route<Name> } = this.#options,
   ): ResolvedRoute<Name> {
-    const { query, params, path, name } = to;
+    const { query, params, path, name, stripQuery } = to;
+    console.info('Resolving route:', { query });
 
     let _path: string | undefined = path;
     //  if 'name' is present, use namedRoutes to resolve path
@@ -433,7 +437,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     const { wildcards, params: _params } = route?.matcher.extract(_path) ?? {};
 
     //  use hash, path, and query to resolve new href
-    const { href, search } = resolveNewHref(_path, { hash, query: { ...from?.query, ...query }, base });
+    const { href, search } = resolveNewHref(_path, { hash, stripQuery, query: { ...route?.query, ...query }, base });
 
     //  return resolved route
     return {
@@ -505,11 +509,15 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
 
       // If a guard returns a redirect, navigate to the new location and replace state
       if (typeof blockOrRedirect === 'object' && options.followGuardRedirects) {
+        Logger.debug(this.#log, 'Guard redirect', { from, to, redirect: blockOrRedirect });
         return this.replace(blockOrRedirect, { ...options, followGuardRedirects: false });
       }
 
       // If the route is a redirect, navigate to the new location and replace state
-      if (to.route?.redirect) return this.replace(to.route.redirect, options);
+      if (to.route?.redirect) {
+        Logger.debug(this.#log, 'Route redirect', { from, to, redirect: to.route.redirect });
+        return this.replace(to.route.redirect, options);
+      }
 
       // Update the current route and location
       this.#route = to.route;
@@ -546,14 +554,14 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @private
    */
   async #sync(): Promise<ResolvedRouterLocationSnapshot<Name>> {
-    const path = this.#hash ? window.location.hash?.split('?')?.at(0) : window.location.pathname;
-    if (!path) {
-      return Logger.warn(this.#log, 'Navigate listener could not parse path, router may be out of sync.', {
-        path,
-        route: this.#route,
-        location: this.#location,
-      });
+    let path: string = window.location.pathname;
+    if (this.#base && !path.startsWith(this.#base)) {
+      this.#location = undefined;
+      this.#route = undefined;
+      return Logger.debug(this.#log, 'Not on base path, ignoring sync', { path, base: this.#base });
     }
+    if (this.#hash) path = window.location.hash.slice(1);
+    if (!path) path = '/';
     const resolve = this.resolve({ path });
     return this.#navigate(resolve);
   }
@@ -570,12 +578,9 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    *
    * @throws {@link NavigationFailure} if the navigation is not found.
    */
-  async push(
-    to: RouteNavigation<Name>,
-    { strict, failOnNotFound, metaAsState, nameAsTitle }: RouterNavigationOptions = this.#options,
-  ): Promise<ResolvedRouterLocationSnapshot<Name>> {
-    const resolved = this.resolve(to, { strict, failOnNotFound });
-    const { state, title } = routeToHistoryState(resolved, { metaAsState, nameAsTitle, state: to.state });
+  async push(to: RouteNavigation<Name>, options: RouterNavigationOptions = this.#options): Promise<ResolvedRouterLocationSnapshot<Name>> {
+    const resolved = this.resolve(to, options);
+    const { state, title } = routeToHistoryState(resolved, { ...options, state: to.state });
     this.#history.pushState(state, title ?? '', resolved.href);
     Logger.debug(this.#log, 'Pushed state', { resolved, state, title });
     return this.#navigate(resolved);
@@ -591,12 +596,9 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    *
    * @throws {@link NavigationNotFoundError} if the navigation is not found.
    */
-  async replace(
-    to: RouteNavigation<Name>,
-    { strict, failOnNotFound, metaAsState, nameAsTitle }: RouterNavigationOptions = this.#options,
-  ): Promise<ResolvedRouterLocationSnapshot<Name>> {
-    const resolved = this.resolve(to, { strict, failOnNotFound });
-    const { state, title } = routeToHistoryState(resolved, { metaAsState, nameAsTitle, state: to.state });
+  async replace(to: RouteNavigation<Name>, options: RouterNavigationOptions = this.#options): Promise<ResolvedRouterLocationSnapshot<Name>> {
+    const resolved = this.resolve(to, options);
+    const { state, title } = routeToHistoryState(resolved, { ...options, state: to.state });
     this.#history.replaceState(state, title ?? '', resolved.href);
     Logger.debug(this.#log, 'Replaced state', { resolved, state, title });
     return this.#navigate(resolved);
