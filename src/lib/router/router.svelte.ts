@@ -657,6 +657,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     if (this.#listening === 'navigation') this.#internalEvent = true;
     try {
       this.#history[method](state, title ?? '', resolved.href);
+      if (title) document.title = title;
       Logger.debug(this.#log, 'State change', { method, resolved, state, title });
       return this.#navigate(resolved);
     } catch (error) {

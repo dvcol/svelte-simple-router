@@ -24,7 +24,7 @@ export const routeToHistoryState = <Name extends RouteName = RouteName>(
 } => {
   const title: string | undefined = route?.title ?? (nameAsTitle ? route?.name?.toString() : undefined);
   const routerState: History['state'] = {};
-  if (metaAsState && route?.meta) routerState.meta = route.meta;
+  if (metaAsState && route?.meta) routerState.meta = JSON.parse(JSON.stringify(route.meta));
   if (name) routerState.name = name;
   if (path) routerState.path = path;
   if (href) routerState.href = href.toString();
