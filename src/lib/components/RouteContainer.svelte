@@ -47,6 +47,11 @@
   const component = $derived(route?.component);
   const components = $derived(route?.components);
 
+  const resolvedProps = $derived.by(() => {
+    if (name) return route?.props?.[name];
+    return route?.props ?? {};
+  });
+
   const ResolvedComponent = $derived.by(() => {
     if (name) return components?.[name];
     return component ?? components?.default;
@@ -106,7 +111,7 @@
     {@render viewLoading?.(children)}
   {/if}
 {:then Component}
-  <Component>
+  <Component {...resolvedProps}>
     {@render children?.(router)}
   </Component>
 {:catch err}
