@@ -7,14 +7,14 @@
   import { useRouter } from '~/router/use-router.svelte.js';
   import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 
-  const { children, options, router }: RouterContextProps = $props();
+  const { children, router, options }: RouterContextProps = $props();
 
   const outerRouter = useRouter();
 
-  if (outerRouter && router) {
+  if (outerRouter && (router || options)) {
     Logger.warn(`[${LoggerKey} Context]`, 'Router Context is already defined, router prop will be ignored', {
       context: outerRouter,
-      props: router,
+      props: router ?? options,
     });
   }
 

@@ -196,10 +196,11 @@ export type NavigationEndListener<Name extends RouteName = RouteName> = (
   to: ResolvedRouterLocationSnapshot<Name>,
 ) => void;
 export type NavigationErrorListener<Name extends RouteName = RouteName> = (
-  from: ResolvedRouterLocationSnapshot<Name>,
-  to: ResolvedRoute<Name>,
   error: Error | unknown,
+  context: { from?: ResolvedRouterLocationSnapshot<Name>; to?: ResolvedRoute<Name>; route?: BaseRoute<Name> },
 ) => void;
+
+export type LoadingListener<Name extends RouteName = RouteName> = (route?: BaseRoute<Name>) => void;
 
 export type BaseRoute<Name extends RouteName = RouteName> = {
   /**

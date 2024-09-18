@@ -231,28 +231,36 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   constructor(options: RouterOptions<Name> = {}) {
     this.#options = { history: window.history, listen: true, followGuardRedirects: true, ...options, base: toPathSegment(options.base) };
     this.#options.routes?.forEach(this.addRoute.bind(this));
-    if (this.#options.listen) this.init();
+    this.#init();
     Logger.debug(this.#log, 'Router created', { options: this.#options });
+  }
+
+  async #init() {
+    await this.#sync();
+
     if (this.#options.beforeEach) this.#beforeEachGuards.add(this.#options.beforeEach);
     if (this.#options.onStart) this.#onStartListeners.add(this.#options.onStart);
     if (this.#options.onEnd) this.#onEndListeners.add(this.#options.onEnd);
     if (this.#options.onError) this.#onErrorListeners.add(this.#options.onError);
-    this.#sync();
+    if (this.#options.listen) this.listen();
+
+    Logger.debug(this.#log, 'Router initialized', { options: this.#options });
   }
 
-  init() {
+  listen() {
+    //  If already listening, exit
     if (this.#listening) return;
     if (this.#useNavigationApi) window.navigation?.addEventListener('currententrychange', this.#navigateListener);
     else window.addEventListener('popstate', this.#navigateListener);
     this.#listening = this.#useNavigationApi ? 'navigation' : 'history';
-    Logger.debug(this.#log, 'Router init', { listening: this.#listening }, window.navigation);
+    Logger.debug(this.#log, 'Router listening', { listening: this.#listening }, window.navigation);
   }
 
   destroy() {
     window.removeEventListener('popstate', this.#navigateListener);
     window.navigation?.removeEventListener('currententrychange', this.#navigateListener);
     this.#listening = false;
-    Logger.debug(this.#log, 'Router destroy', { listening: this.#listening });
+    Logger.debug(this.#log, 'Router stopped listening', { listening: this.#listening });
   }
 
   /**
@@ -410,7 +418,6 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     }: Omit<RouterNavigationOptions, 'metaAsState' | 'nameAsTitle'> & { from?: Route<Name> } = this.#options,
   ): ResolvedRoute<Name> {
     const { query, params, path, name, stripQuery } = to;
-    console.info('Resolving route:', { query });
 
     let _path: string | undefined = path;
     //  if 'name' is present, use namedRoutes to resolve path
@@ -545,7 +552,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       this.#error = error;
 
       // Broadcast the navigation error event
-      this.#onErrorListeners.forEach(listener => listener(from, to, error));
+      this.#onErrorListeners.forEach(listener => listener(error, { from, to }));
       Logger.error(this.#log, 'Navigation error', { from, to, error });
       throw error;
     } finally {

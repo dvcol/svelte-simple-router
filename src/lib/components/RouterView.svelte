@@ -5,12 +5,12 @@
   import RouterContext from '~/components/RouterContext.svelte';
   import { useRouter } from '~/router/use-router.svelte.js';
 
-  const { children: outerChildren, options, router, name, loading, error }: RouterViewProps = $props();
+  const { children: outerChildren, options, router, ..._props }: RouterViewProps = $props();
   const contextRouter = useRouter();
 </script>
 
 {#snippet view(_router: IRouter)}
-  <RouteContainer {name} {loading} {error}>
+  <RouteContainer {..._props}>
     {@render outerChildren?.(_router)}
   </RouteContainer>
 {/snippet}

@@ -2,6 +2,7 @@ import type { Snippet } from 'svelte';
 import type {
   BaseRoute,
   HistoryState,
+  LoadingListener,
   NavigationEndListener,
   NavigationErrorListener,
   NavigationGuard,
@@ -54,13 +55,31 @@ export const RouterStateConstant = '__SVELTE_SIMPLE_ROUTER_STATE__' as const;
 export const RouterScrollConstant = '__SVELTE_SIMPLE_ROUTER_SCROLL__' as const;
 export const RouterDebuggerConstant = '__SVELTE_SIMPLE_ROUTER_DEBUGGER__' as const;
 
-export type RouterContextProps<Name extends RouteName = any> = { router?: IRouter<Name>; options?: RouterOptions<Name> } & {
+export type RouterContextProps<Name extends RouteName = any> = {
+  /**
+   * Router instance to use.
+   */
+  router?: IRouter<Name>;
+  /**
+   * Router options to use when creating a new router instance.
+   */
+  options?: RouterOptions<Name>;
+  /**
+   * Children to render when the router is ready.
+   */
   children?: Snippet<[IRouter<Name>]>;
 };
-export type RouterViewProps = RouterContextProps & {
+
+export type RouterViewProps<Name extends RouteName = any> = RouterContextProps<Name> & {
   name?: string;
   loading?: Snippet<[unknown]>;
   error?: Snippet<[unknown]>;
+  onLoading?: LoadingListener<Name>;
+  onLoaded?: LoadingListener<Name>;
+  onError?: NavigationErrorListener<Name>;
+  onStart?: NavigationListener<Name>;
+  onEnd?: NavigationEndListener<Name>;
+  beforeEach?: NavigationGuard<Name>;
 };
 
 export type RouterScrollPosition = { x: number; y: number };

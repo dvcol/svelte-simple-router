@@ -32,4 +32,20 @@ export const resolveComponent = async <
   Bindings extends keyof Props | '' = string,
 >(
   component?: ComponentOrLazy<Props, Exports, Bindings>,
-): Promise<Component<Props, Exports, Bindings> | undefined> => (isLazyComponent(component) ? (await component()).default : component);
+  { onLoading, onLoaded, onError }: { onLoading?: () => void; onLoaded?: () => void; onError?: (error: unknown) => void } = {},
+): Promise<Component<Props, Exports, Bindings> | undefined> => {
+  if (!component) return component;
+  if (isLazyComponent(component)) {
+    onLoading?.();
+    try {
+      const awaited = await component();
+      onLoaded?.();
+      return awaited.default;
+    } catch (error) {
+      onError?.(error);
+      throw error;
+    }
+  }
+  onLoaded?.();
+  return component;
+};
