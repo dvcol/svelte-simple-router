@@ -32,6 +32,7 @@ import {
   type RouterLocation,
   type RouterNavigationOptions,
   type RouterOptions,
+  RouterPathPriority,
   RouterStateConstant,
   type RouterStateLocation,
   toBasicRouterLocation,
@@ -46,7 +47,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * Unique identifier for the router instance.
    * @private
    */
-  readonly id = randomHex(4);
+  readonly id = `r${randomHex(4)}`;
 
   /**
    * Logger prefix for the router instance.
@@ -75,7 +76,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * List of all the routes matchers.
    * @private
    */
-  #parsedRoutes = $derived(Array.from(this.#routes.values()));
+  #parsedRoutes = $derived<ParsedRoute<Name>[]>(this.routes);
 
   /**
    * Current {@link RouterLocation}
@@ -146,7 +147,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     }
     const routerState: RouterStateLocation<Name> = this.#history.state?.[RouterStateConstant];
     if (routerState && this.#location?.href?.toString() === routerState.href?.toString()) return;
-    await this.#sync();
+    await this.sync();
     Logger.debug(this.#log, 'Navigate listener', this.snapshot, routerState);
   };
 
@@ -166,6 +167,10 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     return this.#options.hash ?? false;
   }
 
+  /**
+   * Base path for the router.
+   * @private
+   */
   get #base(): string | undefined {
     return this.#options.base;
   }
@@ -177,6 +182,20 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   get #useNavigationApi(): boolean {
     if (!window.navigation) return false;
     return this.#options.listen === true || this.#options.listen === 'navigation';
+  }
+
+  /**
+   * Get the route name map based on the case sensitivity option.
+   * @private
+   */
+  get #routeNameMap(): Pick<Map<Name, string>, 'set' | 'get' | 'delete' | 'has'> {
+    if (this.#options.caseSensitive) return this.#namedRoutes;
+    return {
+      has: (name: Name) => this.#namedRoutes.has(String(name).toLowerCase() as Name),
+      get: (name: Name) => this.#namedRoutes.get(String(name).toLowerCase() as Name),
+      set: (name: Name, path: string) => this.#namedRoutes.set(String(name).toLowerCase() as Name, path),
+      delete: (name: Name) => this.#namedRoutes.delete(String(name).toLowerCase() as Name),
+    };
   }
 
   /**
@@ -224,19 +243,27 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   /**
    * Get a full list of all the {@link Route}.
    */
-  get routes(): Route<Name>[] {
-    return Array.from(this.#routes.values());
+  get routes(): ParsedRoute<Name>[] {
+    return Array.from(this.#routes.values()).sort(this.#options.priority);
   }
 
   constructor(options: RouterOptions<Name> = {}) {
-    this.#options = { history: window.history, listen: true, followGuardRedirects: true, ...options, base: toPathSegment(options.base) };
-    this.#options.routes?.forEach(this.addRoute.bind(this));
+    this.#options = {
+      history: window.history,
+      listen: true,
+      followGuardRedirects: true,
+      priority: RouterPathPriority,
+      caseSensitive: false,
+      ...options,
+      base: toPathSegment(options.base),
+    };
+    if (this.#options.routes) this.addRoutes(this.#options.routes);
     this.#init();
     Logger.debug(this.#log, 'Router created', { options: this.#options });
   }
 
   async #init() {
-    await this.#sync();
+    await this.sync();
 
     if (this.#options.beforeEach) this.#beforeEachGuards.add(this.#options.beforeEach);
     if (this.#options.onStart) this.#onStartListeners.add(this.#options.onStart);
@@ -269,7 +296,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @param name - Name of the route to check
    */
   hasRouteName(name: Name): boolean {
-    return this.#namedRoutes.has(name);
+    return this.#routeNameMap.has(name);
   }
 
   /**
@@ -304,7 +331,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     const _route = route as ParsedRoute<Name>;
     _route.matcher = new Matcher(route);
     this.#routes.set(route.path, _route);
-    if (route.name) this.#namedRoutes.set(route.name, route.path);
+    if (route.name) this.#routeNameMap.set(route.name, route.path);
     route.children?.forEach(child => {
       const _child: Route<Name> = {
         ...child,
@@ -314,7 +341,19 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       this.addRoute(_child);
     });
     Logger.debug(this.#log, 'Route added', { route, routes: this.routes, names: this.#namedRoutes });
-    // TODO sync here ?
+    return this;
+  }
+
+  /**
+   * Add multiple {@link Route} to the router.
+   *
+   * @param routes - Array of routes to add
+   *
+   * @throws {@link RouterNameConflictError} if a route with the same name already exists
+   * @throws {@link RouterPathConflictError} if a route with the same path already exists
+   */
+  addRoutes(routes: Readonly<Route<Name>[]> | Route<Name>[]): Router<Name> {
+    routes.forEach(this.addRoute.bind(this));
     return this;
   }
 
@@ -329,7 +368,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     if (!name && !path) return false;
 
     //  Check if the name or path provided matches the registered name or path when both are provided
-    const registeredPath = name ? this.#namedRoutes.get(name) : undefined;
+    const registeredPath = name ? this.#routeNameMap.get(name) : undefined;
     const registeredName = path ? this.#routes.get(path)?.name : undefined;
     if (name && path) {
       if (registeredPath && registeredPath !== path) throw new RouterNamePathMismatchError<Name>({ name, path, registeredPath });
@@ -339,11 +378,20 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     const _path = path || registeredPath;
     const _name = name || registeredName;
     let result = false;
-    if (_name) result = this.#namedRoutes.delete(_name);
-    if (_path) result = result || this.#routes.delete(_path);
-    Logger.debug(this.#log, 'Removed route', { name: _name, path: _path, routes: this.routes, names: this.#namedRoutes });
-    // TODO sync here ?
+    if (_name) result = this.#routeNameMap.delete(_name);
+    if (_path) result = this.#routes.delete(_path) || result;
+    if (result) Logger.debug(this.#log, 'Removed route', { name: _name, path: _path, routes: this.routes, names: this.#namedRoutes });
     return result;
+  }
+
+  /**
+   * Remove multiple routes by their name or path.
+   * @param routes - Array of routes to remove
+   *
+   * @returns Array of removed routes
+   */
+  removeRoutes(routes: Readonly<Route<Name>[]> | Route<Name>[]): Route<Name>[] {
+    return routes.filter(this.removeRoute.bind(this));
   }
 
   /**
@@ -421,7 +469,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
 
     let _path: string | undefined = path;
     //  if 'name' is present, use namedRoutes to resolve path
-    if (!path && name) _path = this.#namedRoutes.get(name);
+    if (!path && name) _path = this.#routeNameMap.get(name);
     if (!_path) throw new NavigationNotFoundError({ to, from }, { message: 'No path could be resolved from the provided location' });
 
     // strip hash from path
@@ -443,7 +491,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     if (_path) _path = replaceTemplateParams(_path, { ...route?.params, ...params });
 
     //  Find exact match
-    route = this.#parsedRoutes.find(r => r.matcher.match(_path, true));
+    if (!route) route = this.#parsedRoutes.find(r => r.matcher.match(_path, true));
 
     //  If no route found, find first match (if strict is false)
     if (!route && !strict) route = this.#parsedRoutes.find(r => r.matcher.match(_path));
@@ -544,11 +592,11 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
         ...to,
       };
 
-      Logger.debug(this.#log, 'Navigated', { from, to });
+      Logger.debug(this.#log, 'Navigated to', to?.name || to?.path, { from, to });
       return this.snapshot;
     } catch (error) {
-      // If the navigation was cancelled return the new promise
-      if (!isStillRouting()) throw new NavigationCancelledError({ from, to });
+      // If the navigation was cancelled throw cancellation error
+      if (!isStillRouting()) throw new NavigationCancelledError({ from, to }, { error });
       this.#error = error;
 
       // Broadcast the navigation error event
@@ -570,7 +618,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * Sync the router with the current location.
    * @private
    */
-  async #sync(): Promise<ResolvedRouterLocationSnapshot<Name>> {
+  async sync(): Promise<ResolvedRouterLocationSnapshot<Name>> {
     let path: string = window.location.pathname;
     if (this.#base && !path.startsWith(this.#base)) {
       this.#location = undefined;
@@ -653,7 +701,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    */
   back(): ReturnType<Router['go']> {
     this.#history.back();
-    if (!this.#listening) this.#sync();
+    if (!this.#listening) this.sync();
   }
 
   /**
@@ -662,7 +710,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    */
   forward(): ReturnType<Router['go']> {
     this.#history.forward();
-    if (!this.#listening) this.#sync();
+    if (!this.#listening) this.sync();
   }
 
   /**
@@ -673,6 +721,6 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    */
   go(delta: number): void {
     this.#history.go(delta);
-    if (!this.#listening) this.#sync();
+    if (!this.#listening) this.sync();
   }
 }

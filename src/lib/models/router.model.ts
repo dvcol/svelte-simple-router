@@ -147,6 +147,9 @@ export type RouterNavigationOptions = {
   followGuardRedirects?: boolean;
 };
 
+export const RouterPathPriority = <T extends Route<any> = Route>(a: T, b: T): number =>
+  (b.path?.length || 0) - (a.path?.length || 0) || (b.path || '').localeCompare(a.path || '');
+
 /**
  * Options to initialize a {@link Router} instance.
  */
@@ -173,6 +176,19 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
    * @see [History API](https://developer.mozilla.org/docs/Web/API/History)
    */
   listen?: boolean | 'navigation' | 'history';
+  /**
+   * A sorting function to sort the routes when resolving.
+   * By default, the routes are sorted by length of the path and then by reverse alphabetical order (to keep wildcards at the end).
+   *
+   * @example (a, b) => b.path.length - a.path.length || b.path.localeCompare(a.path)
+   * @param a - Route to compare
+   * @param b - Route to compare
+   */
+  priority?: (a: Route<Name>, b: Route<Name>) => number;
+  /**
+   * If `true`, the route name will be case-sensitive, otherwise route names will be coerced to lowercase.
+   */
+  caseSensitive?: boolean;
   /**
    * If `true`, the router will restore the scroll position when navigating back.
    */
@@ -258,12 +274,30 @@ export interface IRouter<Name extends RouteName = RouteName> {
   addRoute(route: Route<Name>): IRouter<Name>;
 
   /**
+   * Add multiple {@link Route} to the router.
+   *
+   * @param routes - List of Route Records to add
+   *
+   * @throws {@link RouterNameConflictError} if a route with the same name already exists
+   * @throws {@link RouterPathConflictError} if a route with the same path already exists
+   */
+  addRoutes(routes: Route<Name>[]): IRouter<Name>;
+
+  /**
    * Remove an existing route by its name.
    *
    * @param name - Name of the route to remove
    * @param path - Path of the route to remove
    */
   removeRoute({ path, name }: { name: Name; path?: Route<Name>['path'] } | { name?: Name; path: Route<Name>['path'] }): boolean;
+
+  /**
+   * Remove multiple routes by their name or path.
+   * @param routes - Array of routes to remove
+   *
+   * @returns Array of removed routes
+   */
+  removeRoutes(routes: Route<Name>[]): Route<Name>[];
 
   /**
    * Add a navigation guard that executes before any navigation.
@@ -300,6 +334,12 @@ export interface IRouter<Name extends RouteName = RouteName> {
    * @returns a function that removes the registered listener
    */
   onError(listener: NavigationErrorListener<Name>): () => void;
+
+  /**
+   * Sync the router with the current location.
+   * @private
+   */
+  sync(): Promise<ResolvedRouterLocationSnapshot<Name>>;
 
   /**
    * Returns the {@link ResolvedRoute} from a {@link RouteNavigation} and current route {@link Route}.
