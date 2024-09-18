@@ -408,4 +408,9 @@ export interface IRouter<Name extends RouteName = RouteName> {
    * @param delta - The position in the history to which you want to move, relative to the current page
    */
   go(delta: number): void;
+
+  /**
+   * Teardown function to clean up the router instance.
+   */
+  destroy(): void;
 }

@@ -503,6 +503,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
 
     //  use hash, path, and query to resolve new href
     const { href, search } = resolveNewHref(_path, { hash, stripQuery, query: { ...route?.query, ...query }, base });
+    Logger.debug(this.#log, 'Route resolved', { to, from, route, path: _path, href, search, wildcards, params: _params });
 
     //  return resolved route
     return {
@@ -626,6 +627,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       return Logger.debug(this.#log, 'Not on base path, ignoring sync', { path, base: this.#base });
     }
     if (this.#hash) path = window.location.hash.slice(1);
+    else if (this.#base) path = path.slice(this.#base.length);
     if (!path) path = '/';
     const resolve = this.resolve({ path });
     return this.#navigate(resolve);

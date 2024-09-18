@@ -29,6 +29,7 @@
 
   onDestroy(() => {
     if (!innerRouter) return;
+    innerRouter.destroy();
     setContext(RouterContextSymbol, null);
     Logger.debug(`[${LoggerKey} Context]`, 'Router Context unset:', innerRouter);
   });

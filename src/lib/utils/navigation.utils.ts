@@ -84,9 +84,11 @@ export const resolveNewHref = (
     if (strSearch) href.hash += `?${strSearch}`;
     if (base) href.pathname = toPathSegment(base, true);
   } else {
-    href.pathname = [base, target].filter(Boolean).join('/');
+    href.pathname = [base, target]
+      .filter(Boolean)
+      .map(s => toPathSegment(s))
+      .join('');
   }
-  console.info('Resolved new href:', { target, base, hash, query, current, href });
   return { href, search };
 };
 
