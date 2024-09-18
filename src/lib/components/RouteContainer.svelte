@@ -1,32 +1,12 @@
 <script lang="ts">
-  import { onDestroy, onMount, type Snippet } from 'svelte';
+  import { onDestroy } from 'svelte';
 
-  import type { IRouter } from '~/models/router.model.js';
+  import type { RouterViewProps } from '~/models/router.model.js';
 
-  import {
-    type LoadingListener,
-    type NavigationEndListener,
-    type NavigationErrorListener,
-    type NavigationGuard,
-    type NavigationListener,
-    toBasicRoute,
-  } from '~/models/route.model.js';
+  import { toBasicRoute } from '~/models/route.model.js';
 
   import { useRouter } from '~/router/use-router.svelte.js';
   import { resolveComponent } from '~/utils/svelte.utils.js';
-
-  type RouteContainerProps = {
-    name?: string;
-    children?: Snippet<[IRouter<any> | undefined]>;
-    loading?: Snippet<[unknown]>;
-    error?: Snippet<[unknown]>;
-    onLoading?: LoadingListener;
-    onLoaded?: LoadingListener;
-    onError?: NavigationErrorListener;
-    onStart?: NavigationListener;
-    onEnd?: NavigationEndListener;
-    beforeEach?: NavigationGuard;
-  };
 
   const {
     children,
@@ -39,7 +19,8 @@
     onStart,
     onEnd,
     beforeEach,
-  }: RouteContainerProps = $props();
+    transition,
+  }: Omit<RouterViewProps, 'options' | 'router'> = $props();
 
   const router = useRouter();
   const route = $derived(router?.route);
@@ -89,37 +70,54 @@
     return (err: unknown) => loadingUUID === _uuid && onError?.(err, { route: _route });
   });
 
+  const _in = $derived((node, props, options) => transition?.in?.(node, props, options));
+  const _out = $derived((node, props, options) => transition?.out?.(node, props, options));
+  const _inParams = $derived(transition?.params?.in);
+  const _outParams = $derived(transition?.params?.out);
+  const _transitionProps = $derived(transition?.props);
+
   const subs: (() => void)[] = [];
-  onMount(() => {
-    if (!router) return;
-    if (beforeEach) subs.push(router.beforeEach(beforeEach));
-    if (onStart) subs.push(router.onStart(onStart));
-    if (onEnd) subs.push(router.onEnd(onEnd));
-    if (onError) subs.push(router.onError(onError));
-  });
+
+  if (beforeEach) subs.push(router.beforeEach(beforeEach));
+  if (onStart) subs.push(router.onStart(onStart));
+  if (onEnd) subs.push(router.onEnd(onEnd));
+  if (onError) subs.push(router.onError(onError));
+
   onDestroy(() => subs.forEach(sub => sub()));
 </script>
 
+{#snippet view()}
+  {#await resolveComponent(ResolvedComponent, { onLoading: _onLoading, onLoaded: _onLoaded, onError: _onError })}
+    {#if ResolvedLoading}
+      <ResolvedLoading>
+        {@render children?.(router)}
+      </ResolvedLoading>
+    {:else}
+      {@render viewLoading?.(router)}
+    {/if}
+  {:then Component}
+    <Component {...resolvedProps}>
+      {@render children?.(router)}
+    </Component>
+  {:catch err}
+    {#if ResolvedError}
+      <ResolvedError error={err}>
+        {@render children?.(router)}
+      </ResolvedError>
+    {:else}
+      {@render viewError?.(err)}
+    {/if}
+  {/await}
+{/snippet}
+
 {@render children?.(router)}
 
-{#await resolveComponent(ResolvedComponent, { onLoading: _onLoading, onLoaded: _onLoaded, onError: _onError })}
-  {#if ResolvedLoading}
-    <ResolvedLoading>
-      {@render children?.(router)}
-    </ResolvedLoading>
-  {:else}
-    {@render viewLoading?.(children)}
-  {/if}
-{:then Component}
-  <Component {...resolvedProps}>
-    {@render children?.(router)}
-  </Component>
-{:catch err}
-  {#if ResolvedError}
-    <ResolvedError error={err}>
-      {@render children?.(router)}
-    </ResolvedError>
-  {:else}
-    {@render viewError?.(err)}
-  {/if}
-{/await}
+{#if transition}
+  {#key route?.path}
+    <div class="transition-container" in:_in={_inParams} out:_out={_outParams} {..._transitionProps}>
+      {@render view()}
+    </div>
+  {/key}
+{:else}
+  {@render view()}
+{/if}

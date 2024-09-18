@@ -1,4 +1,6 @@
 import type { Snippet } from 'svelte';
+import type { TransitionConfig } from 'svelte/transition';
+
 import type {
   BaseRoute,
   HistoryState,
@@ -70,16 +72,72 @@ export type RouterContextProps<Name extends RouteName = any> = {
   children?: Snippet<[IRouter<Name>]>;
 };
 
+export type TransitionFunction<T extends Record<string, any> = Record<string, any>> = (
+  node: Element,
+  props: T | undefined,
+  options: { direction?: 'in' | 'out' | 'both' },
+) => TransitionConfig | ((options: { direction?: 'in' | 'out' }) => TransitionConfig);
+
+export type TransitionProps = {
+  in?: TransitionFunction;
+  out?: TransitionFunction;
+  params?: {
+    in?: Record<string, any>;
+    out?: Record<string, any>;
+  };
+  props?: Record<string, any>;
+};
+
 export type RouterViewProps<Name extends RouteName = any> = RouterContextProps<Name> & {
+  /**
+   * Name of the router view to render.
+   * If not provided, the default view will be used.
+   */
   name?: string;
-  loading?: Snippet<[unknown]>;
+  /**
+   * Loading snippet to display while the route is loading.
+   * Route loading component will take precedence over this.
+   *
+   * @see {@link RouteComponents.loadings}
+   * @see {@link RouteComponent.loading}
+   */
+  loading?: Snippet<[IRouter<Name>]>;
+  /**
+   * Error snippet to display if the route fails to load.
+   * Route error component will take precedence over this.
+   *
+   * @see {@link RouteComponents.errors}
+   * @see {@link RouteComponent.error}
+   */
   error?: Snippet<[unknown]>;
+  /**
+   * Loading listener to execute when the view starts loading.
+   */
   onLoading?: LoadingListener<Name>;
+  /**
+   * Loaded listener to execute when the view is loaded.
+   */
   onLoaded?: LoadingListener<Name>;
+  /**
+   * Error listener to execute when the view fails to load.
+   */
   onError?: NavigationErrorListener<Name>;
+  /**
+   * Navigation listener passed to the router instance.
+   */
   onStart?: NavigationListener<Name>;
+  /**
+   * Navigation end listener passed to the router instance.
+   */
   onEnd?: NavigationEndListener<Name>;
+  /**
+   * Navigation guard passed to the router instance.
+   */
   beforeEach?: NavigationGuard<Name>;
+  /**
+   * Transition to use when navigating between routes.
+   */
+  transition?: TransitionProps;
 };
 
 export type RouterScrollPosition = { x: number; y: number };
