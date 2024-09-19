@@ -230,6 +230,8 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
    * Note: If set to 'navigation' and navigation API is not available, it will fallback to 'history'.
    * This is useful to sync a router instance with another or with native navigation events.
    *
+   * Warning: If set to 'navigation' and multiple router instances are listening to the same navigation events, it may cause conflicts (especially for redirects).
+   *
    * @see [Navigation API](https://developer.mozilla.org/docs/Web/API/Navigation)
    * @see [History API](https://developer.mozilla.org/docs/Web/API/History)
    */

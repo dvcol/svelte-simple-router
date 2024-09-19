@@ -4,6 +4,8 @@ import { randomHex } from '@dvcol/common-utils';
 
 import { raceUntil } from '@dvcol/common-utils/common/promise';
 
+import { SvelteMap, SvelteSet } from 'svelte/reactivity';
+
 import {
   NavigationCancelledError,
   NavigationNotFoundError,
@@ -57,72 +59,86 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
 
   /**
    * Original options object passed to create the Router
+   * @private
    */
   readonly #options: RouterOptions<Name> & { history: IHistory<Name> };
 
   /**
    * Map of all the routes added to the router.
+   * @reactive
    * @private
    */
-  #routes: Map<string, ParsedRoute<Name>> = $state(new Map());
+  #routes: Map<string, ParsedRoute<Name>> = $state(new SvelteMap());
+
+  /**
+   * Sorted list of all the routes added to the router.
+   * @reactive
+   * @private
+   */
+  #sortedRoutes = $derived<ParsedRoute<Name>[]>(Array.from(this.#routes.values()).sort(this.#priority));
 
   /**
    * Map of all the named routes added to the router.
+   * @reactive
    * @private
    */
-  #namedRoutes: Map<Name, string> = $state(new Map());
-
-  /**
-   * List of all the routes matchers.
-   * @private
-   */
-  #parsedRoutes = $derived<ParsedRoute<Name>[]>(this.routes);
+  #namedRoutes: Map<Name, string> = $state(new SvelteMap());
 
   /**
    * Current {@link RouterLocation}
+   * @reactive
+   * @private
    */
   #location?: RouterLocation<Name> = $state();
 
   /**
    * Current {@link Route}
+   * @reactive
+   * @private
    */
   #route?: Route<Name> = $state();
 
   /**
    * Last error that occurred during navigation.
+   * @reactive
    * @private
    */
   #error?: unknown = $state();
 
   /**
    * Promise that resolves when the router is done loading the current route.
+   * @reactive
    * @private
    */
   #routing?: ReturnType<typeof crypto.randomUUID> = $state();
 
   /**
    * List of navigation guards that should be executed before each navigation.
+   * @reactive
    * @private
    */
-  #beforeEachGuards: Set<NavigationGuard<Name>> = $state(new Set());
+  #beforeEachGuards: Set<NavigationGuard<Name>> = $state(new SvelteSet());
 
   /**
    * List of navigation listeners that should be executed when the navigation is triggered but before the route is resolved.
+   * @reactive
    * @private
    */
-  #onStartListeners: Set<NavigationListener<Name>> = $state(new Set());
+  #onStartListeners: Set<NavigationListener<Name>> = $state(new SvelteSet());
 
   /**
    * List of navigation listeners that should be executed when the navigation is triggered and the route is resolved.
+   * @reactive
    * @private
    */
-  #onEndListeners: Set<NavigationEndListener<Name>> = $state(new Set());
+  #onEndListeners: Set<NavigationEndListener<Name>> = $state(new SvelteSet());
 
   /**
    * List of navigation listeners that should be executed when an error occurs during navigation.
+   * @reactive
    * @private
    */
-  #onErrorListeners: Set<NavigationErrorListener<Name>> = $state(new Set());
+  #onErrorListeners: Set<NavigationErrorListener<Name>> = $state(new SvelteSet());
 
   /**
    * If the router is listening to `popstate` (history API)  or `currententrychange` (navigation API)  events.
@@ -132,6 +148,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
 
   /**
    * Mark if the current navigation is internal for navigation listeners.
+   * @reactive
    * @private
    */
   #internalEvent = $state(false);
@@ -176,6 +193,14 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   }
 
   /**
+   * Priority function to sort routes.
+   * @private
+   */
+  get #priority(): (a: ParsedRoute<Name>, b: ParsedRoute<Name>) => number {
+    return this.#options.priority ?? RouterPathPriority;
+  }
+
+  /**
    * If the router should use the navigation API for listening to navigation events.
    * @private
    */
@@ -200,6 +225,8 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
 
   /**
    * The last error that occurred during navigation.
+   * This is reactive and will update when an error occurs.
+   * @reactive
    */
   get error(): unknown {
     return this.#error;
@@ -209,6 +236,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * This is a reactive state of the router.
    * To get a snapshot of the router state, use {@link snapshot} instead.
    * Current {@link ResolvedRouterLocation}
+   * @reactive
    */
   get current(): ResolvedRouterLocation<Name> {
     return { route: this.route, location: this.location };
@@ -228,13 +256,17 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
 
   /**
    * Current {@link RouterLocation}
+   * This is reactive and will update when the location changes.
+   * @reactive
    */
   get location(): RouterLocation<Name> | undefined {
     return this.#location;
   }
 
   /**
-   * Current {@link Route}
+   * Current {@link Route}.
+   * This is reactive and will update when the route changes.
+   * @reactive
    */
   get route(): Route<Name> | undefined {
     return this.#route;
@@ -242,9 +274,10 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
 
   /**
    * Get a full list of all the {@link Route}.
+   * @reactive
    */
   get routes(): ParsedRoute<Name>[] {
-    return Array.from(this.#routes.values()).sort(this.#options.priority);
+    return this.#sortedRoutes;
   }
 
   constructor(options: RouterOptions<Name> = {}) {
@@ -491,10 +524,10 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     if (_path) _path = replaceTemplateParams(_path, { ...route?.params, ...params });
 
     //  Find exact match
-    if (!route) route = this.#parsedRoutes.find(r => r.matcher.match(_path, true));
+    if (!route) route = this.routes.find(r => r.matcher.match(_path, true));
 
     //  If no route found, find first match (if strict is false)
-    if (!route && !strict) route = this.#parsedRoutes.find(r => r.matcher.match(_path));
+    if (!route && !strict) route = this.routes.find(r => r.matcher.match(_path));
 
     //  if no route found and failOnNotFound is true, throw NavigationNotFoundError
     if (!route && failOnNotFound) throw new NavigationNotFoundError({ to, from });
