@@ -59,7 +59,7 @@ const isNotValidAnchorNavigation = (event: MouseEvent | KeyboardEvent) => {
 export type LinkActionOptions = CommonRouteNavigation & RouterNavigationOptions & { replace?: boolean; name?: string; path?: string };
 
 /**
- * A link action to add to an element to navigate to a new location using the router.
+ * A svelte action to add to an element to navigate to a new location using the router.
  *
  * The link action will prevent the default behavior and use the router only if the following conditions are met:
  * - The element is within a router context
@@ -76,7 +76,10 @@ export type LinkActionOptions = CommonRouteNavigation & RouterNavigationOptions 
  *
  * If the host is not an anchor element, the role and tabindex attributes will be set.
  *
- * Example:
+ * @param node - The element to add the link action to
+ * @param options - The options to use for the navigation
+ *
+ * @Example
  * ```html
  * <a href="/path/:param?query=value" use:link>simple link</a>
  * <a href='goodbye' name use:link>named link</a>

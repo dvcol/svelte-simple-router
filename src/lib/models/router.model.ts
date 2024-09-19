@@ -9,6 +9,7 @@ import type {
   NavigationErrorListener,
   NavigationGuard,
   NavigationListener,
+  ParsedRoute,
   ResolvedRoute,
   Route,
   RouteName,
@@ -257,6 +258,8 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
   /**
    * If `true`, the route name will be case-sensitive, otherwise route names will be coerced to lowercase.
    *
+   * Note: When using case-sensitive, route names will be coerced to string even if they are numbers or symbols.
+   *
    * @default false
    */
   caseSensitive?: boolean;
@@ -302,12 +305,12 @@ export interface IRouter<Name extends RouteName = RouteName> {
   /**
    * Current {@link Route}
    */
-  route?: Route<Name>;
+  route?: ParsedRoute<Name>;
 
   /**
    * Get a full list of all the {@link Route}.
    */
-  routes: Route<Name>[];
+  routes: ParsedRoute<Name>[];
 
   /**
    * Checks if a route with a given name exists

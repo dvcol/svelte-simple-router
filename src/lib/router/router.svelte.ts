@@ -96,7 +96,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @reactive
    * @private
    */
-  #route?: Route<Name> = $state();
+  #route?: ParsedRoute<Name> = $state();
 
   /**
    * Last error that occurred during navigation.
@@ -280,7 +280,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * This is reactive and will update when the route changes.
    * @reactive
    */
-  get route(): Route<Name> | undefined {
+  get route(): ParsedRoute<Name> | undefined {
     return this.#route;
   }
 

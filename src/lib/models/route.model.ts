@@ -279,7 +279,7 @@ export const toBasicRoute = <Name extends RouteName = RouteName>(route?: Route<N
   };
 };
 
-export type ParsedRoute<Name extends RouteName = RouteName> = Route<Name> & { matcher: Matcher<Name> };
+export type ParsedRoute<Name extends RouteName = RouteName> = Route<Name> & { parent?: ParsedRoute<Name>; matcher: Matcher<Name> };
 
 export type ResolvedRoute<Name extends RouteName = RouteName> = {
   /**
