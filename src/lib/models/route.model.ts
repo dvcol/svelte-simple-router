@@ -41,8 +41,21 @@ export type CommonRouteNavigation = {
   state?: HistoryState;
   /**
    * Strip current query parameters when navigating.
+   * @default false
    */
   stripQuery?: boolean;
+  /**
+   * Strip current hash when navigating when hash mode is disabled.
+   * This is only used in path mode.
+   * @default false
+   */
+  stripHash?: boolean;
+  /**
+   * Strip trailing hash from the new href (i.e. only keep one url fragment used for routing).
+   * This is only used in hash mode.
+   * @default false
+   */
+  stripTrailingHash?: boolean;
 };
 
 /**

@@ -14,17 +14,35 @@
 <script lang="ts">
   import { getContext, onDestroy } from 'svelte';
 
-  import { RouterContextSymbol } from '~/models/router.model.js';
+  import { type IRouter, RouterContextSymbol } from '~/models/router.model.js';
   import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 
-  if (import.meta.env.MODE === 'development') {
-    const contextRouter = getContext<IRouter>(RouterContextSymbol);
-    Logger.info(`[${LoggerKey} Debugger]`, 'router attached to "window.router"', contextRouter);
-    window[RouterDebuggerConstant] = { ...window[RouterDebuggerConstant], [contextRouter.id]: contextRouter };
+  const router = getContext<IRouter>(RouterContextSymbol);
+  Logger.info(`[${LoggerKey} Debugger]`, 'router attached to "window.router"', router);
+  window[RouterDebuggerConstant] = { ...window[RouterDebuggerConstant], [router.id]: router };
 
-    onDestroy(() => {
-      Logger.info(`[${LoggerKey} Debugger]`, 'router detached from "window.router"', contextRouter);
-      delete window[RouterDebuggerConstant]?.[contextRouter.id];
-    });
-  }
+  const options = $derived(router.options);
+
+  onDestroy(() => {
+    Logger.info(`[${LoggerKey} Debugger]`, 'router detached from "window.router"', router);
+    delete window[RouterDebuggerConstant]?.[router.id];
+  });
 </script>
+
+<div class="debug">
+  <h3>Router options - {router?.id}</h3>
+  <pre>{JSON.stringify(options, null, 2)}</pre>
+</div>
+
+<style>
+  .debug {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: color-mix(in srgb, transparent, white 10%);
+    border-radius: 0.5rem;
+
+    h3 {
+      margin-top: 0;
+    }
+  }
+</style>

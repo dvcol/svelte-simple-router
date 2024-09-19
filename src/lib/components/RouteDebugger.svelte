@@ -4,6 +4,7 @@
   const router = useRouter();
   const route = $derived(router?.route);
   const location = $derived(router?.location);
+  const meta = $derived(route?.meta);
   const error = $derived<any>(router?.error);
 </script>
 
@@ -15,7 +16,7 @@
   <div>Wildcards - {JSON.stringify(location?.wildcards, undefined, 2)}</div>
   <br />
   <div>Route - {route?.name}</div>
-  <div>Meta - {JSON.stringify(route?.meta, undefined, 2)}</div>
+  <div>Meta - {JSON.stringify(meta, undefined, 2)}</div>
   <div>Parent - {route?.parent?.name ?? route?.parent?.path}</div>
   <div>
     Children - {JSON.stringify(

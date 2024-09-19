@@ -15,7 +15,6 @@ export const routeToHistoryState = <Name extends RouteName = RouteName>(
   }: {
     metaAsState?: boolean;
     nameAsTitle?: boolean;
-    restoreScroll?: boolean;
     state?: HistoryState;
   } = {},
 ): {
@@ -59,6 +58,8 @@ export const resolveNewHref = (
     hash,
     query,
     stripQuery,
+    stripHash,
+    stripTrailingHash,
     current = window.location.href,
   }: {
     base?: string;
@@ -66,28 +67,33 @@ export const resolveNewHref = (
     query?: RouteQuery;
     current?: string;
     stripQuery?: boolean;
+    stripHash?: boolean;
+    stripTrailingHash?: boolean;
   },
 ): { href: URL; search: URLSearchParams } => {
   const href = new URL(current);
   // In hash mode, we extract the query from the hash, else we use the search params
   let search: URLSearchParams;
   if (stripQuery) search = new URLSearchParams();
-  else if (hash) search = new URLSearchParams(href.hash?.split('?')?.at(1));
+  else if (hash) search = new URLSearchParams(href.hash?.split('?')?.at(1)?.split('#').at(0));
   else search = href.searchParams;
 
   // If we have a query params, we override the current query params
   if (query) Object.entries(query).forEach(([key, value]) => search.set(key, String(value)));
   // if we have a hash, we override the current hash
   if (hash) {
+    const trailingHash = href.hash.split('#')?.slice(2).join('#') ?? '';
     href.hash = `#${target}`;
     const strSearch = search.toString();
     if (strSearch) href.hash += `?${strSearch}`;
+    if (trailingHash?.length && !stripTrailingHash) href.hash += `#${trailingHash}`;
     if (base) href.pathname = toPathSegment(base, true);
   } else {
     href.pathname = [base, target]
       .filter(Boolean)
       .map(s => toPathSegment(s))
       .join('');
+    if (stripHash) href.hash = '';
   }
   return { href, search };
 };

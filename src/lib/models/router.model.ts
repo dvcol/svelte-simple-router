@@ -171,36 +171,41 @@ export type RouterNavigationOptions = {
   base?: string;
   /**
    * If `true`, the router will use the hash portion of the URL for routing.
-   * Defaults to `false`.
+   *
+   * @default false
    */
   hash?: boolean;
   /**
    * If `true`, the router will match the routes strictly.
-   * Defaults to `false`.
+   *
+   * @default false
    */
   strict?: boolean;
   /**
    * If `true`, the router will throw an error if the route is not found during navigation, resolve, push or replace state.
-   * Defaults to `false`.
+   *
+   * @default false
    */
   failOnNotFound?: boolean;
   /**
    * If `true`, the router will push the `meta` property of the route to the state.
-   * Defaults to `false`.
-   *
    * Warning: Depending on the history implementation, the state may not hold any reactive values and some primitives like Symbols are forbidden.
    *
    * @see [MDN for more information](https://developer.mozilla.org/en-US/docs/Web/API/History/state)
+   *
+   * @default false
    */
   metaAsState?: boolean;
   /**
    * If `true`, the router will use the name of the route as the title of the page.
-   * Defaults to `false`.
+   *
+   * @default false
    */
   nameAsTitle?: boolean;
   /**
    * If `true`, the router will follow redirects when executing guards.
-   * Defaults to `true`.
+   *
+   * @default true
    */
   followGuardRedirects?: boolean;
 };
@@ -214,8 +219,9 @@ export const RouterPathPriority = <T extends Route<any> = Route>(a: T, b: T): nu
 export type RouterOptions<Name extends RouteName = RouteName> = {
   /**
    * History instance to use.
-   * Defaults to global `window.history`.
+   *
    * @see [MDN for more information](https://developer.mozilla.org/docs/Web/API/History)
+   * @default window.history
    */
   history?: IHistory<Name>;
   /**
@@ -223,7 +229,7 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
    */
   routes?: Readonly<Route<Name>[]>;
   /**
-   * If `true`, the router will listen to events when instantiated.
+   * If `truthy`, the router will listen to events when instantiated.
    * - 'currententrychange' for external navigation events (navigation API if available).
    * - 'popstate' event for external history navigation (history API).
    *
@@ -234,25 +240,26 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
    *
    * @see [Navigation API](https://developer.mozilla.org/docs/Web/API/Navigation)
    * @see [History API](https://developer.mozilla.org/docs/Web/API/History)
+   *
+   * @default history
    */
   listen?: boolean | 'navigation' | 'history';
   /**
    * A sorting function to sort the routes when resolving.
    * By default, the routes are sorted by length of the path and then by reverse alphabetical order (to keep wildcards at the end).
    *
-   * @example (a, b) => b.path.length - a.path.length || b.path.localeCompare(a.path)
    * @param a - Route to compare
    * @param b - Route to compare
+   *
+   * @example (a, b) => b.path.length - a.path.length || b.path.localeCompare(a.path)
    */
   priority?: (a: Route<Name>, b: Route<Name>) => number;
   /**
    * If `true`, the route name will be case-sensitive, otherwise route names will be coerced to lowercase.
+   *
+   * @default false
    */
   caseSensitive?: boolean;
-  /**
-   * If `true`, the router will restore the scroll position when navigating back.
-   */
-  restoreScroll?: boolean;
   /**
    * A route guard that executes before any navigation.
    */

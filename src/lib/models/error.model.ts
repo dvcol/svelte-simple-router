@@ -44,6 +44,10 @@ export const enum ErrorTypes {
    * Parsing errors are thrown when the router cannot compute a relative path.
    */
   PARSING_RELATIVE_PATH_ERROR = 'PARSING_RELATIVE_PATH_ERROR',
+  /**
+   * The html element is not an anchor element.
+   */
+  INVALID_LINK_TARGET = 'INVALID_LINK_TARGET',
 }
 
 type NavigationErrors = ErrorTypes.NAVIGATION_CANCELLED | ErrorTypes.NAVIGATION_ABORTED | ErrorTypes.NAVIGATION_NOT_FOUND;
@@ -213,5 +217,15 @@ export class ParsingMissingRequiredParamError extends ParsingError<ParsingMissin
     message = `Missing required param "${missing}" while parsing path "${template}" .`,
   ) {
     super(ErrorTypes.PARSING_MISSING_REQUIRED_PARAM, { template, missing, params }, message);
+  }
+}
+
+export class InvalidLinkTargetError extends Error {
+  readonly type: ErrorTypes.INVALID_LINK_TARGET = ErrorTypes.INVALID_LINK_TARGET;
+  readonly element?: Element;
+
+  constructor(element?: Element, message = 'Invalid link target: expected an anchor element') {
+    super(message);
+    this.element = element;
   }
 }

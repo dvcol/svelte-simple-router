@@ -180,8 +180,8 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * If the router should use the hash portion of the URL for routing.
    * @private
    */
-  get #hash(): boolean {
-    return this.#options.hash ?? false;
+  get #hash(): boolean | undefined {
+    return this.#options.hash;
   }
 
   /**
@@ -254,6 +254,18 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     };
   }
 
+  get options(): RouterNavigationOptions {
+    return {
+      base: this.#base,
+      hash: this.#hash,
+      strict: this.#options.strict,
+      failOnNotFound: this.#options.failOnNotFound,
+      metaAsState: this.#options.metaAsState,
+      nameAsTitle: this.#options.nameAsTitle,
+      followGuardRedirects: this.#options.followGuardRedirects,
+    };
+  }
+
   /**
    * Current {@link RouterLocation}
    * This is reactive and will update when the location changes.
@@ -283,10 +295,15 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   constructor(options: RouterOptions<Name> = {}) {
     this.#options = {
       history: window.history,
-      listen: true,
-      followGuardRedirects: true,
+      listen: 'history',
       priority: RouterPathPriority,
       caseSensitive: false,
+      hash: false,
+      strict: false,
+      failOnNotFound: false,
+      metaAsState: false,
+      nameAsTitle: false,
+      followGuardRedirects: true,
       ...options,
       base: toPathSegment(options.base),
     };
@@ -492,13 +509,13 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     to: RouteNavigation<Name>,
     {
       from = this.#route,
-      strict,
-      failOnNotFound,
-      base,
-      hash,
-    }: Omit<RouterNavigationOptions, 'metaAsState' | 'nameAsTitle'> & { from?: Route<Name> } = this.#options,
+      strict = this.options?.strict,
+      failOnNotFound = this.options?.failOnNotFound,
+      base = this.options?.base,
+      hash = this.options?.hash,
+    }: Omit<RouterNavigationOptions, 'metaAsState' | 'nameAsTitle'> & { from?: Route<Name> } = {},
   ): ResolvedRoute<Name> {
-    const { query, params, path, name, stripQuery } = to;
+    const { query, params, path, name, stripQuery, stripHash, stripTrailingHash } = to;
 
     let _path: string | undefined = path;
     //  if 'name' is present, use namedRoutes to resolve path
@@ -535,7 +552,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     const { wildcards, params: _params } = route?.matcher.extract(_path) ?? {};
 
     //  use hash, path, and query to resolve new href
-    const { href, search } = resolveNewHref(_path, { hash, stripQuery, query: { ...route?.query, ...query }, base });
+    const { href, search } = resolveNewHref(_path, { hash, stripQuery, stripHash, stripTrailingHash, query: { ...route?.query, ...query }, base });
     Logger.debug(this.#log, 'Route resolved', { to, from, route, path: _path, href, search, wildcards, params: _params });
 
     //  return resolved route
@@ -587,10 +604,13 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   async #navigate(
     to: ResolvedRoute<Name>,
     from: ResolvedRouterLocationSnapshot<Name> = this.snapshot,
-    options: RouterNavigationOptions = this.#options,
+    options: RouterNavigationOptions = {},
   ): Promise<ResolvedRouterLocationSnapshot<Name>> {
     // Reset the error state
     this.#error = undefined;
+
+    // Merge the options with the router options
+    const _options = { ...this.options, ...options };
 
     // Create a new promise and store it in the routing state
     const uuid = crypto.randomUUID();
@@ -607,22 +627,22 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       if (!isStillRouting()) throw new NavigationCancelledError({ from, to });
 
       // If a guard returns a redirect, navigate to the new location and replace state
-      if (typeof blockOrRedirect === 'object' && options.followGuardRedirects) {
+      if (typeof blockOrRedirect === 'object' && _options.followGuardRedirects) {
         Logger.debug(this.#log, 'Guard redirect', { from, to, redirect: blockOrRedirect });
-        return this.replace(blockOrRedirect, { ...options, followGuardRedirects: false });
+        return this.replace(blockOrRedirect, { ..._options, followGuardRedirects: false });
       }
 
       // If the route is a redirect, navigate to the new location and replace state
       if (to.route?.redirect) {
         Logger.debug(this.#log, 'Route redirect', { from, to, redirect: to.route.redirect });
-        return this.replace(to.route.redirect, options);
+        return this.replace(to.route.redirect, _options);
       }
 
       // Update the current route and location
       this.#route = to.route;
       this.#location = {
         origin: to.href.origin,
-        base: options.base,
+        base: _options.base,
         ...to,
       };
 
@@ -683,7 +703,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   #historyWrapper(
     method: 'pushState' | 'replaceState',
     to: RouteNavigation<Name>,
-    options: RouterNavigationOptions = this.#options,
+    options: RouterNavigationOptions,
   ): Promise<ResolvedRouterLocationSnapshot<Name>> {
     const resolved = this.resolve(to, options);
     const { state, title } = routeToHistoryState(resolved, { ...options, state: to.state });
@@ -711,8 +731,8 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @throws {@link NavigationAbortedError} if the navigation is aborted by a navigation guard.
    * @throws {@link ParsingError} if the URL cannot be parsed.
    */
-  async push(to: RouteNavigation<Name>, options: RouterNavigationOptions = this.#options): Promise<ResolvedRouterLocationSnapshot<Name>> {
-    return this.#historyWrapper('pushState', to, options);
+  async push(to: RouteNavigation<Name>, options: RouterNavigationOptions = {}): Promise<ResolvedRouterLocationSnapshot<Name>> {
+    return this.#historyWrapper('pushState', to, { ...this.options, ...options });
   }
 
   /**
@@ -727,8 +747,8 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @throws {@link ParsingError} if the URL cannot be parsed.
    *
    */
-  async replace(to: RouteNavigation<Name>, options: RouterNavigationOptions = this.#options): Promise<ResolvedRouterLocationSnapshot<Name>> {
-    return this.#historyWrapper('replaceState', to, options);
+  async replace(to: RouteNavigation<Name>, options: RouterNavigationOptions = {}): Promise<ResolvedRouterLocationSnapshot<Name>> {
+    return this.#historyWrapper('replaceState', to, { ...this.options, ...options });
   }
 
   /**

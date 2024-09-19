@@ -8,6 +8,6 @@ export const hasRouter = (): boolean => {
   return hasContext(RouterContextSymbol);
 };
 
-export const useRouter = <Name extends RouteName = RouteName>(): IRouter<Name> | undefined => {
+export const useRouter = <Name extends RouteName = any>(): IRouter<Name> | undefined => {
   return getContext<IRouter<Name>>(RouterContextSymbol);
 };
