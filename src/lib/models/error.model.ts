@@ -40,6 +40,10 @@ export const enum ErrorTypes {
    * A required parameter is missing when parsing a path.
    */
   PARSING_MISSING_REQUIRED_PARAM = 'PARSING_MISSING_REQUIRED_PARAM',
+  /**
+   * Could not find a required router context.
+   */
+  MISSING_ROUTER_CONTEXT = 'MISSING_ROUTER_CONTEXT',
 }
 
 type NavigationErrors = ErrorTypes.NAVIGATION_CANCELLED | ErrorTypes.NAVIGATION_ABORTED | ErrorTypes.NAVIGATION_NOT_FOUND;
@@ -198,5 +202,13 @@ export class ParsingMissingRequiredParamError extends ParsingError<ParsingMissin
     message = `Missing required param "${missing}" while parsing path "${template}" .`,
   ) {
     super(ErrorTypes.PARSING_MISSING_REQUIRED_PARAM, { template, missing, params }, message);
+  }
+}
+
+export class MissingRouterContextError extends Error {
+  readonly type: ErrorTypes.MISSING_ROUTER_CONTEXT;
+  constructor(message = 'Router context is missing. Make sure you are calling useRoutes inside a RouterContext or RouterView component tree.') {
+    super(message);
+    this.type = ErrorTypes.MISSING_ROUTER_CONTEXT;
   }
 }

@@ -26,7 +26,7 @@ import {
   type Route,
   type RouteName,
   type RouteNavigation,
-  toBasicRoute,
+  toBaseRoute,
 } from '~/models/route.model.js';
 import {
   type IHistory,
@@ -250,7 +250,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    */
   get snapshot(): ResolvedRouterLocationSnapshot<Name> {
     return {
-      route: toBasicRoute(this.#route),
+      route: toBaseRoute(this.#route),
       location: toBasicRouterLocation(this.#location),
     };
   }

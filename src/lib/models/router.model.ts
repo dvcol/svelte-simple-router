@@ -77,7 +77,7 @@ export type TransitionFunction<T extends Record<string, any> = Record<string, an
   node: Element,
   props: T | undefined,
   options: { direction?: 'in' | 'out' | 'both' },
-) => TransitionConfig | ((options: { direction?: 'in' | 'out' }) => TransitionConfig);
+) => TransitionConfig | (() => TransitionConfig);
 
 export type TransitionProps = {
   in?: TransitionFunction;
