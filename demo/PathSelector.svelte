@@ -40,15 +40,17 @@
       <tr>
         <th>Name</th>
         <th>Path</th>
+        <th>Redirect</th>
         <th>Go</th>
         <th>Remove</th>
       </tr>
     </thead>
     <tbody>
-      {#each routes as { name, path }}
-        <tr use:link={{ name }}>
+      {#each routes as { name, path, redirect }}
+        <tr use:link={{ name }} use:active={{ name, class: 'active', exact: true }}>
           <td>{name}</td>
           <td>{path}</td>
+          <td>{redirect?.name ?? '-'}</td>
           <td><button onclick={() => onRouterButton(path)}>Go</button></td>
           <td><button onclick={() => onRemoveRoute(name)}>Remove</button></td>
         </tr>
@@ -90,11 +92,11 @@
     display: flex;
     flex-direction: column;
     gap: 1rem;
+  }
 
-    // stylelint-disable-next-line selector-pseudo-class-no-unknown
-    :global(.active) {
-      color: red;
-    }
+  // stylelint-disable-next-line selector-pseudo-class-no-unknown
+  :global(.active) {
+    color: red;
   }
 
   .routes {
@@ -103,7 +105,7 @@
     border-radius: 0.5rem;
   }
 
-  tr {
+  tbody tr {
     cursor: pointer;
     transition: background-color 300ms ease;
 

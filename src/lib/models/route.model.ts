@@ -2,6 +2,8 @@ import type { Matcher } from '~/models/matcher.model.js';
 import type { ResolvedRouterLocationSnapshot } from '~/models/router.model.js';
 import type { AnyComponent, ComponentOrLazy } from '~/utils/svelte.utils.js';
 
+import { shallowClone } from '~/utils/object.utils.js';
+
 /**
  * Allowed variables in HTML5 history state. Note that pushState clones the state
  * passed and does not accept everything: e.g.: it doesn't accept symbols, nor
@@ -266,6 +268,9 @@ export type Route<Name extends RouteName = RouteName> = BaseRoute<Name> &
      */
     beforeLeave?: NavigationGuard<Name>;
   };
+
+export const cloneRoute = <Name extends RouteName = RouteName>(route: Route<Name>): Route<Name> =>
+  shallowClone<Route<Name>, keyof Route<Name>>(route, 2, ['parent', 'component', 'components', 'loading', 'loadings', 'error', 'errors']);
 
 export const toBasicRoute = <Name extends RouteName = RouteName>(route?: Route<Name>): BaseRoute<Name> | undefined => {
   if (!route) return route;

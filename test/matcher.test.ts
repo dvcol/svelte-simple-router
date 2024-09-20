@@ -1,6 +1,6 @@
 import { describe, it } from 'vitest';
 
-describe('matcher.model', () => {
+describe('matcher', () => {
   describe('replaceTemplateParams', () => {
     it.todo('should replace template params with the provided params');
     it.todo('should strip the type from the template path then replace path params with the provided params');

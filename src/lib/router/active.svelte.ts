@@ -72,15 +72,16 @@ const getParentName = (route?: ParsedRoute, names: ParsedRoute['name'][] = []) =
  * <div :use:active="{ name: 'route-name' }">div link</div>
  * ```
  */
-export const active: Action<HTMLElement, ActiveActionOptions> = (node: HTMLElement, options: ActiveActionOptions) => {
+export const active: Action<HTMLElement, ActiveActionOptions> = (node: HTMLElement, options: ActiveActionOptions = {}) => {
   const router = useRouter();
   if (!router) {
     Logger.warn('Router not found. Make sure you are using the active action within a Router context.', { node, options });
     return {};
   }
 
-  const _path: string | null = options.path || node.getAttribute('data-path') || node.getAttribute('href');
-  const _name: string | null = options.name || node.getAttribute('data-name');
+  let _options = $state(options);
+  let _path: string | null = $state(_options.path || node.getAttribute('data-path') || node.getAttribute('href'));
+  let _name: string | null = $state(_options.name || node.getAttribute('data-name'));
 
   if (!_path && !_name) {
     Logger.warn('No path or name found. Make sure you are using the active action with the proper parameters.', { node, options });
@@ -91,32 +92,44 @@ export const active: Action<HTMLElement, ActiveActionOptions> = (node: HTMLEleme
   const match = $derived.by(() => {
     if (_name) {
       if (!route?.name) return false;
-      const names = options.exact ? [route.name] : getParentName(route);
-      if (options.caseSensitive) return names.includes(_name);
+      const names = _options.exact ? [route.name] : getParentName(route);
+      if (_options.caseSensitive) return names.includes(_name);
       return names.map(n => String(n)?.toLowerCase()).includes(_name?.toLowerCase());
     }
     if (!_path) return false;
     if (!route?.matcher) return false;
-    if (options.exact) return route.matcher.match(_path, true);
+    if (_options.exact) return route.matcher.match(_path, true);
     return route.matcher.match(_path);
   });
 
-  const originalStyle = Object.fromEntries(Object.keys(options.style || {}).map(key => [key, node.style[key as keyof CSSStyleDeclaration]]));
+  const originalStyle = Object.fromEntries(Object.keys(_options.style || {}).map(key => [key, node.style[key as keyof CSSStyleDeclaration]]));
 
   $effect(() => {
     if (match) {
       node.setAttribute('data-active', 'true');
-      if (options.class) node.classList.add(options.class);
-      if (options.style) {
-        Object.assign(node.style, options.style);
+      if (_options.class) node.classList.add(_options.class);
+      if (_options.style) {
+        Object.assign(node.style, _options.style);
       }
     } else {
       node.removeAttribute('data-active');
-      if (options.class) node.classList.remove(options.class);
-      if (options.style) {
-        Object.keys(options.style).forEach(key => node.style.removeProperty(key));
+      if (_options.class) node.classList.remove(_options.class);
+      if (_options.style) {
+        Object.keys(_options.style).forEach(key => node.style.removeProperty(key));
         Object.assign(node.style, originalStyle);
       }
     }
   });
+
+  return {
+    update: (newOptions: ActiveActionOptions = {}) => {
+      _options = newOptions;
+      _path = newOptions.path || node.getAttribute('data-path') || node.getAttribute('href');
+      _name = newOptions.name || node.getAttribute('data-name');
+
+      if (!_path && !_name) {
+        Logger.warn('No path or name found. Make sure you are using the active action with the proper parameters.', { node, options });
+      }
+    },
+  };
 };

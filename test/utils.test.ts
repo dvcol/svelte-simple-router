@@ -19,9 +19,15 @@ describe('computeAbsolutePath', () => {
 describe('resolveNewHref', () => {
   it.todo('should resolve a new href in hash mode');
   it.todo('should resolve a new href in hash mode with a query');
+  it.todo('should resolve a new href in hash mode with a base');
+  it.todo('should strip the query from the new href in hash mode');
+  it.todo('should strip the trailing hash from the new href in hash mode');
 
   it.todo('should resolve a new href in path mode');
   it.todo('should resolve a new href in path mode with a query');
+  it.todo('should resolve a new href in path mode with a base');
+  it.todo('should strip the query from the new href in path mode');
+  it.todo('should strip the hash from the new href in path mode');
 });
 
 describe('guards', () => {

@@ -101,39 +101,39 @@ export const link: Action<HTMLElement, LinkActionOptions> = (node: HTMLElement, 
     return {};
   }
 
+  let _options = options;
+
   const navigate = (event: MouseEvent | KeyboardEvent) => {
     // if the target is an anchor element and the event is not a valid navigation event, we return
     if (isNotValidAnchorNavigation(event)) return;
 
     event.preventDefault();
 
-    const replace = options?.replace || parseBooleanAttribute(node, 'replace');
+    const replace = _options?.replace || parseBooleanAttribute(node, 'replace');
 
-    const name = options?.name || node.getAttribute('data-name');
-    const path = (options?.path || node.getAttribute('data-path') || node.getAttribute('href')) ?? '';
+    const name = _options?.name || node.getAttribute('data-name');
+    const path = (_options?.path || node.getAttribute('data-path') || node.getAttribute('href')) ?? '';
 
     const navigation: RouteNavigation = name?.length ? { name } : { path };
 
     // CommonRouteNavigation
-    addIfFound(navigation, 'query', options.query ?? parseJsonAttribute(node, 'query'));
-    addIfFound(navigation, 'params', options.params ?? parseJsonAttribute(node, 'params'));
-    addIfFound(navigation, 'state', options.state ?? parseJsonAttribute(node, 'state'));
-    addIfFound(navigation, 'stripQuery', options.stripQuery ?? parseBooleanAttribute(node, 'strip-query'));
-    addIfFound(navigation, 'stripHash', options.stripQuery ?? parseBooleanAttribute(node, 'strip-hash'));
-    addIfFound(navigation, 'stripTrailingHash', options.stripQuery ?? parseBooleanAttribute(node, 'strip-trailing-hash'));
+    addIfFound(navigation, 'query', _options.query ?? parseJsonAttribute(node, 'query'));
+    addIfFound(navigation, 'params', _options.params ?? parseJsonAttribute(node, 'params'));
+    addIfFound(navigation, 'state', _options.state ?? parseJsonAttribute(node, 'state'));
+    addIfFound(navigation, 'stripQuery', _options.stripQuery ?? parseBooleanAttribute(node, 'strip-query'));
+    addIfFound(navigation, 'stripHash', _options.stripQuery ?? parseBooleanAttribute(node, 'strip-hash'));
+    addIfFound(navigation, 'stripTrailingHash', _options.stripQuery ?? parseBooleanAttribute(node, 'strip-trailing-hash'));
 
     const navigationOptions: RouterNavigationOptions = {};
 
     // RouterNavigationOptions
-    addIfFound(navigationOptions, 'base', options.base ?? (node.getAttribute('base') || undefined));
-    addIfFound(navigationOptions, 'hash', options.hash ?? parseBooleanAttribute(node, 'hash'));
-    addIfFound(navigationOptions, 'strict', options.strict ?? parseBooleanAttribute(node, 'strict'));
-    addIfFound(navigationOptions, 'failOnNotFound', options.failOnNotFound ?? parseBooleanAttribute(node, 'fail-on-not-found'));
-    addIfFound(navigationOptions, 'metaAsState', options.metaAsState ?? parseBooleanAttribute(node, 'meta-as-state'));
-    addIfFound(navigationOptions, 'nameAsTitle', options.nameAsTitle ?? parseBooleanAttribute(node, 'name-as-title'));
-    addIfFound(navigationOptions, 'followGuardRedirects', options.followGuardRedirects ?? parseBooleanAttribute(node, 'follow-guard-redirects'));
-
-    console.info('navigation', navigation, options);
+    addIfFound(navigationOptions, 'base', _options.base ?? (node.getAttribute('base') || undefined));
+    addIfFound(navigationOptions, 'hash', _options.hash ?? parseBooleanAttribute(node, 'hash'));
+    addIfFound(navigationOptions, 'strict', _options.strict ?? parseBooleanAttribute(node, 'strict'));
+    addIfFound(navigationOptions, 'failOnNotFound', _options.failOnNotFound ?? parseBooleanAttribute(node, 'fail-on-not-found'));
+    addIfFound(navigationOptions, 'metaAsState', _options.metaAsState ?? parseBooleanAttribute(node, 'meta-as-state'));
+    addIfFound(navigationOptions, 'nameAsTitle', _options.nameAsTitle ?? parseBooleanAttribute(node, 'name-as-title'));
+    addIfFound(navigationOptions, 'followGuardRedirects', _options.followGuardRedirects ?? parseBooleanAttribute(node, 'follow-guard-redirects'));
 
     return router[replace ? 'replace' : 'push'](navigation, navigationOptions);
   };
@@ -141,6 +141,9 @@ export const link: Action<HTMLElement, LinkActionOptions> = (node: HTMLElement, 
   node.addEventListener('click', navigate);
   node.addEventListener('keydown', navigate);
   return {
+    update(newOptions: LinkActionOptions) {
+      _options = newOptions;
+    },
     destroy() {
       node.removeEventListener('click', navigate);
       node.removeEventListener('keydown', navigate);

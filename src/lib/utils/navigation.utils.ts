@@ -94,6 +94,7 @@ export const resolveNewHref = (
       .map(s => toPathSegment(s))
       .join('');
     if (stripHash) href.hash = '';
+    if (stripQuery) href.search = search.toString();
   }
   return { href, search };
 };

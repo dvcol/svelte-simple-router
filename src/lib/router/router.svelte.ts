@@ -15,6 +15,7 @@ import {
 } from '~/models/error.model.js';
 import { Matcher, replaceTemplateParams } from '~/models/matcher.model.js';
 import {
+  cloneRoute,
   type NavigationEndListener,
   type NavigationErrorListener,
   type NavigationGuard,
@@ -378,7 +379,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   addRoute(route: Route<Name>): Router<Name> {
     if (route.name && this.hasRouteName(route.name)) throw new RouterNameConflictError(route.name);
     if (route.path && this.hasRoutePath(route.path)) throw new RouterPathConflictError(route.path);
-    const _route = route as ParsedRoute<Name>;
+    const _route = cloneRoute(route) as ParsedRoute<Name>;
     _route.matcher = new Matcher(route);
     this.#routes.set(route.path, _route);
     if (route.name) this.#routeNameMap.set(route.name, route.path);

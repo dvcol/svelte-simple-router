@@ -151,13 +151,13 @@
           setTimeout(() => resolve(), 5000);
         }),
     },
-    // {
-    //   name: RouteName.Any,
-    //   path: '*',
-    //   redirect: {
-    //     name: RouteName.Hello,
-    //   },
-    // },
+    {
+      name: RouteName.Any,
+      path: '*',
+      redirect: {
+        name: RouteName.Hello,
+      },
+    },
   ];
 
   const options: RouterOptions<Routes> = $state({

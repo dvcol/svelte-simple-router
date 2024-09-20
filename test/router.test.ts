@@ -1,6 +1,6 @@
 import { describe, it } from 'vitest';
 
-describe('router.model', () => {
+describe('router', () => {
   describe('addRoute', () => {
     it.todo('should add a new route to the router');
     it.todo('should add a new route to the router with no name');
@@ -88,6 +88,7 @@ describe('router.model', () => {
       it.todo('should call #navigate when push is called');
       it.todo('should throw a NavigationCancelledError if the navigation is cancelled by new navigation');
       it.todo('should throw a NavigationAbortedError if the navigation is aborted by a navigation guard');
+      it.todo('should throw a NavigationNotFoundError if the route does not exist and failOnNotFound is true');
     });
 
     describe('replace', () => {
@@ -99,6 +100,7 @@ describe('router.model', () => {
       it.todo('should call #navigate when replace is called');
       it.todo('should throw a NavigationCancelledError if the navigation is cancelled by new navigation');
       it.todo('should throw a NavigationAbortedError if the navigation is aborted by a navigation guard');
+      it.todo('should throw a NavigationNotFoundError if the route does not exist and failOnNotFound is true');
     });
 
     describe('resolve', () => {
@@ -151,9 +153,6 @@ describe('router.model', () => {
     });
 
     describe('listeners', () => {
-      it.todo('should store scroll position when unloading a page');
-      it.todo('should restore scroll position when loading a page');
-
       it.todo('should update state when unloading a page');
       it.todo('should update state when unloading a page when the state is different');
       it.todo('should not update state when unloading a page if the state is the same');
