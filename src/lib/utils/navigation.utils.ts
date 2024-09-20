@@ -1,10 +1,10 @@
+import { toPathSegment } from '@dvcol/common-utils/common/string';
+
 import type { HistoryState, NavigationGuardReturn, ResolvedRoute, RouteName, RouteNavigation, RouteQuery } from '~/models/route.model.js';
 import type { RouterState } from '~/models/router.model.js';
 
 import { NavigationAbortedError, type NavigationFailureType, ParsingRelativePathError } from '~/models/error.model.js';
 import { RouterScrollConstant, RouterStateConstant } from '~/models/router.model.js';
-
-import { toPathSegment } from '~/utils/string.utils.js';
 
 export const routeToHistoryState = <Name extends RouteName = RouteName>(
   { route, href, query, params, name, path }: Partial<ResolvedRoute<Name>>,

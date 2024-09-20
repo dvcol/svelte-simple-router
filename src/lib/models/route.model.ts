@@ -1,8 +1,8 @@
+import { shallowClone } from '@dvcol/common-utils/common/object';
+
 import type { Matcher } from '~/models/matcher.model.js';
 import type { ResolvedRouterLocationSnapshot } from '~/models/router.model.js';
 import type { AnyComponent, ComponentOrLazy } from '~/utils/svelte.utils.js';
-
-import { shallowClone } from '~/utils/object.utils.js';
 
 /**
  * Allowed variables in HTML5 history state. Note that pushState clones the state

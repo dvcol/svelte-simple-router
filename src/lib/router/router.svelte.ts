@@ -4,6 +4,7 @@ import { randomHex } from '@dvcol/common-utils';
 
 import { raceUntil } from '@dvcol/common-utils/common/promise';
 
+import { toPathSegment } from '@dvcol/common-utils/common/string';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
 import {
@@ -43,7 +44,6 @@ import {
 
 import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 import { computeAbsolutePath, preventNavigation, resolveNewHref, routeToHistoryState } from '~/utils/navigation.utils.js';
-import { toPathSegment } from '~/utils/string.utils.js';
 
 export class Router<Name extends RouteName = RouteName> implements IRouter<Name> {
   /**
