@@ -8,10 +8,11 @@ inputs:
 
   node_version:
     description: Pnpm version to use
-    required: true
+    required: false
+    default: 22.x
   pnpm_version:
     description: Node version to use
-    required: true
+    required: false
 
 runs:
   using: composite

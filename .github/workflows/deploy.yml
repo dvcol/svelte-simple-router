@@ -1,0 +1,63 @@
+name: 🚀 Deploy - Github Pages
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-deploy
+  cancel-in-progress: true
+
+on:
+  workflow_dispatch:
+  workflow_call:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  deploy:
+    name: 🚀 Deploy Github Pages
+    runs-on: ubuntu-latest
+
+    environment:
+      name: web-extension-template
+      url: https://dvcol.github.io/web-extension-template/
+
+    steps:
+      - name: ⛙ Checkout branch ${{ github.ref }}
+        uses: actions/checkout@v4
+
+      - name: 🚧 Build
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+        uses: ./.github/actions/build
+        with:
+          script: 'build:web'
+
+      - name: 🏗️ Setup Pages
+        uses: actions/configure-pages@v5
+
+      - name: 📦 Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: dist
+
+      - name: 🚀 Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: ⛙ Setup credentials
+        run: |
+          # =================  ⛙ Setup credentials =================
+
+          git config user.name "GitHub Release Bot"
+          git config user.email "<>"
+
+      - name: 🏷️ Tag deployment
+        run: |
+          # =================  🏷️ Tag deployment =================
+
+          git tag -fa deployed -m 'Deployed on github pages'
+          git push origin --tags --force
