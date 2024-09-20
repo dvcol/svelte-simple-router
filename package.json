@@ -32,6 +32,10 @@
       "types": "./dist/models/index.d.ts",
       "import": "./dist/models/index.js"
     },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.js"
+    },
     "./router": {
       "types": "./dist/router/index.d.ts",
       "import": "./dist/router/index.js"
@@ -44,9 +48,9 @@
       "types": "./dist/components/RouterView.svelte.d.ts",
       "svetle": "./dist/components/RouterView.svelte"
     },
-    "./components/link": {
-      "types": "./dist/components/RouterLink.svelte.d.ts",
-      "svetle": "./dist/components/RouterLink.svelte"
+    "./components/context": {
+      "types": "./dist/components/RouterContext.svelte.d.ts",
+      "svetle": "./dist/components/RouterContext.svelte"
     }
   },
   "files": [

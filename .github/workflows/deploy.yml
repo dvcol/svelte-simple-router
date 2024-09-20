@@ -22,8 +22,8 @@ jobs:
     runs-on: ubuntu-latest
 
     environment:
-      name: web-extension-template
-      url: https://dvcol.github.io/web-extension-template/
+      name: svelte-simple-router
+      url: https://dvcol.github.io/svelte-simple-router/
 
     steps:
       - name: ⛙ Checkout branch ${{ github.ref }}

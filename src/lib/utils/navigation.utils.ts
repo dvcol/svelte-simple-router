@@ -3,7 +3,7 @@ import { toPathSegment } from '@dvcol/common-utils/common/string';
 import type { HistoryState, NavigationGuardReturn, ResolvedRoute, RouteName, RouteNavigation, RouteQuery } from '~/models/route.model.js';
 import type { RouterState } from '~/models/router.model.js';
 
-import { NavigationAbortedError, type NavigationFailureType, ParsingRelativePathError } from '~/models/error.model.js';
+import { NavigationAbortedError, type NavigationFailureType } from '~/models/error.model.js';
 import { RouterScrollConstant, RouterStateConstant } from '~/models/router.model.js';
 
 export const routeToHistoryState = <Name extends RouteName = RouteName>(
@@ -38,17 +38,6 @@ export const routeToHistoryState = <Name extends RouteName = RouteName>(
     },
     title,
   };
-};
-
-export const computeAbsolutePath = (parent: string, relative: string) => {
-  const relativeSegments = relative.split('/').filter(Boolean);
-  const parentSegments = parent.split('/').filter(Boolean);
-  relativeSegments.forEach(segment => {
-    if (segment === '..' && parentSegments.length < 1) throw new ParsingRelativePathError({ parent, relative });
-    else if (segment === '..') parentSegments.pop();
-    else if (segment !== '.') parentSegments.push(segment);
-  });
-  return `/${parentSegments.join('/')}`;
 };
 
 export const resolveNewHref = (

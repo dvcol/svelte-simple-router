@@ -114,6 +114,7 @@ node_modules
 .output
 .vercel
 /.svelte-kit
+!/.svelte-kit/tsconfig.json
 /build
 /dist
 
