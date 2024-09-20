@@ -2,15 +2,17 @@
   import { active } from '~/router/active.svelte';
   import { link } from '~/router/link.svelte';
   import { useRouter } from '~/router/use-router.svelte';
+  import { Logger } from '~/utils/logger.utils.js';
 
   const { stripQuery, stripHash, stripTrailingHash }: { stripQuery?: boolean; stripHash?: boolean; stripTrailingHash?: boolean } = $props();
 
   const router = useRouter();
 
-  const routes = $derived(router?.routes);
+  const routes = $derived(router?.routes ?? []);
 
   const onRouterButton = async (path: string) => {
     console.info('onRouterButton', path);
+    if (!router) return Logger.error('Router not found');
     try {
       const route = await router.push({ path, stripQuery, stripHash, stripTrailingHash });
       console.info('Route', route);
@@ -21,11 +23,13 @@
 
   const route = $state({ name: 'dynamic', path: '/dynamic', redirect: { name: 'goodbye' } });
   const onAddRoute = async () => {
+    if (!router) return Logger.error('Router not found');
     console.info('onAddRoute', route);
     await router.addRoute(route).sync();
     console.info('New routes', router.routes);
   };
   const onRemoveRoute = async (name: string) => {
+    if (!router) return Logger.error('Router not found');
     console.info('onRemoveRoute', route);
     if (!router.removeRoute({ name })) return;
     await router.sync();
@@ -77,7 +81,7 @@
   <input id="route" type="text" bind:value={route.name} />
   <input id="route.path" type="text" bind:value={route.path} />
   <input id="route.redirect.name" type="text" bind:value={route.redirect.name} />
-  <button onclick={() => onAddRoute(router)}>Add</button>
+  <button onclick={() => onAddRoute()}>Add</button>
 </div>
 
 <style lang="scss">

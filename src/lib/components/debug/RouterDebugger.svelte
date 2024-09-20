@@ -14,7 +14,7 @@
 <script lang="ts">
   import { getContext, onDestroy } from 'svelte';
 
-  import { type IRouter, RouterContextSymbol } from '~/models/router.model.js';
+  import { RouterContextSymbol } from '~/models/router.model.js';
   import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 
   const router = getContext<IRouter>(RouterContextSymbol);

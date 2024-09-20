@@ -89,7 +89,7 @@ export type LinkActionOptions = CommonRouteNavigation & RouterNavigationOptions 
  * <button href='/path/:param' use:link="{ params: { param: 'value' } }">button link</button>
  * ```
  */
-export const link: Action<HTMLElement, LinkActionOptions> = (node: HTMLElement, options: LinkActionOptions = {}) => {
+export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: HTMLElement, options: LinkActionOptions | undefined = {}) => {
   if (!isAnchorTarget(node)) {
     if (!node.hasAttribute('role')) node.setAttribute('role', 'link');
     if (!node.hasAttribute('tabindex')) node.setAttribute('tabindex', '0');
@@ -141,7 +141,7 @@ export const link: Action<HTMLElement, LinkActionOptions> = (node: HTMLElement, 
   node.addEventListener('click', navigate);
   node.addEventListener('keydown', navigate);
   return {
-    update(newOptions: LinkActionOptions) {
+    update(newOptions: LinkActionOptions | undefined = {}) {
       _options = newOptions;
     },
     destroy() {

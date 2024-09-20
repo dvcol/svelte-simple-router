@@ -285,32 +285,37 @@ export interface IRouter<Name extends RouteName = RouteName> {
   /**
    * Unique identifier of the router instance.
    */
-  id: string;
+  readonly id: string;
 
   /**
    * Last navigation error that occurred.
    */
-  error?: unknown;
+  readonly error?: unknown;
 
   /**
    * Current {@link ResolvedRoute}
    */
-  current?: ResolvedRouterLocation<Name>;
+  readonly current?: ResolvedRouterLocation<Name>;
 
   /**
    * Current {@link RouterLocation}
    */
-  location?: RouterLocation<Name>;
+  readonly location?: RouterLocation<Name>;
 
   /**
    * Current {@link Route}
    */
-  route?: ParsedRoute<Name>;
+  readonly route?: ParsedRoute<Name>;
 
   /**
    * Get a full list of all the {@link Route}.
    */
-  routes: ParsedRoute<Name>[];
+  readonly routes: ParsedRoute<Name>[];
+
+  /**
+   * Get the options used to initialize the router.
+   */
+  readonly options: RouterOptions<Name>;
 
   /**
    * Checks if a route with a given name exists

@@ -3,11 +3,11 @@ import { LogLevel, ProxyLogger } from '@dvcol/common-utils/common/logger';
 export const LoggerKey = 'SSR Router' as const;
 
 export class Logger {
-  static logger = new ProxyLogger({
-    logLevel: import.meta.env.DEV ? LogLevel.Debug : LogLevel.Warn,
-  });
+  static logger = new ProxyLogger({ logLevel: LogLevel.Warn });
 
   static colorize = ProxyLogger.colorize;
+
+  static logLevel = this.logger.logLevel;
 
   static get timestamp() {
     return ProxyLogger.timestamp();

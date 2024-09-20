@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { LogLevel } from '@dvcol/common-utils';
   import { tick } from 'svelte';
 
   import { fade } from 'svelte/transition';
@@ -13,10 +14,11 @@
 
   import type { RouterOptions } from '~/models/router.model.js';
 
-  import RouteDebugger from '~/components/RouteDebugger.svelte';
   import RouterContext from '~/components/RouterContext.svelte';
-  import RouterDebugger from '~/components/RouterDebugger.svelte';
   import RouterView from '~/components/RouterView.svelte';
+  import RouteDebugger from '~/components/debug/RouteDebugger.svelte';
+  import RouterDebugger from '~/components/debug/RouterDebugger.svelte';
+  import { Logger } from '~/utils/logger.utils';
 
   const RouteName = {
     Hello: 'Hello',
@@ -171,16 +173,16 @@
     followGuardRedirects: true,
     caseSensitive: false,
     beforeEach: (from, to) => {
-      console.info('Before each', { from, to });
+      console.info('Option before each', { from, to });
     },
     onStart: (from, to) => {
-      console.info('On start', { from, to });
+      console.info('Option on start', { from, to });
     },
     onEnd: (from, to) => {
-      console.info('On end', { from, to });
+      console.info('Option on end', { from, to });
     },
     onError: (err, { from, to, route }) => {
-      console.error('On error', { err, from, to, route });
+      console.error('Option on error', { err, from, to, route });
     },
     routes,
   });
@@ -206,6 +208,8 @@
     await tick();
     mounted = true;
   };
+
+  if (import.meta.env.DEV) Logger.logLevel = LogLevel.Debug;
 </script>
 
 <div class="row">
@@ -304,12 +308,12 @@
       <h3>Independent Router</h3>
       <RouterView
         options={{ ...options, listen: true }}
-        onLoading={_route => console.warn('loading', _route)}
-        onLoaded={_route => console.info('loaded', _route)}
-        onError={(err, { route: _route }) => console.error('load error', { err, route: _route })}
-        onStart={(from, to) => console.info('start', { from, to })}
-        onEnd={(from, to) => console.info('end', { from, to })}
-        beforeEach={(from, to) => console.info('before each', { from, to })}
+        onLoading={_route => console.warn('View loading', _route)}
+        onLoaded={_route => console.info('View loaded', _route)}
+        onError={(err, { route: _route }) => console.error('View load error', { err, route: _route })}
+        onStart={(from, to) => console.info('View start', { from, to })}
+        onEnd={(from, to) => console.info('View end', { from, to })}
+        beforeEach={(from, to) => console.info('View before each', { from, to })}
         transition={{
           in: fade,
           out: fade,

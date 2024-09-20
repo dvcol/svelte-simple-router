@@ -72,7 +72,7 @@ const getParentName = (route?: ParsedRoute, names: ParsedRoute['name'][] = []) =
  * <div :use:active="{ name: 'route-name' }">div link</div>
  * ```
  */
-export const active: Action<HTMLElement, ActiveActionOptions> = (node: HTMLElement, options: ActiveActionOptions = {}) => {
+export const active: Action<HTMLElement, ActiveActionOptions | undefined> = (node: HTMLElement, options: ActiveActionOptions | undefined = {}) => {
   const router = useRouter();
   if (!router) {
     Logger.warn('Router not found. Make sure you are using the active action within a Router context.', { node, options });
@@ -122,7 +122,7 @@ export const active: Action<HTMLElement, ActiveActionOptions> = (node: HTMLEleme
   });
 
   return {
-    update: (newOptions: ActiveActionOptions = {}) => {
+    update: (newOptions: ActiveActionOptions | undefined = {}) => {
       _options = newOptions;
       _path = newOptions.path || node.getAttribute('data-path') || node.getAttribute('href');
       _name = newOptions.name || node.getAttribute('data-name');
