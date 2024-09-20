@@ -5,13 +5,15 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { sveltePreprocess } from 'svelte-preprocess';
 import { checker } from 'vite-plugin-checker';
-import { defineConfig } from 'vitest/config';
+import { defineConfig, type UserConfig } from 'vitest/config';
 
 import type { PluginOption } from 'vite';
 
 const plugins: PluginOption[] = [];
+const isDev = process.env.NODE_ENV === 'development';
+const isWeb = process.env.VITE_MODE === 'WEB';
 
-if (process.env.NODE_ENV === 'development') {
+if (isDev) {
   plugins.push(
     svelte({
       preprocess: sveltePreprocess(),
@@ -22,8 +24,7 @@ if (process.env.NODE_ENV === 'development') {
       },
     }),
   );
-} else if (process.env.VITE_MODE === 'WEB') {
-  // TODO implement web mode
+} else if (isWeb) {
   plugins.push(
     svelte({
       preprocess: sveltePreprocess(),
@@ -33,7 +34,7 @@ if (process.env.NODE_ENV === 'development') {
   plugins.push(sveltekit());
 }
 
-export default defineConfig({
+const config: UserConfig = {
   plugins,
   resolve: {
     alias: {
@@ -54,4 +55,8 @@ export default defineConfig({
       '~/': fileURLToPath(new URL('./src/lib', import.meta.url)),
     },
   },
-});
+};
+
+if (isWeb) config.base = '/svelte-simple-router/';
+
+export default defineConfig(config);

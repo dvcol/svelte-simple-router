@@ -164,7 +164,7 @@
 
   const options: RouterOptions<Routes> = $state({
     listen: 'history',
-    base: '/demo',
+    base: '/svelte-simple-router',
     hash: true,
     strict: false,
     failOnNotFound: false,
