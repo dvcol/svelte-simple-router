@@ -88,7 +88,12 @@ const templateToParams = (template: string) => {
 };
 
 export type PathParamsResult = { params: Record<string, string>; wildcards: Record<string, string> };
-export class Matcher<Name extends RouteName = RouteName> {
+export type IMatcher = {
+  match(path: string, strict?: boolean): boolean;
+  extract(path: string): PathParamsResult;
+};
+
+export class Matcher<Name extends RouteName = RouteName> implements IMatcher {
   readonly #route: Route<Name>;
 
   readonly #regex: RegExp;

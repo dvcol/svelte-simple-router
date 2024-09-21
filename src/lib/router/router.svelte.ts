@@ -380,7 +380,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     if (route.name && this.hasRouteName(route.name)) throw new RouterNameConflictError(route.name);
     if (route.path && this.hasRoutePath(route.path)) throw new RouterPathConflictError(route.path);
     const _route = cloneRoute(route) as ParsedRoute<Name>;
-    _route.matcher = new Matcher(route);
+    if (!_route.matcher) _route.matcher = new Matcher(route);
     this.#routes.set(route.path, _route);
     if (route.name) this.#routeNameMap.set(route.name, route.path);
     route.children?.forEach(child => {

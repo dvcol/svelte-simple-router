@@ -1,6 +1,6 @@
 import { shallowClone } from '@dvcol/common-utils/common/object';
 
-import type { Matcher } from '~/models/matcher.model.js';
+import type { IMatcher } from '~/models/matcher.model.js';
 import type { ResolvedRouterLocationSnapshot } from '~/models/router.model.js';
 import type { AnyComponent, ComponentOrLazy } from '~/utils/svelte.utils.js';
 
@@ -260,6 +260,10 @@ export type Route<Name extends RouteName = RouteName> = BaseRoute<Name> &
      */
     parent?: Route<Name>;
     /**
+     * Matcher function to match the route to a location.
+     */
+    matcher?: IMatcher;
+    /**
      * Before Enter guard specific to this record.
      */
     beforeEnter?: NavigationGuard<Name>;
@@ -284,7 +288,7 @@ export const toBaseRoute = <Name extends RouteName = RouteName>(route?: Route<Na
   };
 };
 
-export type ParsedRoute<Name extends RouteName = RouteName> = Route<Name> & { parent?: ParsedRoute<Name>; matcher: Matcher<Name> };
+export type ParsedRoute<Name extends RouteName = RouteName> = Route<Name> & { parent?: ParsedRoute<Name>; matcher: IMatcher };
 
 export type ResolvedRoute<Name extends RouteName = RouteName> = {
   /**
