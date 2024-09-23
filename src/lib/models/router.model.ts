@@ -1,3 +1,5 @@
+import { isShallowEqual } from '@dvcol/common-utils/common/object';
+
 import type { Snippet } from 'svelte';
 import type { TransitionConfig } from 'svelte/transition';
 
@@ -19,6 +21,8 @@ import type {
   RouteWildcards,
 } from '~/models/route.model.js';
 
+import { isRouteEqual } from '~/models/route.model.js';
+
 export type RouterLocation<Name extends RouteName = RouteName> = {
   origin: string;
   base?: string;
@@ -30,11 +34,17 @@ export type RouterLocation<Name extends RouteName = RouteName> = {
   wildcards: RouteWildcards;
 };
 
+export const isLocationEqual = <Name extends RouteName = RouteName>(a?: RouterLocation<Name>, b?: RouterLocation<Name>): boolean =>
+  isShallowEqual(a, b, 2);
+
 export type BasicRouterLocation<Name extends RouteName = RouteName> = Omit<RouterLocation<Name>, 'href'> & { href: string };
 export const toBasicRouterLocation = <Name extends RouteName = RouteName>(loc?: RouterLocation<Name>): BasicRouterLocation<Name> | undefined => {
   if (!loc) return loc;
   return {
-    ...loc,
+    origin: loc.origin,
+    base: loc.base,
+    name: loc.name,
+    path: loc.path,
     href: loc.href.toString(),
     query: { ...loc.query },
     params: { ...loc.params },
@@ -51,6 +61,11 @@ export type ResolvedRouterLocationSnapshot<Name extends RouteName = RouteName> =
   route?: BaseRoute<Name>;
   location?: BasicRouterLocation<Name>;
 };
+
+export const isResolvedLocationEqual = <Name extends RouteName = RouteName>(
+  a: ResolvedRouterLocation<Name>,
+  b: ResolvedRouterLocation<Name>,
+): boolean => isRouteEqual(a?.route, b?.route) && isLocationEqual(a?.location, b?.location);
 
 export const RouterContextSymbol = Symbol('SvelteSimpleRouterContext');
 
@@ -182,6 +197,10 @@ export type RouterNavigationOptions = {
    * @default false
    */
   strict?: boolean;
+  /**
+   * If `true`, the router will reload the current route even if the current route is the same as the target route.
+   */
+  force?: boolean;
   /**
    * If `true`, the router will throw an error if the route is not found during navigation, resolve, push or replace state.
    *

@@ -1,8 +1,8 @@
 import { describe, it } from 'vitest';
 
 describe('active', () => {
-  it.todo('should warn if the router is not found');
-  it.todo('should warn if no path or name is found');
+  it.todo('should exit, warn and add a data-error attribute if the router is not found');
+  it.todo('should exit, warn and add a data-error attribute if no path or name is found');
 
   it.todo('should set the data-active attribute if the path matches');
   it.todo('should remove the data-active attribute if the path does not match');

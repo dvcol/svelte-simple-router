@@ -3,13 +3,24 @@
   "type": "module",
   "version": "1.0.0",
   "packageManager": "pnpm@9.9.0",
-  "description": "Simple svelte SPA router",
+  "description": "Simple svelte 5 client side router",
   "homepage": "https://github.com/dvcol/svelte-simple-router",
   "bugs": "https://github.com/dvcol/svelte-simple-router/issues",
   "keywords": [
     "typescript",
     "library",
-    "svelte-simple-router"
+    "svelte-simple-router",
+    "svelte",
+    "svelte 5",
+    "rune",
+    "navigation",
+    "router",
+    "svelte router",
+    "client side routing",
+    "single page application",
+    "spa",
+    "history",
+    "hash"
   ],
   "license": "MIT",
   "author": "dvcol",
@@ -91,7 +102,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@dvcol/common-utils": "^1.16.1",
+    "@dvcol/common-utils": "^1.17.0",
     "svelte": "^5.0.0-next.244",
     "vite": "^5.4.3"
   },

@@ -89,6 +89,8 @@ describe('router', () => {
       it.todo('should throw a NavigationCancelledError if the navigation is cancelled by new navigation');
       it.todo('should throw a NavigationAbortedError if the navigation is aborted by a navigation guard');
       it.todo('should throw a NavigationNotFoundError if the route does not exist and failOnNotFound is true');
+
+      it.todo('should not navigate if the target route and location are the same as the current route');
     });
 
     describe('replace', () => {
@@ -101,6 +103,8 @@ describe('router', () => {
       it.todo('should throw a NavigationCancelledError if the navigation is cancelled by new navigation');
       it.todo('should throw a NavigationAbortedError if the navigation is aborted by a navigation guard');
       it.todo('should throw a NavigationNotFoundError if the route does not exist and failOnNotFound is true');
+
+      it.todo('should not navigate if the target route and location are the same as the current route');
     });
 
     describe('resolve', () => {

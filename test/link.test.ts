@@ -1,8 +1,9 @@
 import { describe, it } from 'vitest';
 
 describe('link', () => {
-  it.todo('should exit and warn if the router is not found');
+  it.todo('should exit, warn and add a data-error attribute if the router is not found');
   it.todo('should set the role and tabindex attributes if the target is not an anchor element');
+  it.todo('should add a href attribute if the target is an anchor element and no href is provided');
 
   it.todo('should ignore the click event if the target is not an anchor element');
   it.todo('should ignore the click event if the target is not _self or empty');

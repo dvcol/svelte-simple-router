@@ -76,6 +76,7 @@ export const active: Action<HTMLElement, ActiveActionOptions | undefined> = (nod
   const router = useRouter();
   if (!router) {
     Logger.warn('Router not found. Make sure you are using the active action within a Router context.', { node, options });
+    node.setAttribute('data-error', 'Router not found.');
     return {};
   }
 
@@ -85,7 +86,8 @@ export const active: Action<HTMLElement, ActiveActionOptions | undefined> = (nod
 
   if (!_path && !_name) {
     Logger.warn('No path or name found. Make sure you are using the active action with the proper parameters.', { node, options });
-    return;
+    node.setAttribute('data-error', 'No path or name found.');
+    return {};
   }
 
   const route = $derived(router.route);

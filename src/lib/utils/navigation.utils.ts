@@ -77,6 +77,7 @@ export const resolveNewHref = (
     if (strSearch) href.hash += `?${strSearch}`;
     if (trailingHash?.length && !stripTrailingHash) href.hash += `#${trailingHash}`;
     if (base) href.pathname = toPathSegment(base, true);
+    else href.pathname = toPathSegment(href.pathname, true);
   } else {
     href.pathname = [base, target]
       .filter(Boolean)

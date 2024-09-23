@@ -7,6 +7,29 @@ import { raceUntil } from '@dvcol/common-utils/common/promise';
 import { computeAbsolutePath, toPathSegment } from '@dvcol/common-utils/common/string';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
+import type {
+  NavigationEndListener,
+  NavigationErrorListener,
+  NavigationGuard,
+  NavigationListener,
+  ParsedRoute,
+  ResolvedRoute,
+  Route,
+  RouteName,
+  RouteNavigation,
+} from '~/models/route.model.js';
+
+import type {
+  IHistory,
+  IRouter,
+  ResolvedRouterLocation,
+  ResolvedRouterLocationSnapshot,
+  RouterLocation,
+  RouterNavigationOptions,
+  RouterOptions,
+  RouterStateLocation,
+} from '~/models/router.model.js';
+
 import {
   NavigationCancelledError,
   NavigationNotFoundError,
@@ -15,32 +38,8 @@ import {
   RouterPathConflictError,
 } from '~/models/error.model.js';
 import { Matcher, replaceTemplateParams } from '~/models/matcher.model.js';
-import {
-  cloneRoute,
-  type NavigationEndListener,
-  type NavigationErrorListener,
-  type NavigationGuard,
-  type NavigationListener,
-  type ParsedRoute,
-  type ResolvedRoute,
-  type Route,
-  type RouteName,
-  type RouteNavigation,
-  toBaseRoute,
-} from '~/models/route.model.js';
-import {
-  type IHistory,
-  type IRouter,
-  type ResolvedRouterLocation,
-  type ResolvedRouterLocationSnapshot,
-  type RouterLocation,
-  type RouterNavigationOptions,
-  type RouterOptions,
-  RouterPathPriority,
-  RouterStateConstant,
-  type RouterStateLocation,
-  toBasicRouterLocation,
-} from '~/models/router.model.js';
+import { cloneRoute, toBaseRoute } from '~/models/route.model.js';
+import { isResolvedLocationEqual, RouterPathPriority, RouterStateConstant, toBasicRouterLocation } from '~/models/router.model.js';
 
 import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 import { preventNavigation, resolveNewHref, routeToHistoryState } from '~/utils/navigation.utils.js';
@@ -604,14 +603,23 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    */
   async #navigate(
     to: ResolvedRoute<Name>,
-    from: ResolvedRouterLocationSnapshot<Name> = this.snapshot,
     options: RouterNavigationOptions = {},
+    from: ResolvedRouterLocationSnapshot<Name> = this.snapshot,
   ): Promise<ResolvedRouterLocationSnapshot<Name>> {
+    const { route, ...location } = to;
+    // Merge the options with the router options
+    const _options: RouterNavigationOptions = { ...this.options, ...options };
+    const _location: RouterLocation<Name> = {
+      origin: location.href.origin,
+      base: _options.base,
+      ...location,
+    };
+
+    // If the route is the same, return the current snapshot
+    if (!_options.force && isResolvedLocationEqual(this.current, { route, location: _location })) return this.snapshot;
+
     // Reset the error state
     this.#error = undefined;
-
-    // Merge the options with the router options
-    const _options = { ...this.options, ...options };
 
     // Create a new promise and store it in the routing state
     const uuid = crypto.randomUUID();
@@ -634,18 +642,14 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       }
 
       // If the route is a redirect, navigate to the new location and replace state
-      if (to.route?.redirect) {
-        Logger.debug(this.#log, 'Route redirect', { from, to, redirect: to.route.redirect });
-        return this.replace(to.route.redirect, _options);
+      if (route?.redirect) {
+        Logger.debug(this.#log, 'Route redirect', { from, to, redirect: route.redirect });
+        return this.replace(route.redirect, _options);
       }
 
       // Update the current route and location
-      this.#route = to.route;
-      this.#location = {
-        origin: to.href.origin,
-        base: _options.base,
-        ...to,
-      };
+      this.#route = route;
+      this.#location = _location;
 
       Logger.debug(this.#log, 'Navigated to', to?.name || to?.path, { from, to });
       return this.snapshot;
@@ -713,7 +717,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       this.#history[method](state, title ?? '', resolved.href);
       if (title) document.title = title;
       Logger.debug(this.#log, 'State change', { method, resolved, state, title });
-      return this.#navigate(resolved);
+      return this.#navigate(resolved, options);
     } catch (error) {
       Logger.error(this.#log, 'History error', { method, resolved, state, title, error });
       if (this.#listening === 'navigation') this.#internalEvent = false;

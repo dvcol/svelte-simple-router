@@ -3,8 +3,8 @@
 
   import type { RouterViewProps, TransitionFunction } from '~/models/router.model.js';
 
-  import { type ComponentProps, MissingRouterContextError } from '~';
-  import { toBaseRoute } from '~/models/route.model.js';
+  import { MissingRouterContextError } from '~/models/error.model.js';
+  import { type ParsedRoute, toBaseRoute } from '~/models/route.model.js';
 
   import { useRouter } from '~/router/use-router.svelte.js';
   import { resolveComponent } from '~/utils/svelte.utils.js';
@@ -31,9 +31,9 @@
   const component = $derived(route?.component);
   const components = $derived(route?.components);
 
-  const resolvedProps = $derived.by<ComponentProps>(() => {
+  const resolvedProps = $derived.by<ParsedRoute['props'] | undefined>(() => {
     if (name) return route?.props?.[name];
-    return route?.props ?? {};
+    return route?.props;
   });
 
   const ResolvedComponent = $derived.by(() => {

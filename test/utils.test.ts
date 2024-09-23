@@ -22,6 +22,7 @@ describe('resolveNewHref', () => {
   it.todo('should resolve a new href in hash mode with a base');
   it.todo('should strip the query from the new href in hash mode');
   it.todo('should strip the trailing hash from the new href in hash mode');
+  it.todo('should enforce trailing slashes in pathname when no base is provided');
 
   it.todo('should resolve a new href in path mode');
   it.todo('should resolve a new href in path mode with a query');
@@ -47,5 +48,31 @@ describe('guards', () => {
     it.todo('should return false if the guard returns undefined');
     it.todo('should return false if the guard returns null');
     it.todo('should return false if the guard returns a falsy value');
+  });
+});
+
+describe('route', () => {
+  describe('cloneRoute', () => {
+    it.todo('should clone a route');
+    it.todo('should clone a route with array properties');
+    it.todo('should not modify the original route when modifying the clone');
+  });
+
+  describe('isRouteEqual', () => {
+    it.todo('should return true if the routes are the same');
+    it.todo('should return true if one route is a proxy of the other');
+    it.todo('should return false if one route is undefined');
+    it.todo('should return false if the routes components are different');
+    it.todo('should return false if the routes loading properties are different');
+    it.todo('should return false if the routes meta properties are different');
+  });
+
+  describe('isLocationEqual', () => {
+    it.todo('should return true if the locations are the same');
+    it.todo('should return true if one location is a proxy of the other');
+    it.todo('should return false if one location is undefined');
+    it.todo('should return false if the locations query properties are different');
+    it.todo('should return false if the locations params properties are different');
+    it.todo('should return false if the locations state properties are different');
   });
 });

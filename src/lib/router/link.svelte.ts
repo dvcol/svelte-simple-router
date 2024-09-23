@@ -35,7 +35,7 @@ const parseJsonAttribute = <T = Record<string, any>>(element: HTMLElement, name:
 };
 
 const parseBooleanAttribute = (element: HTMLElement, name: string): boolean | undefined => {
-  const value = element.getAttribute(name);
+  const value = element.getAttribute(`data-${name}`);
   if (value === undefined || value === null) return;
   return value !== 'false';
 };
@@ -93,11 +93,14 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
   if (!isAnchorTarget(node)) {
     if (!node.hasAttribute('role')) node.setAttribute('role', 'link');
     if (!node.hasAttribute('tabindex')) node.setAttribute('tabindex', '0');
+  } else if (!node.hasAttribute('href') && options?.path) {
+    node.setAttribute('href', options.path);
   }
 
   const router = useRouter();
   if (!router) {
     Logger.warn('Router not found. Make sure you are using the link action within a Router context.', { node, options });
+    node.setAttribute('data-error', 'Router not found.');
     return {};
   }
 
@@ -127,9 +130,10 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
     const navigationOptions: RouterNavigationOptions = {};
 
     // RouterNavigationOptions
-    addIfFound(navigationOptions, 'base', _options.base ?? (node.getAttribute('base') || undefined));
+    addIfFound(navigationOptions, 'base', _options.base ?? (node.getAttribute('data-base') || undefined));
     addIfFound(navigationOptions, 'hash', _options.hash ?? parseBooleanAttribute(node, 'hash'));
     addIfFound(navigationOptions, 'strict', _options.strict ?? parseBooleanAttribute(node, 'strict'));
+    addIfFound(navigationOptions, 'force', _options.force ?? parseBooleanAttribute(node, 'force'));
     addIfFound(navigationOptions, 'failOnNotFound', _options.failOnNotFound ?? parseBooleanAttribute(node, 'fail-on-not-found'));
     addIfFound(navigationOptions, 'metaAsState', _options.metaAsState ?? parseBooleanAttribute(node, 'meta-as-state'));
     addIfFound(navigationOptions, 'nameAsTitle', _options.nameAsTitle ?? parseBooleanAttribute(node, 'name-as-title'));
