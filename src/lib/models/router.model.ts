@@ -88,18 +88,35 @@ export type RouterContextProps<Name extends RouteName = any> = {
   children?: Snippet<[IRouter<Name>]>;
 };
 
-export type TransitionFunction<T extends Record<string, any> = Record<string, any>> = (
+export type TransitionFunction<T extends Record<string, any> | undefined = Record<string, any> | undefined> = (
   node: Element,
-  props: T | undefined,
+  props: T,
   options: { direction?: 'in' | 'out' | 'both' },
 ) => TransitionConfig | (() => TransitionConfig);
 
-export type TransitionProps = {
-  in?: TransitionFunction;
-  out?: TransitionFunction;
+export type TransitionProps<
+  T extends { in?: Record<string, any>; out?: Record<string, any> } = { in?: Record<string, any>; out?: Record<string, any> },
+> = {
+  /**
+   * Skip the first enter transition.
+   * This is useful when the first route load is fast and the transition is not needed.
+   * @default true
+   */
+  skip?: boolean;
+  /**
+   * Transition to use when navigating to a new route.
+   */
+  in?: TransitionFunction<T['in']>;
+  /**
+   * Transition to use when navigating away from the current route.
+   */
+  out?: TransitionFunction<T['out']>;
+  /**
+   * Transition parameters to be passed to the transition functions.
+   */
   params?: {
-    in?: Record<string, any>;
-    out?: Record<string, any>;
+    in?: T['in'];
+    out?: T['out'];
   };
   props?: Record<string, any>;
 };

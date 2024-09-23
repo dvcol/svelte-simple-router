@@ -73,8 +73,20 @@
     return (err: unknown) => loadingUUID === _uuid && onError?.(err, { route: _route });
   });
 
-  const _in = $derived<TransitionFunction>(((node, props, options) => transition?.in?.(node, props, options)) as TransitionFunction);
+  let firstRender = true;
+  const skipFirst = $derived<boolean>(transition?.skip ?? true);
+  const skipTransition = (skip = skipFirst) => {
+    if (!firstRender || !skip) return false;
+    firstRender = false;
+    return true;
+  };
+
+  const _in = $derived<TransitionFunction>(((node, props, options) => {
+    if (skipTransition()) return;
+    return transition?.in?.(node, props, options);
+  }) as TransitionFunction);
   const _out = $derived<TransitionFunction>(((node, props, options) => transition?.out?.(node, props, options)) as TransitionFunction);
+
   const _inParams = $derived(transition?.params?.in || {});
   const _outParams = $derived(transition?.params?.out ?? {});
   const _transitionProps = $derived(transition?.props);
