@@ -2,8 +2,6 @@
   import { LogLevel } from '@dvcol/common-utils';
   import { tick } from 'svelte';
 
-  import { fade } from 'svelte/transition';
-
   import ErrorComponent from './Error.svelte';
   import GoodbyeComponent from './Goodbye.svelte';
   import HelloComponent from './Hello.svelte';
@@ -19,6 +17,7 @@
   import RouteDebugger from '~/components/debug/RouteDebugger.svelte';
   import RouterDebugger from '~/components/debug/RouterDebugger.svelte';
   import { Logger } from '~/utils/logger.utils';
+  import { transition } from '~/utils/transition.utils';
 
   const RouteName = {
     Hello: 'Hello',
@@ -26,6 +25,7 @@
     Nested: 'Nested',
     Async: 'Async',
     Loading: 'Loading',
+    LoadingCustom: 'LoadingCustom',
     Error: 'Error',
     Params: 'Params',
     Parent: 'Parent',
@@ -80,6 +80,15 @@
     {
       name: RouteName.Loading,
       path: '/loading',
+      component: () =>
+        new Promise(resolve => {
+          setTimeout(() => resolve({ default: HelloComponent }), 5000);
+        }),
+    },
+    {
+      name: RouteName.LoadingCustom,
+      path: '/loading-custom',
+      loading: Loading,
       component: () =>
         new Promise(resolve => {
           setTimeout(() => resolve({ default: HelloComponent }), 5000);
@@ -279,7 +288,7 @@
       <RouterContext {options}>
         <PathSelector {stripQuery} {stripHash} {stripTrailingHash} />
         <br />
-        <br />
+
         <div>Nested Context</div>
         <RouterDebugger />
         <RouteDebugger />
@@ -315,12 +324,7 @@
         onEnd={(from, to) => console.info('View end', { from, to })}
         beforeEach={(from, to) => console.info('View before each', { from, to })}
         transition={{
-          in: fade,
-          out: fade,
-          params: {
-            in: { duration: 300, delay: 300 },
-            out: { duration: 300 },
-          },
+          ...transition,
           props: {
             class: 'custom-class',
           },

@@ -57,21 +57,34 @@
     return error ?? errors?.default;
   });
 
-  const loadingUUID: string | undefined = $derived(route ? crypto.randomUUID() : undefined);
+  const loadingUUID: string | undefined = $derived.by(() => {
+    if (route) return crypto.randomUUID();
+    return undefined;
+  });
+
   const _onLoading = $derived.by(() => {
     const _route = toBaseRoute(route);
     const _uuid = loadingUUID;
-    return () => loadingUUID === _uuid && onLoading?.(_route);
+    return () => {
+      if (loadingUUID !== _uuid) return;
+      return onLoading?.(_route);
+    };
   });
   const _onLoaded = $derived.by(() => {
     const _route = toBaseRoute(route);
     const _uuid = loadingUUID;
-    return () => loadingUUID === _uuid && onLoaded?.(_route);
+    return () => {
+      if (loadingUUID !== _uuid) return;
+      return onLoaded?.(_route);
+    };
   });
   const _onError = $derived.by(() => {
     const _route = toBaseRoute(route);
     const _uuid = loadingUUID;
-    return (err: unknown) => loadingUUID === _uuid && onError?.(err, { route: _route });
+    return (err: unknown) => {
+      if (loadingUUID !== _uuid) return;
+      return onError?.(err, { route: _route });
+    };
   });
 
   const subs: (() => void)[] = [];
@@ -112,7 +125,7 @@
   {@render children?.(router)}
 
   {#if transition}
-    <RouteContainerTransition {route} {transition}>
+    <RouteContainerTransition key={loadingUUID} {route} {transition}>
       {@render view()}
     </RouteContainerTransition>
   {:else}

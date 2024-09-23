@@ -32,7 +32,15 @@ export const resolveComponent = async <
   Bindings extends keyof Props | '' = string,
 >(
   component?: ComponentOrLazy<Props, Exports, Bindings>,
-  { onLoading, onLoaded, onError }: { onLoading?: () => void; onLoaded?: () => void; onError?: (error: unknown) => void } = {},
+  {
+    onLoading,
+    onLoaded,
+    onError,
+  }: {
+    onLoading?: () => void;
+    onLoaded?: () => void;
+    onError?: (error: unknown) => void;
+  } = {},
 ): Promise<Component<Props, Exports, Bindings> | undefined> => {
   if (!component) return component;
   if (isLazyComponent(component)) {

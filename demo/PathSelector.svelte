@@ -62,15 +62,6 @@
     </tbody>
   </table>
   <div class="column">
-    <a href={'/base/path/*/:{number}:id:?/path/:{string}:name:?/:lastName/end'} data-params={JSON.stringify({ id: 12345 })} use:link>params</a>
-    <a href="-" use:link={{ name: 'params', params: { id: 5321 } }}>params</a>
-    <a href="http://github.com/dvcol/svelte-simple-router" target="_blank" rel="noreferrer" use:link>Svelte Simple Router</a>
-    <a href="/demo/mega/sub/path" use:link>mega</a>
-    <a href="/root">root</a>
-    <a href="/root/child">child</a>
-    <div use:link={{ name: 'params', params: { id: 5321 } }} role="link">div</div>
-    <button use:link={{ name: 'params', params: { id: 5321 } }}>button</button>
-
     <a href="/parent" use:link use:active={{ class: 'active', exact: true }}>active parent</a>
     <div use:link={{ name: 'child' }} use:active={{ path: '/parent/child', class: 'active', exact: true }}>active child</div>
   </div>

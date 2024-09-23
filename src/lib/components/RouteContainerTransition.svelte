@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import type { ParsedRoute, TransitionFunction, TransitionProps } from '~';
+  import type { TransitionFunction, TransitionProps } from '~';
 
-  const { children, route, transition }: { children: Snippet; route: ParsedRoute; transition: TransitionProps } = $props();
+  const { children, key, transition }: { children: Snippet; key: string; transition: TransitionProps } = $props();
 
   let firstRender = true;
   const skipFirst = $derived<boolean>(transition?.skip ?? true);
@@ -23,7 +23,7 @@
   const _transitionProps = $derived(transition?.props);
 </script>
 
-{#key route?.path}
+{#key key}
   <div class="transition-container" in:_in={_inParams} out:_out={_outParams} {..._transitionProps}>
     {@render children?.()}
   </div>
