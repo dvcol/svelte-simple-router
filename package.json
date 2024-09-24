@@ -55,6 +55,10 @@
       "types": "./dist/components/index.d.ts",
       "import": "./dist/components/index.js"
     },
+    "./components/debug": {
+      "types": "./dist/components/index.d.ts",
+      "svetle": "./dist/components/index.js"
+    },
     "./components/router": {
       "types": "./dist/components/RouterView.svelte.d.ts",
       "svetle": "./dist/components/RouterView.svelte"
@@ -100,6 +104,9 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "peerDependencies": {
+    "svelte": ">=5"
   },
   "dependencies": {
     "@dvcol/common-utils": "^1.17.0",
@@ -155,7 +162,7 @@
     "vitest": "^2.0.5"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,vue,svelte,json,md}": [
+    "*.{js,jsx,ts,tsx,vue,svelte,json}": [
       "eslint --fix"
     ],
     "*.{css,scss,less,vue,svelte}": [

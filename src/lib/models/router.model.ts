@@ -209,7 +209,7 @@ export type RouterNavigationOptions = {
    */
   hash?: boolean;
   /**
-   * If `true`, the router will match the routes strictly.
+   * If `true`, the router will match the routes strictly (i.e. /path will not match /path/child).
    *
    * @default false
    */

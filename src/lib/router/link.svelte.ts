@@ -68,13 +68,15 @@ export type LinkActionOptions = CommonRouteNavigation & RouterNavigationOptions 
  * - The target is not an external link (for anchor elements)
  * - The target is not a new tab or window (for anchor elements)
  *
- * The action merge data-attributes with the options passed as argument.
- * Passed options have precedence over data-attributes.
- * If attribute expects a JSON object, it will be parsed.
- * If a name or path parameter are provided, they will be used to navigate and href will be ignored.
- * Name takes precedence over path.
+ * Additionally:
+ * - The action merge data-attributes with the options passed as argument.
+ * - Passed options have precedence over data-attributes.
+ * - If attribute expects a JSON object, it will be parsed.
+ * - If a name or path parameter are provided, they will be used to navigate and href will be ignored.
+ * - Name takes precedence over path.
+ * - If the host is not an anchor element, the role and tabindex attributes will be set.
  *
- * If the host is not an anchor element, the role and tabindex attributes will be set.
+ * Note: The action requires the router context to be present in the component tree.
  *
  * @param node - The element to add the link action to
  * @param options - The options to use for the navigation

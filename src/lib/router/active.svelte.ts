@@ -51,13 +51,13 @@ const getParentName = (route?: ParsedRoute, names: ParsedRoute['name'][] = []) =
 /**
  * A svelte action to add an active state (class, style or attribute) to an element when the route matches.
  *
- * If attached to an anchor element, it will attempt to match the href attribute.
- * If path or name options are provided, they will take precedence over the element attributes.
- * Name always takes precedence over path.
+ * Additionally:
+ * - If attached to an anchor element, it will attempt to match the href attribute.
+ * - If path or name options are provided, they will take precedence over the element attributes.
+ * - Name always takes precedence over path.
+ * - When the route un-matches, the original style will be restored.
  *
- * When the route un-matches, the original style will be restored.
- *
- * Requires the `Router` context to be available.
+ * Note: The action requires the router context to be present in the component tree.
  *
  * @param node - The element to add the active state to
  * @param options - The options to use for the active state

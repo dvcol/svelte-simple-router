@@ -11,6 +11,7 @@
     "svelte.config.js",
     ".eslintrc.cjs",
     "README*md/*.ts",
+    "README*md/*.svelte",
     "package.json"
   ],
   "compilerOptions": {
