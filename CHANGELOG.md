@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.1](https://github.com/dvcol/svelte-simple-router/compare/v1.1.0...v1.1.1) (2024-09-24)
+
+
+### Bug Fixes
+
+* **lint:** adds svelte check to lint ci ([4c52f49](https://github.com/dvcol/svelte-simple-router/commit/4c52f493f4ba6f81bf314d3f8b7b6c03876921c4))
+* **transition:** animate error & loading state tranisitons ([7f50d42](https://github.com/dvcol/svelte-simple-router/commit/7f50d422480c72c88c667b330dd63a2321e2659a))
+
 ## 1.1.0 (2024-09-24)
 
 
