@@ -5,7 +5,7 @@
 
   import RouteContainerTransition from '~/components/RouteContainerTransition.svelte';
   import { MissingRouterContextError } from '~/models/error.model.js';
-  import { type ParsedRoute, toBaseRoute } from '~/models/route.model.js';
+  import { type ComponentProps, type ParsedRoute, toBaseRoute } from '~/models/route.model.js';
 
   import { useRouter } from '~/router/use-router.svelte.js';
   import { type AnyComponent, resolveComponent } from '~/utils/svelte.utils.js';
@@ -31,8 +31,8 @@
 
   // Extract component props from route
   const resolvedProps = $derived.by<ParsedRoute['props'] | undefined>(() => {
-    if (name) return route?.props?.[name];
-    return route?.props;
+    if (name) return route?.props?.[name] as ComponentProps | undefined;
+    return route?.props as ComponentProps | undefined;
   });
 
   // Extract component from route

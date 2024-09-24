@@ -62,12 +62,17 @@ jobs:
       - name: 🧱 Install
         uses: ./.github/actions/install
 
+      - name: 🔍 Check
+        run: |
+          # =================  🔍 Check  =================
+          pnpm run check
+
       - name: 🧹 Lint
         run: |
           # =================  🧹 Lint  =================
           pnpm run lint
 
-      - name: 🧹 Lint
+      - name: 🪄 Stylelint
         run: |
-          # =================  🧹 Lint  =================
+          # =================  🪄 Stylelint  =================
           pnpm run style
