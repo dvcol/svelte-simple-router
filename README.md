@@ -31,6 +31,7 @@ pnpm add @dvcol/svelte-simple-router
 ## Getting Started
 
 The minimal setup requires a `RouterView` component and a list of routes.
+
 The `RouterView` component will render the component associated with the current route in place.
 
 You can find a complete example in the [demo app](https://github.com/dvcol/svelte-simple-router/blob/main/demo/App.svelte).
@@ -93,7 +94,8 @@ You can find a complete example in the [demo app](https://github.com/dvcol/svelt
 
 ### Router Context
 
-The `RouterContext` component injects the router context into its children.
+The `RouterContext` component injects the router instance into the component tree.
+
 It can be used to share a router instance between `RouterView` components without the need to pass it down as a prop.
 
 ```svelte
@@ -111,7 +113,9 @@ It can be used to share a router instance between `RouterView` components withou
 ### Route / Router debugger
 
 The `RouterDebugger` and `RouteDugger` component will display the current route and router state.
+
 It can be used to debug the router configuration and the current route.
+
 It requires to be placed inside a `RouterView` or `RouterContext` component.
 
 ```svelte
@@ -128,7 +132,10 @@ It requires to be placed inside a `RouterView` or `RouterContext` component.
 
 ### Nested router / named Router
 
-The `RouterView` component can be nested to create a nested routes.
+The `RouterView` component can be nested under another `RouterView` or `RouterContext` component.
+
+Named `RouterView` components can be used to render different components on the same route.
+
 Each `RouterView` grabs the router context from the nearest `RouterContext` or `RouterView` component.
 
 Note: Sibling `RouterView` or `RouterContext` components will instantiate a new router instance.
@@ -186,6 +193,7 @@ Note: Sibling `RouterView` or `RouterContext` components will instantiate a new 
 ### Router transition
 
 The `RouterView` component can take a `transition` [prop](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L97-L122) to animate the route transition.
+
 It wraps the route component in a div with optionals `in` and `out` transitions.
 
 A default fade/scale transition is provided, but you can pass your own [transitions](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L97-L122).
@@ -265,6 +273,7 @@ Note: The action requires the router context to be present in the component tree
 ### Programmatic navigation
 
 To navigate without a dom link, you can grab the router instance from the context and call the `push` or `replace` methods.
+
 See the [router model](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L482-L501) for more information.
 
 ```svelte
@@ -328,6 +337,7 @@ You can also override the router's navigation [options](https://github.com/dvcol
 You can dynamically [add or remove](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L387-L411) routes from the router instance.
 
 Note that although the inner route map are reactive, adding or removing routes will not trigger a re-synchronization of the router state.
+
 To force a re-synchronization, you can call the [`sync` method](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L453) on the router instance.
 
 ### Guards and listeners
@@ -339,7 +349,9 @@ The `route and `router` supports several navigation guards and listeners:
 - [beforeEach](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L420) to run before any route is resolved.
 
 Guards trigger after url change and before the route component is rendered.
+
 If a guard returns `false`, and object of instance `Error` or `throws`, the navigation will be aborted and the error will be thrown.
+
 If a guard returns an object with a `path` or `name` property, the navigation will be redirected to the provided route, if any is found and `followGuardRedirects` is enabled.
 
 The `router` ([dynamically](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L422-L447) or through [options](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L307-L317)) and `RouterView` also support several event listeners:
@@ -350,6 +362,7 @@ The `router` ([dynamically](https://github.com/dvcol/svelte-simple-router/blob/1
 ### Lazy routing
 
 The `Route` object supports lazy loading of the route component.
+
 When the `component` property is a lazy import, the router will resolve the matched component before rendering it.
 
 While the component is being resolved, the `loading` component will be rendered if any, the `loading` snippet if any, or nothing.
@@ -403,6 +416,7 @@ Similarly, if an error occurs during the component resolution, the `error` compo
 ```
 
 Parameters can also have a type constraint by adding `:{string}` or `:{number}` before the parameter name.
+
 The router will only match the route if the parameter matches the type constraint.
 
 ```
