@@ -41,10 +41,8 @@ export function scaleFadeInOut(node: Element, { duration = 400, start = 0.95, ..
 }
 
 export const transition: TransitionProps<{ in?: HeightParams; out?: HeightParams }> = {
-  skip: true,
   in: scaleFadeInOut,
   out: scaleFadeInOut,
-  params: {
-    in: { delay: 400 },
-  },
+  params: { in: { delay: 400 } },
+  skipFirst: true,
 };

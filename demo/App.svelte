@@ -27,6 +27,7 @@
     Loading: 'Loading',
     LoadingCustom: 'LoadingCustom',
     Error: 'Error',
+    ErrorCustom: 'ErrorCustom',
     Params: 'Params',
     Parent: 'Parent',
     Child: 'Child',
@@ -71,6 +72,18 @@
       component: () => {
         throw new Error('Error, failed to import lazy component');
       },
+      loading: Loading,
+      beforeEnter: () => {
+        console.info('Before enter Error');
+      },
+    },
+    {
+      name: RouteName.ErrorCustom,
+      path: '/error-custom',
+      component: () =>
+        new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Error, failed to import lazy component')), 5000);
+        }),
       loading: Loading,
       error: ErrorComponent,
       beforeEnter: () => {

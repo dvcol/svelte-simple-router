@@ -102,7 +102,7 @@ export type TransitionProps<
    * This is useful when the first route load is fast and the transition is not needed.
    * @default true
    */
-  skip?: boolean;
+  skipFirst?: boolean;
   /**
    * Transition to use when navigating to a new route.
    */

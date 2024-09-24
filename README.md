@@ -190,7 +190,7 @@ It wraps the route component in a div with optionals `in` and `out` transitions.
 
 A default fade/scale transition is provided, but you can pass your own [transitions](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L97-L122).
 
-Note: By default the first enter transition is ignored, you can change this behavior by setting the `skip` option to `false`.
+Note: By default the first enter transition is ignored, you can change this behavior by setting the `skipFirst` option to `false`.
 
 ```svelte
 <script lang="ts">

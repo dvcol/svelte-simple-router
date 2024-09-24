@@ -1,11 +1,11 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import type { TransitionFunction, TransitionProps } from '~';
+  import type { TransitionFunction, TransitionProps } from '~/models/router.model.js';
 
-  const { children, key, transition }: { children: Snippet; key: string; transition: TransitionProps } = $props();
+  const { children, key, transition }: { children: Snippet; key: any[]; transition: TransitionProps } = $props();
 
   let firstRender = true;
-  const skipFirst = $derived<boolean>(transition?.skip ?? true);
+  const skipFirst = $derived<boolean>(transition?.skipFirst ?? true);
   const skipTransition = (skip = skipFirst) => {
     if (!firstRender || !skip) return false;
     firstRender = false;
