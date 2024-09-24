@@ -126,8 +126,8 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
     addIfFound(navigation, 'params', _options.params ?? parseJsonAttribute(node, 'params'));
     addIfFound(navigation, 'state', _options.state ?? parseJsonAttribute(node, 'state'));
     addIfFound(navigation, 'stripQuery', _options.stripQuery ?? parseBooleanAttribute(node, 'strip-query'));
-    addIfFound(navigation, 'stripHash', _options.stripQuery ?? parseBooleanAttribute(node, 'strip-hash'));
-    addIfFound(navigation, 'stripTrailingHash', _options.stripQuery ?? parseBooleanAttribute(node, 'strip-trailing-hash'));
+    addIfFound(navigation, 'stripHash', _options.stripHash ?? parseBooleanAttribute(node, 'strip-hash'));
+    addIfFound(navigation, 'stripTrailingHash', _options.stripTrailingHash ?? parseBooleanAttribute(node, 'strip-trailing-hash'));
 
     const navigationOptions: RouterNavigationOptions = {};
 

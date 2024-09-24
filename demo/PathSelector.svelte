@@ -51,7 +51,7 @@
     </thead>
     <tbody>
       {#each routes as { name, path, redirect }}
-        <tr use:link={{ name }} use:active={{ name, class: 'active', exact: true }}>
+        <tr use:link={{ name, stripHash, stripTrailingHash, stripQuery }} use:active={{ name, class: 'active', exact: true }}>
           <td>{name}</td>
           <td>{path}</td>
           <td>{redirect?.name ?? '-'}</td>
@@ -62,8 +62,10 @@
     </tbody>
   </table>
   <div class="column">
-    <a href="/parent" use:link use:active={{ class: 'active', exact: true }}>active parent</a>
-    <div use:link={{ name: 'child' }} use:active={{ path: '/parent/child', class: 'active', exact: true }}>active child</div>
+    <a href="/parent" use:link={{ stripHash, stripTrailingHash, stripQuery }} use:active={{ class: 'active', exact: true }}>active parent</a>
+    <div use:link={{ name: 'child', stripHash, stripTrailingHash, stripQuery }} use:active={{ path: '/parent/child', class: 'active', exact: true }}>
+      active child
+    </div>
   </div>
 </div>
 
