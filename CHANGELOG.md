@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.2](https://github.com/dvcol/svelte-simple-router/compare/v1.1.1...v1.1.2) (2024-09-25)
+
+
+### Bug Fixes
+
+* **link:** correctly merge options with attributes ([bbaa295](https://github.com/dvcol/svelte-simple-router/commit/bbaa295e0c601a6f010d3568433f0f0d50f86484))
+
 ### [1.1.1](https://github.com/dvcol/svelte-simple-router/compare/v1.1.0...v1.1.1) (2024-09-24)
 
 
