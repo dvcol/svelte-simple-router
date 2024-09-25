@@ -61,7 +61,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * Original options object passed to create the Router
    * @private
    */
-  readonly #options: RouterOptions<Name> & { history: IHistory<Name> };
+  readonly #options: RouterOptions<Name> & { history: IHistory<Name>; location: Location };
 
   /**
    * Map of all the routes added to the router.
@@ -173,7 +173,11 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @private
    */
   get #history(): IHistory<Name> {
-    return this.#options.history ?? window.history;
+    return this.#options.history;
+  }
+
+  get #browser(): Location {
+    return this.#options.location;
   }
 
   /**
@@ -205,7 +209,8 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @private
    */
   get #useNavigationApi(): boolean {
-    if (!window.navigation) return false;
+    if (typeof window === 'undefined') return false;
+    if (!window?.navigation) return false;
     return this.#options.listen === true || this.#options.listen === 'navigation';
   }
 
@@ -294,7 +299,8 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
 
   constructor(options: RouterOptions<Name> = {}) {
     this.#options = {
-      history: window.history,
+      history: globalThis?.history,
+      location: globalThis?.location,
       listen: 'history',
       priority: RouterPathPriority,
       caseSensitive: false,
@@ -327,6 +333,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   listen() {
     //  If already listening, exit
     if (this.#listening) return;
+    if (typeof window === 'undefined') return;
     if (this.#useNavigationApi) window.navigation?.addEventListener('currententrychange', this.#navigateListener);
     else window.addEventListener('popstate', this.#navigateListener);
     this.#listening = this.#useNavigationApi ? 'navigation' : 'history';
@@ -334,6 +341,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   }
 
   destroy() {
+    if (typeof window === 'undefined') return;
     window.removeEventListener('popstate', this.#navigateListener);
     window.navigation?.removeEventListener('currententrychange', this.#navigateListener);
     this.#listening = false;
@@ -552,7 +560,15 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     const { wildcards, params: _params } = route?.matcher.extract(_path) ?? {};
 
     //  use hash, path, and query to resolve new href
-    const { href, search } = resolveNewHref(_path, { hash, stripQuery, stripHash, stripTrailingHash, query: { ...route?.query, ...query }, base });
+    const { href, search } = resolveNewHref(_path, {
+      base,
+      hash,
+      stripQuery,
+      stripHash,
+      stripTrailingHash,
+      query: { ...route?.query, ...query },
+      current: this.#browser.href,
+    });
     Logger.debug(this.#log, 'Route resolved', { to, from, route, path: _path, href, search, wildcards, params: _params });
 
     //  return resolved route
@@ -678,13 +694,13 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @private
    */
   async sync(): Promise<ResolvedRouterLocationSnapshot<Name>> {
-    let path: string = window.location.pathname;
+    let path: string = this.#browser.pathname;
     if (this.#base && !path.startsWith(this.#base)) {
       this.#location = undefined;
       this.#route = undefined;
       return Logger.debug(this.#log, 'Not on base path, ignoring sync', { path, base: this.#base });
     }
-    if (this.#hash) path = window.location.hash.slice(1);
+    if (this.#hash) path = this.#browser.hash.slice(1);
     else if (this.#base) path = path.slice(this.#base.length);
     if (!path) path = '/';
     const resolve = this.resolve({ path });

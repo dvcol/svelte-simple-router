@@ -49,7 +49,7 @@ export const resolveNewHref = (
     stripQuery,
     stripHash,
     stripTrailingHash,
-    current = window.location.href,
+    current = globalThis?.location.href,
   }: {
     base?: string;
     hash?: boolean;

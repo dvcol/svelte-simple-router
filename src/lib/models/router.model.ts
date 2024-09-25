@@ -258,9 +258,16 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
    * History instance to use.
    *
    * @see [MDN for more information](https://developer.mozilla.org/docs/Web/API/History)
-   * @default window.history
+   * @default global.history
    */
   history?: IHistory<Name>;
+  /**
+   * Location instance to use.
+   *
+   * @see [MDN for more information](https://developer.mozilla.org/docs/Web/API/Location)
+   * @default global.location
+   */
+  location?: Location;
   /**
    * Initial list of routes that should be added to the router.
    */

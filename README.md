@@ -471,7 +471,8 @@ Will match `/path/any/12` and `/path/other/12/path/end`.
 ### Router
 
 In addition to default navigation options (see [programmatic navigation](#programmatic-navigation)), the router instance supports several [options](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L256-L318):
-- `history` to set the history instance the router will use (defaults to window.history).
+- `history` to set the history instance the router will use (defaults to global.history).
+- `location` to set the location instance the router will use (defaults to global.location).
 - `listen` to listen to `popstate` or `navigation` events and trigger synchronization.
 - `priority` to set the priority when multiple routes match the current path.
 - `caseSensitive` to enable case sensitive route names.
