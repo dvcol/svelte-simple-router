@@ -385,7 +385,7 @@ Similarly, if an error occurs during the component resolution, the `error` compo
         {
             name: 'lazy-snippet',
             path: '/lazy-snippet',
-            components: () => import('./LazyComponent.svelte')
+            component: () => import('./LazyComponent.svelte')
         }
     ] as const;
 </script>
