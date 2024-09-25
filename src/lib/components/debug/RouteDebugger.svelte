@@ -13,6 +13,7 @@
   <br />
   <div>Location - {location?.path}</div>
   <div>Params - {JSON.stringify(location?.params, undefined, 2)}</div>
+  <div>Query - {JSON.stringify(location?.query, undefined, 2)}</div>
   <div>Wildcards - {JSON.stringify(location?.wildcards, undefined, 2)}</div>
   <br />
   <div>Route - {route?.name}</div>

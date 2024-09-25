@@ -92,6 +92,20 @@ You can find a complete example in the [demo app](https://github.com/dvcol/svelt
 
 ## Advanced Usage
 
+- [Router Context](#router-context)
+- [Debuggers](#debuggers)
+- [Nested routes](#nested-routes)
+- [Router transition](#router-transition)
+- [Dom actions](#dom-actions)
+  - [Link action](#link-action)
+  - [Active action](#active-action)
+- [Programmatic navigation](#programmatic-navigation)
+- [Dynamic routes](#dynamic-routes)
+- [Guards and listeners](#guards-and-listeners)
+- [Lazy routing](#lazy-routing)
+- [Routes](#routes)
+- [Router](#router)
+
 ### Router Context
 
 The `RouterContext` component injects the router instance into the component tree.
@@ -110,7 +124,7 @@ It can be used to share a router instance between `RouterView` components withou
 
 ```
 
-### Route / Router debugger
+### Debuggers
 
 The `RouterDebugger` and `RouteDugger` component will display the current route and router state.
 
@@ -130,7 +144,7 @@ It requires to be placed inside a `RouterView` or `RouterContext` component.
 </RouterView>
 ```
 
-### Nested router / named Router
+### Nested routes
 
 The `RouterView` component can be nested under another `RouterView` or `RouterContext` component.
 
