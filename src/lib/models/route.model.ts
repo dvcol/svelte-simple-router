@@ -124,6 +124,10 @@ export type RouteComponent = {
    * Error components are forbidden in this case.
    */
   errors?: never;
+  /**
+   * Properties are forbidden in this case.
+   */
+  properties?: never;
 };
 
 export type RouteComponents<Name extends RouteName = RouteName> = {
@@ -142,7 +146,7 @@ export type RouteComponents<Name extends RouteName = RouteName> = {
   /**
    * Allow passing down params as props to the component rendered by `router`.
    */
-  props?: Partial<Record<Name | 'default', ComponentProps>>;
+  properties?: Partial<Record<Name | 'default', ComponentProps>>;
   /**
    * Redirect is forbidden in this case.
    */
@@ -159,6 +163,10 @@ export type RouteComponents<Name extends RouteName = RouteName> = {
    * Error component is forbidden in this case.
    */
   error?: never;
+  /**
+   * Props are forbidden in this case.
+   */
+  props?: never;
 };
 
 export type RouteRedirect<Name extends RouteName = RouteName> = {
@@ -172,6 +180,10 @@ export type RouteRedirect<Name extends RouteName = RouteName> = {
    * Props are forbidden in this case.
    */
   props?: never;
+  /**
+   * Properties are forbidden in this case.
+   */
+  properties?: never;
   /**
    * Component is forbidden in this case.
    */

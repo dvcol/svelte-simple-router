@@ -121,28 +121,20 @@ export type TransitionProps<
   props?: Record<string, any>;
 };
 
-export type RouterViewProps<Name extends RouteName = any> = RouterContextProps<Name> & {
+export type RouteContainerProps<Name extends RouteName = any> = {
   /**
    * Name of the router view to render.
    * If not provided, the default view will be used.
    */
   name?: string;
   /**
-   * Loading snippet to display while the route is loading.
-   * Route loading component will take precedence over this.
-   *
-   * @see {@link RouteComponents.loadings}
-   * @see {@link RouteComponent.loading}
+   * Transition to use when navigating between routes.
    */
-  loading?: Snippet<[IRouter<Name>]>;
+  transition?: TransitionProps;
   /**
-   * Error snippet to display if the route fails to load.
-   * Route error component will take precedence over this.
-   *
-   * @see {@link RouteComponents.errors}
-   * @see {@link RouteComponent.error}
+   * Navigation guard passed to the router instance.
    */
-  error?: Snippet<[unknown]>;
+  beforeEach?: NavigationGuard<Name>;
   /**
    * Loading listener to execute when the view starts loading.
    */
@@ -164,14 +156,28 @@ export type RouterViewProps<Name extends RouteName = any> = RouterContextProps<N
    */
   onEnd?: NavigationEndListener<Name>;
   /**
-   * Navigation guard passed to the router instance.
+   * Loading snippet to display while the route is loading.
+   * Route loading component will take precedence over this.
+   *
+   * @see {@link RouteComponents.loadings}
+   * @see {@link RouteComponent.loading}
    */
-  beforeEach?: NavigationGuard<Name>;
+  loading?: Snippet<[IRouter<Name>]>;
   /**
-   * Transition to use when navigating between routes.
+   * Error snippet to display if the route fails to load.
+   * Route error component will take precedence over this.
+   *
+   * @see {@link RouteComponents.errors}
+   * @see {@link RouteComponent.error}
    */
-  transition?: TransitionProps;
+  error?: Snippet<[unknown]>;
+  /**
+   * Children to render when the router is ready.
+   */
+  children?: Snippet<[IRouter<Name>]>;
 };
+
+export type RouterViewProps<Name extends RouteName = any> = RouterContextProps<Name> & RouteContainerProps<Name>;
 
 export type RouterScrollPosition = { x: number; y: number };
 export type RouterStateLocation<Name extends RouteName = RouteName> = {

@@ -45,11 +45,17 @@
       name: RouteName.Hello,
       path: '/hello',
       component: HelloComponent,
+      props: {
+        title: RouteName.Hello,
+      },
     },
     {
       name: RouteName.Goodbye,
       path: '/goodbye',
       component: GoodbyeComponent,
+      props: {
+        title: RouteName.Goodbye,
+      },
     },
     {
       name: RouteName.Nested,
@@ -58,6 +64,14 @@
         default: HelloComponent,
         Nested: GoodbyeComponent,
       },
+      properties: {
+        default: {
+          title: RouteName.Nested,
+        },
+        Nested: {
+          title: RouteName.Nested,
+        },
+      },
     },
     {
       name: RouteName.Async,
@@ -65,12 +79,18 @@
       component: () => import('./Async.svelte'),
       loading: Loading,
       error: ErrorComponent,
+      props: {
+        title: RouteName.Async,
+      },
     },
     {
       name: RouteName.Error,
       path: '/error',
       component: () => {
         throw new Error('Error, failed to import lazy component');
+      },
+      props: {
+        title: RouteName.Error,
       },
       loading: Loading,
       beforeEnter: () => {
@@ -84,6 +104,9 @@
         new Promise((_, reject) => {
           setTimeout(() => reject(new Error('Error, failed to import lazy component')), 5000);
         }),
+      props: {
+        title: RouteName.ErrorCustom,
+      },
       loading: Loading,
       error: ErrorComponent,
       beforeEnter: () => {
@@ -97,6 +120,9 @@
         new Promise(resolve => {
           setTimeout(() => resolve({ default: HelloComponent }), 5000);
         }),
+      props: {
+        title: RouteName.Loading,
+      },
     },
     {
       name: RouteName.LoadingCustom,
@@ -106,6 +132,9 @@
         new Promise(resolve => {
           setTimeout(() => resolve({ default: HelloComponent }), 5000);
         }),
+      props: {
+        title: RouteName.LoadingCustom,
+      },
     },
     {
       name: RouteName.Params,
@@ -138,8 +167,14 @@
           name: RouteName.Child,
           path: 'child',
           component: GoodbyeComponent,
+          props: {
+            title: RouteName.Child,
+          },
         },
       ],
+      props: {
+        title: RouteName.Parent,
+      },
     },
     {
       name: RouteName.Redirect,
@@ -157,6 +192,9 @@
           name: RouteName.Goodbye,
         };
       },
+      props: {
+        title: RouteName.BeforeRedirect,
+      },
     },
     {
       name: RouteName.BeforeEnterError,
@@ -164,6 +202,9 @@
       component: HelloComponent,
       beforeEnter: () => {
         throw new Error('Before enter Error');
+      },
+      props: {
+        title: RouteName.BeforeEnterError,
       },
     },
     {
@@ -174,6 +215,9 @@
         new Promise(resolve => {
           setTimeout(() => resolve(), 5000);
         }),
+      props: {
+        title: RouteName.SlowRoute,
+      },
     },
     {
       name: RouteName.Any,
@@ -329,7 +373,7 @@
     <div class="column">
       <h3>Independent Router</h3>
       <RouterView
-        options={{ ...options, listen: true }}
+        options={{ ...options, listen: false }}
         onLoading={_route => console.warn('View loading', _route)}
         onLoaded={_route => console.info('View loaded', _route)}
         onError={(err, { route: _route }) => console.error('View load error', { err, route: _route })}
