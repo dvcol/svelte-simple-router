@@ -396,6 +396,14 @@
           <RouteDebugger />
           <h3>View external</h3>
         </div>
+
+        {#snippet loading()}
+          <h1>Default Loading...</h1>
+        {/snippet}
+
+        {#snippet error(err)}
+          <h1>Error: {err}</h1>
+        {/snippet}
       </RouterView>
     </div>
   </div>

@@ -111,7 +111,7 @@
 {@render children?.(router)}
 
 {#if transition}
-  <RouteTransition key={[routeUUID, ResolvedComponent]} {transition}>
+  <RouteTransition key={ResolvedComponent} {transition}>
     {@render view()}
   </RouteTransition>
 {:else}

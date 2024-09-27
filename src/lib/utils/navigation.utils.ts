@@ -12,10 +12,12 @@ export const routeToHistoryState = <Name extends RouteName = RouteName>(
     metaAsState,
     nameAsTitle,
     state,
+    scrollState = { x: globalThis?.scrollX, y: globalThis?.scrollY },
   }: {
     metaAsState?: boolean;
     nameAsTitle?: boolean;
     state?: HistoryState;
+    scrollState?: { x: number; y: number };
   } = {},
 ): {
   state: RouterState<Name>;
@@ -34,7 +36,7 @@ export const routeToHistoryState = <Name extends RouteName = RouteName>(
     state: {
       ...state,
       [RouterStateConstant]: routerState,
-      [RouterScrollConstant]: { x: window.scrollX, y: window.scrollY },
+      [RouterScrollConstant]: scrollState,
     },
     title,
   };
