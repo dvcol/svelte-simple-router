@@ -3,6 +3,7 @@ import { fileURLToPath, URL } from 'url';
 import { sveltekit } from '@sveltejs/kit/vite';
 
 import { svelte } from '@sveltejs/vite-plugin-svelte';
+import { svelteTesting } from '@testing-library/svelte/vite';
 import { sveltePreprocess } from 'svelte-preprocess';
 import { checker } from 'vite-plugin-checker';
 import { defineConfig, type UserConfig } from 'vitest/config';
@@ -10,6 +11,7 @@ import { defineConfig, type UserConfig } from 'vitest/config';
 import type { PluginOption } from 'vite';
 
 const plugins: PluginOption[] = [];
+const isTest = process.env.NODE_ENV === 'test';
 const isDev = process.env.NODE_ENV === 'development';
 const isWeb = process.env.VITE_MODE === 'WEB';
 
@@ -34,6 +36,10 @@ if (isDev) {
   plugins.push(sveltekit());
 }
 
+if (isTest) {
+  plugins.push(svelteTesting());
+}
+
 const config: UserConfig = {
   plugins,
   resolve: {
@@ -43,14 +49,16 @@ const config: UserConfig = {
   },
   server: {
     port: 3303,
-    open: true,
+    open: '/svelte-simple-router/',
   },
   preview: {
     port: 3304,
-    open: true,
+    open: '/svelte-simple-router/',
   },
   test: {
     include: ['**/*.{test,spec}.{js,ts}'],
+    environment: 'jsdom',
+    setupFiles: ['/test/setup.test.ts'],
     alias: {
       '~/': fileURLToPath(new URL('./src/lib', import.meta.url)),
     },

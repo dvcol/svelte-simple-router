@@ -94,23 +94,22 @@ export type IMatcher = {
 };
 
 export class Matcher<Name extends RouteName = RouteName> implements IMatcher {
-  readonly #route: Route<Name>;
-
   readonly #regex: RegExp;
   readonly #strictRegex: RegExp;
 
   readonly #template: string;
   readonly #params: string[];
 
-  constructor(route: Route<Name>) {
-    this.#route = route;
+  constructor(routeOrPath: string | Route<Name>) {
+    const path = typeof routeOrPath === 'string' ? routeOrPath : routeOrPath.path;
+    if (!path) throw new MatcherInvalidPathError(path);
 
-    const { regex, strictRegex } = templateToRegex(route.path);
+    const { regex, strictRegex } = templateToRegex(path);
     this.#regex = regex;
     this.#strictRegex = strictRegex;
 
-    this.#template = route.path;
-    this.#params = templateToParams(route.path);
+    this.#template = path;
+    this.#params = templateToParams(path);
   }
 
   match(path: string, strict?: boolean): boolean {

@@ -2,6 +2,7 @@ import type { Action } from 'svelte/action';
 
 import type { ParsedRoute } from '~/models/route.model.js';
 
+import { Matcher } from '~/models/index.js';
 import { useRouter } from '~/router/use-router.svelte.js';
 import { Logger } from '~/utils/logger.utils.js';
 
@@ -23,7 +24,7 @@ export type ActiveActionOptions = {
   /**
    * Inline styles to apply when the route is active
    */
-  style?: CSSStyleDeclaration;
+  style?: Partial<CSSStyleDeclaration>;
   /**
    * Match the route path exactly
    *
@@ -35,7 +36,7 @@ export type ActiveActionOptions = {
    * Coerce the route name to lowercase before comparing.
    * Note: Symbols and numbers will be coerced to strings. Be sure to register your routes names accordingly.
    *
-   * @default false
+   * @default router if set, else false
    * @see {@link RouterOptions.caseSensitive}
    */
   caseSensitive?: boolean;
@@ -91,18 +92,26 @@ export const active: Action<HTMLElement, ActiveActionOptions | undefined> = (nod
   }
 
   const route = $derived(router.route);
-  const match = $derived.by(() => {
-    if (_name) {
-      if (!route?.name) return false;
-      const names = _options.exact ? [route.name] : getParentName(route);
-      if (_options.caseSensitive) return names.includes(_name);
-      return names.map(n => String(n)?.toLowerCase()).includes(_name?.toLowerCase());
-    }
-    if (!_path) return false;
-    if (!route?.matcher) return false;
-    if (_options.exact) return route.matcher.match(_path, true);
-    return route.matcher.match(_path);
+  const caseSensitive = $derived(_options?.caseSensitive ?? router.options?.caseSensitive);
+  const matchName = $derived.by(() => {
+    if (!_name) return false;
+    if (!route?.name) return false;
+    const names = _options.exact ? [route.name] : getParentName(route);
+    if (caseSensitive) return names.includes(_name);
+    return names.map(n => String(n)?.toLowerCase()).includes(_name?.toLowerCase());
   });
+
+  const location = $derived(router.location?.href?.pathname);
+  const matcher = $derived(_path ? new Matcher(_path) : undefined);
+  const matchPath = $derived.by(() => {
+    if (_name) return false;
+    if (!matcher) return false;
+    if (!location) return false;
+    if (_options.exact) return matcher.match(location, true);
+    return matcher.match(location);
+  });
+
+  const match = $derived(matchName || matchPath);
 
   const originalStyle = Object.fromEntries(Object.keys(_options.style || {}).map(key => [key, node.style[key as keyof CSSStyleDeclaration]]));
 
