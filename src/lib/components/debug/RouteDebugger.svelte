@@ -40,6 +40,7 @@
 
 <style>
   .debug {
+    width: fit-content;
     margin: 1rem 0;
     padding: 1rem;
     background-color: color-mix(in srgb, transparent, white 10%);

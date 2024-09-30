@@ -16,7 +16,10 @@
     if (skipTransition()) return;
     return transition?.in?.(node, props, options);
   }) as TransitionFunction);
-  const _out = $derived<TransitionFunction>(((node, props, options) => transition?.out?.(node, props, options)) as TransitionFunction);
+  const _out = $derived<TransitionFunction>(((node, props, options) => {
+    if (firstRender && skipFirst) return;
+    return transition?.out?.(node, props, options);
+  }) as TransitionFunction);
 
   const _inParams = $derived(transition?.params?.in || {});
   const _outParams = $derived(transition?.params?.out ?? {});
@@ -24,7 +27,7 @@
 </script>
 
 {#key key}
-  <div class="transition-container" in:_in={_inParams} out:_out={_outParams} {..._transitionProps}>
+  <div in:_in={_inParams} out:_out={_outParams} {..._transitionProps}>
     {@render children?.()}
   </div>
 {/key}
