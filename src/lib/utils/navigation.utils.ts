@@ -23,11 +23,13 @@ export const routeToHistoryState = <Name extends RouteName = RouteName>(
   state: RouterState<Name>;
   title?: string;
 } => {
-  const title: string | undefined = route?.title ?? (nameAsTitle ? route?.name?.toString() : undefined);
+  const _name = name ?? route?.name;
+  const _path = path ?? route?.path;
+  const title: string | undefined = route?.title ?? (nameAsTitle ? _name?.toString() : undefined);
   const routerState: History['state'] = {};
   if (metaAsState && route?.meta) routerState.meta = JSON.parse(JSON.stringify(route.meta));
-  if (name) routerState.name = name;
-  if (path) routerState.path = path;
+  if (name) routerState.name = _name;
+  if (path) routerState.path = _path;
   if (href) routerState.href = href.toString();
   if (query) routerState.query = query;
   if (params) routerState.params = params;
@@ -60,7 +62,7 @@ export const resolveNewHref = (
     stripQuery?: boolean;
     stripHash?: boolean;
     stripTrailingHash?: boolean;
-  },
+  } = {},
 ): { href: URL; search: URLSearchParams } => {
   const href = new URL(current);
   // In hash mode, we extract the query from the hash, else we use the search params
@@ -91,7 +93,7 @@ export const resolveNewHref = (
   return { href, search };
 };
 
-const isRouteNavigation = <Name extends RouteName = RouteName>(navigation: unknown): navigation is RouteNavigation<Name> => {
+export const isRouteNavigation = <Name extends RouteName = RouteName>(navigation: unknown): navigation is RouteNavigation<Name> => {
   if (!navigation) return false;
   if (typeof navigation !== 'object') return false;
   return !!(('name' in navigation && navigation?.name) || ('path' in navigation && navigation?.path));

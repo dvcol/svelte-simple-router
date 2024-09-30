@@ -293,7 +293,7 @@ export type Route<Name extends RouteName = RouteName> = BaseRoute<Name> &
 export const cloneRoute = <Name extends RouteName = RouteName>(route: Route<Name>): Route<Name> =>
   shallowClone<Route<Name>, keyof Route<Name>>(route, 2, ['parent', 'component', 'components', 'loading', 'loadings', 'error', 'errors']);
 
-export const isRouteEqual = <Name extends RouteName = RouteName>(a?: Route<Name>, b?: Route<Name>): boolean => isShallowEqual(a, b);
+export const isRouteEqual = <Name extends RouteName = RouteName>(a?: Route<Name>, b?: Route<Name>): boolean => isShallowEqual(a, b, 2);
 
 export const toBaseRoute = <Name extends RouteName = RouteName>(route?: Route<Name>): BaseRoute<Name> | undefined => {
   if (!route) return route;
