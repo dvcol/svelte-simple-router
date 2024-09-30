@@ -38,6 +38,12 @@ const templateWildcardSegmentReplace = '/([^/]+)/';
 const templateWildcardOrParamRegex = /\/((\*)|(:[^/]+))/g;
 const templateWildcardOrParamPrefixRegex = /^\/:?/g;
 
+/**
+ * Replaces template params with their values
+ * @param template
+ * @param params
+ * @throws {ParsingMissingRequiredParamError} when a required param is missing
+ */
 export const replaceTemplateParams = (template: string, params: RouteParams = {}) =>
   template?.replace(templateParamRegexPrefix, templateParamReplacePrefix).replace(templateParamRegex, match => {
     let paramName = match.slice(2);
@@ -52,6 +58,11 @@ export const replaceTemplateParams = (template: string, params: RouteParams = {}
     return `/${params[paramName]}`;
   });
 
+/**
+ * Converts a template path to a regex
+ * @param template
+ * @throws {MatcherInvalidPathError} when the template is invalid (empty or relative)
+ */
 export const templateToRegex = (template: string) => {
   let _template = template?.trim();
   if (!_template?.length) throw new MatcherInvalidPathError(template);
@@ -75,7 +86,12 @@ export const templateToRegex = (template: string) => {
   };
 };
 
-const templateToParams = (template: string) => {
+/**
+ * Extracts params from a template path
+ * @param template
+ * @throws {MatcherInvalidPathError} when the template is invalid (empty)
+ */
+export const templateToParams = (template: string) => {
   const _template = template?.trim();
   if (!_template?.length) throw new MatcherInvalidPathError(template);
   return (
@@ -89,7 +105,18 @@ const templateToParams = (template: string) => {
 
 export type PathParamsResult = { params: Record<string, string>; wildcards: Record<string, string> };
 export type IMatcher = {
+  /**
+   * Matches a path against the template
+   * @param path
+   * @param strict
+   * @returns {boolean} whether the path matches the template
+   */
   match(path: string, strict?: boolean): boolean;
+  /**
+   * Extracts params from a path
+   * @param path
+   * @returns {PathParamsResult} extracted params
+   */
   extract(path: string): PathParamsResult;
 };
 
@@ -100,6 +127,11 @@ export class Matcher<Name extends RouteName = RouteName> implements IMatcher {
   readonly #template: string;
   readonly #params: string[];
 
+  /**
+   * Creates a new matcher
+   * @param routeOrPath
+   * @throws {MatcherInvalidPathError} when the path is invalid (empty or relative)
+   */
   constructor(routeOrPath: string | Route<Name>) {
     const path = typeof routeOrPath === 'string' ? routeOrPath : routeOrPath.path;
     if (!path) throw new MatcherInvalidPathError(path);
