@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/svelte';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import Active from './Active.test.svelte';
 
@@ -31,6 +31,10 @@ describe('active', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    await router.push({ path: '/' });
   });
 
   describe('init', () => {
