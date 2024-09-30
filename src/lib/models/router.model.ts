@@ -104,6 +104,13 @@ export type TransitionProps<
    */
   skipFirst?: boolean;
   /**
+   * If `true`, the transition will be updated on any route change.
+   * By default, the transition is only triggered when the component changes to avoid unnecessary mounting and unmounting.
+   *
+   * @default false
+   */
+  updateOnRouteChange?: boolean;
+  /**
    * Transition to use when navigating to a new route.
    */
   in?: TransitionFunction<T['in']>;

@@ -56,6 +56,9 @@
     return '';
   });
 
+  // Trigger transition on route change or component update
+  const transitionKey = $derived(transition?.updateOnRouteChange ? [ResolvedComponent, routeUUID] : ResolvedComponent);
+
   // Delay properties update until component is resolved
   let _properties: ComponentProps | undefined = $state();
 
@@ -115,7 +118,7 @@
 {@render children?.(router)}
 
 {#if transition}
-  <RouteTransition key={ResolvedComponent} {transition}>
+  <RouteTransition key={transitionKey} {transition}>
     {@render view()}
   </RouteTransition>
 {:else}

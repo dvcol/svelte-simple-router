@@ -68,7 +68,7 @@
   </div>
 </div>
 
-<div class="row">
+<div class="row add">
   <label for="route">Add Route</label>
   <input id="route" type="text" bind:value={route.name} />
   <input id="route.path" type="text" bind:value={route.path} />
@@ -83,6 +83,10 @@
     gap: 1rem;
     align-items: baseline;
     justify-content: center;
+  }
+
+  .add {
+    padding: 0.5rem;
   }
 
   .column {

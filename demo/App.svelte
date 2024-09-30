@@ -261,6 +261,7 @@
   let stripQuery = $state(false);
   let stripHash = $state(false);
   let stripTrailingHash = $state(false);
+  let updateOnRouteChange = $state(false);
 
   let input = $state(`${options?.base ?? ''}${options?.hash ? '/#' : ''}/hello`);
   const onInputButton = () => {
@@ -351,6 +352,7 @@
         beforeEach={(from, to) => console.info('View before each', { from, to })}
         transition={{
           ...transition,
+          updateOnRouteChange,
           props: {
             container: {
               class: 'content',
@@ -360,7 +362,12 @@
       >
         <div class="column">
           <h2>Independent Router</h2>
+
           <PathSelector {stripQuery} {stripHash} {stripTrailingHash} />
+          <div class="row update">
+            <label for="update-on-route-change">Update transition on route change</label>
+            <input id="update-on-route-change" type="checkbox" bind:checked={updateOnRouteChange} />
+          </div>
         </div>
 
         <div class="column debuggers">
@@ -418,6 +425,10 @@
     flex: 1 1 auto;
     flex-wrap: wrap;
     gap: 1rem;
+  }
+
+  .update {
+    padding: 0 1rem;
   }
 
   .column {
