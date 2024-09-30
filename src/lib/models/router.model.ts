@@ -91,7 +91,7 @@ export type RouterContextProps<Name extends RouteName = any> = {
 export type TransitionFunction<T extends Record<string, any> | undefined = Record<string, any> | undefined> = (
   node: Element,
   props: T,
-  options: { direction?: 'in' | 'out' | 'both' },
+  options: { direction: 'in' | 'out' },
 ) => TransitionConfig | (() => TransitionConfig);
 
 export type TransitionProps<
@@ -118,7 +118,10 @@ export type TransitionProps<
     in?: T['in'];
     out?: T['out'];
   };
-  props?: Record<string, any>;
+  props?: {
+    container: Record<string, any>;
+    wrapper: Record<string, any>;
+  };
 };
 
 export type RouteContainerProps<Name extends RouteName = any> = {

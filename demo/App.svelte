@@ -341,38 +341,6 @@
 {#if mounted}
   <div class="column">
     <div class="row">
-      <RouterContext {options}>
-        <div class="column">
-          <h2>Nested Router</h2>
-          <PathSelector {stripQuery} {stripHash} {stripTrailingHash} />
-        </div>
-
-        <div class="column debuggers">
-          <RouterDebugger />
-          <RouteDebugger />
-        </div>
-
-        <div class="content">
-          <RouterView {options}>
-            <h2>View default</h2>
-
-            {#snippet loading()}
-              <p>Default Loading...</p>
-            {/snippet}
-
-            {#snippet error(err)}
-              <p>Error: {err}</p>
-            {/snippet}
-          </RouterView>
-
-          <RouterView {options} name="Nested">
-            <h2>View nested</h2>
-          </RouterView>
-        </div>
-      </RouterContext>
-    </div>
-
-    <div class="row">
       <RouterView
         options={{ ...options, listen: false }}
         onLoading={_route => console.warn('View loading', _route)}
@@ -384,7 +352,9 @@
         transition={{
           ...transition,
           props: {
-            class: 'content',
+            container: {
+              class: 'content',
+            },
           },
         }}
       >
@@ -406,6 +376,38 @@
           <p>Default Error: {err}</p>
         {/snippet}
       </RouterView>
+    </div>
+
+    <div class="row">
+      <RouterContext {options}>
+        <div class="column">
+          <h2>Nested Router</h2>
+          <PathSelector {stripQuery} {stripHash} {stripTrailingHash} />
+        </div>
+
+        <div class="column debuggers">
+          <RouterDebugger />
+          <RouteDebugger />
+        </div>
+
+        <div class="content">
+          <RouterView {options}>
+            <h2>View default</h2>
+
+            {#snippet loading()}
+              <p>Default Loading...</p>
+            {/snippet}
+
+            {#snippet error(err)}
+              <p>Default Error: {err}</p>
+            {/snippet}
+          </RouterView>
+
+          <RouterView {options} name="Nested">
+            <h2>View nested</h2>
+          </RouterView>
+        </div>
+      </RouterContext>
     </div>
   </div>
 {/if}

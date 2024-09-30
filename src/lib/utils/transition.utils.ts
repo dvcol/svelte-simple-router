@@ -20,7 +20,11 @@ export type HeightParams = BaseParams & FreezeParams;
 /**
  * Animates the height of an element from 0 to the current opacity for `in` transitions and from the current opacity to 0 for `out` transitions.
  */
-export function height(node: Element, { delay = 0, duration = 400, easing = x => x, freeze = true }: HeightParams = {}): TransitionConfig {
+export function height(
+  node: Element,
+  { delay = 0, duration = 400, easing = x => x, freeze = true }: HeightParams = {},
+  { direction }: { direction: 'in' | 'out' },
+): TransitionConfig {
   let _height = parseFloat(getComputedStyle(node).height);
   if (!_height || Number.isNaN(_height)) _height = 0;
 
@@ -33,7 +37,7 @@ export function height(node: Element, { delay = 0, duration = 400, easing = x =>
     easing,
     css: t => {
       const _css = `height: ${t * _height}px`;
-      if (!freeze) return _css;
+      if (!freeze || direction === 'in') return _css;
       return `${_css};\nwidth: ${_width}px`;
     },
   };
@@ -44,7 +48,11 @@ export type WidthParams = BaseParams & FreezeParams;
 /**
  * Animates the width of an element from 0 to the current width for `in` transitions and from the current width to 0 for `out` transitions.
  */
-export function width(node: Element, { delay = 0, duration = 400, easing = x => x, freeze = true }: WidthParams = {}): TransitionConfig {
+export function width(
+  node: Element,
+  { delay = 0, duration = 400, easing = x => x, freeze = true }: WidthParams = {},
+  { direction }: { direction: 'in' | 'out' },
+): TransitionConfig {
   let _width = parseFloat(getComputedStyle(node).width);
   if (!_width || Number.isNaN(_width)) _width = 0;
 
@@ -57,7 +65,7 @@ export function width(node: Element, { delay = 0, duration = 400, easing = x => 
     easing,
     css: t => {
       const _css = `width: ${t * _width}px`;
-      if (!freeze) return _css;
+      if (!freeze || direction === 'in') return _css;
       return `${_css};\nheight: ${_height}px`;
     },
   };
@@ -68,7 +76,11 @@ export type ScaleFadeParams = ScaleParams & FreezeParams;
 /**
  * Animates the opacity and scale of an element. `in` transitions animate from an element's current (default) values to the provided values, passed as parameters. `out` transitions animate from the provided values to an element's default values.
  */
-export function scaleFadeInOut(node: Element, { duration = 400, start = 0.95, freeze = true, ...params }: ScaleFadeParams = {}): TransitionConfig {
+export function scaleFadeInOut(
+  node: Element,
+  { duration = 400, start = 0.95, freeze = true, ...params }: ScaleFadeParams = {},
+  { direction }: { direction: 'in' | 'out' },
+): TransitionConfig {
   const { delay, easing, css: scaleCss } = scale(node, { duration, start, ...params });
 
   let _height = parseFloat(getComputedStyle(node).height);
@@ -82,7 +94,7 @@ export function scaleFadeInOut(node: Element, { duration = 400, start = 0.95, fr
     duration,
     easing,
     css: (t, u) => {
-      if (!freeze) return `${scaleCss?.(t, u)}`;
+      if (!freeze || direction === 'in') return `${scaleCss?.(t, u)}`;
       return [`height: ${_height}px`, `width: ${_width}px`, scaleCss?.(t, u)].join(';\n');
     },
   };
