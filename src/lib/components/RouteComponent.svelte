@@ -56,6 +56,9 @@
     return '';
   });
 
+  // Delay properties update until component is resolved
+  let _properties: ComponentProps | undefined = $state();
+
   const _onLoading = $derived.by(() => {
     const _route = toBaseRoute(route);
     const _uuid = routeUUID;
@@ -73,6 +76,7 @@
     return (_component?: AnyComponent) => {
       if (routeUUID !== _uuid) return;
       ResolvedComponent = _component;
+      _properties = properties;
       _loading = false;
       return onLoaded?.(_route);
     };
@@ -98,7 +102,7 @@
 
 {#snippet view()}
   {#if ResolvedComponent}
-    <ResolvedComponent error={_error} {...properties}>
+    <ResolvedComponent error={_error} {..._properties}>
       {@render children?.(router)}
     </ResolvedComponent>
   {:else if _error}

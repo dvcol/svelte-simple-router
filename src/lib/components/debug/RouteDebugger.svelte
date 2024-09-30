@@ -18,6 +18,8 @@
   <br />
   <div>Route - {route?.name}</div>
   <div>Meta - {JSON.stringify(meta, undefined, 2)}</div>
+  <div>Props - {JSON.stringify(route?.props, undefined, 2)}</div>
+
   <div>Parent - {route?.parent?.name ?? route?.parent?.path}</div>
   <div>
     Children - {JSON.stringify(
