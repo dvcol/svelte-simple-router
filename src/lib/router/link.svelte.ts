@@ -31,6 +31,7 @@ const parseJsonAttribute = <T = Record<string, any>>(element: HTMLElement, name:
     return JSON.parse(value) as T;
   } catch (error) {
     Logger.error(`Failed to parse JSON attribute "${name}" on <a> element`, { element, name, error });
+    element.setAttribute('data-error', `Failed to parse JSON attribute "${name}"`);
   }
 };
 
