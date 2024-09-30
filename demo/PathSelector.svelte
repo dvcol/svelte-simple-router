@@ -37,7 +37,6 @@
   };
 </script>
 
-<h3>Routes</h3>
 <div class="routes" id="route-selector">
   <table>
     <thead>
@@ -83,6 +82,7 @@
     flex-direction: row;
     gap: 1rem;
     align-items: baseline;
+    justify-content: center;
   }
 
   .column {
@@ -97,6 +97,7 @@
   }
 
   .routes {
+    max-width: 40rem;
     padding: 1rem;
     background-color: color-mix(in srgb, transparent, black 20%);
     border-radius: 0.5rem;

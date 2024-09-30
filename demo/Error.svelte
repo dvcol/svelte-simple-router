@@ -4,8 +4,15 @@
 
 <div>
   <h1>Error</h1>
-  <p style="color: red">{error?.message ?? error}</p>
+  <p class="error">{error?.message ?? error}</p>
   {#if error?.stack}
-    <p style="color: red">{error.stack}</p>
+    <p class="error">{error.stack}</p>
   {/if}
 </div>
+
+<style>
+  .error {
+    max-width: 30rem;
+    color: red;
+  }
+</style>

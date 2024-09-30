@@ -339,39 +339,40 @@
 </div>
 
 {#if mounted}
-  <div class="row">
-    <div class="column">
-      <h3>Nested Router</h3>
+  <div class="column">
+    <div class="row">
       <RouterContext {options}>
-        <PathSelector {stripQuery} {stripHash} {stripTrailingHash} />
-        <br />
+        <div class="column">
+          <h2>Nested Router</h2>
+          <PathSelector {stripQuery} {stripHash} {stripTrailingHash} />
+        </div>
 
-        <div>Nested Context</div>
-        <RouterDebugger />
-        <RouteDebugger />
+        <div class="column debuggers">
+          <RouterDebugger />
+          <RouteDebugger />
+        </div>
 
         <div class="content">
           <RouterView {options}>
-            <h3>View default</h3>
+            <h2>View default</h2>
 
             {#snippet loading()}
-              <h1>Default Loading...</h1>
+              <p>Default Loading...</p>
             {/snippet}
 
             {#snippet error(err)}
-              <h1>Error: {err}</h1>
+              <p>Error: {err}</p>
             {/snippet}
           </RouterView>
 
           <RouterView {options} name="Nested">
-            <h3>View nested</h3>
+            <h2>View nested</h2>
           </RouterView>
         </div>
       </RouterContext>
     </div>
 
-    <div class="column">
-      <h3>Independent Router</h3>
+    <div class="row">
       <RouterView
         options={{ ...options, listen: false }}
         onLoading={_route => console.warn('View loading', _route)}
@@ -383,26 +384,26 @@
         transition={{
           ...transition,
           props: {
-            class: 'custom-class',
+            class: 'content',
           },
         }}
       >
-        <PathSelector {stripQuery} {stripHash} {stripTrailingHash} />
-        <br />
+        <div class="column">
+          <h2>Independent Router</h2>
+          <PathSelector {stripQuery} {stripHash} {stripTrailingHash} />
+        </div>
 
-        <div class="column custom-class">
-          <div>External Context</div>
+        <div class="column debuggers">
           <RouterDebugger />
           <RouteDebugger />
-          <h3>View external</h3>
         </div>
 
         {#snippet loading()}
-          <h1>Default Loading...</h1>
+          <p>Default Loading...</p>
         {/snippet}
 
         {#snippet error(err)}
-          <h1>Error: {err}</h1>
+          <p>Default Error: {err}</p>
         {/snippet}
       </RouterView>
     </div>
@@ -412,31 +413,35 @@
 <style lang="scss" global>
   .row {
     display: flex;
-    flex-direction: row;
+    flex: 1 1 auto;
+    flex-wrap: wrap;
     gap: 1rem;
-    align-items: baseline;
   }
 
   .column {
     gap: 1rem;
+    margin: auto;
   }
 
   .content,
   .column {
     display: flex;
-    flex: 1 1 50%;
+    flex: 0 0 auto;
     flex-direction: column;
     padding: 1rem;
     border-radius: 0.5rem;
   }
 
-  .content {
-    min-height: 50vh;
+  .debuggers {
+    width: 30rem;
   }
 
-  .custom-class {
-    display: flex;
-    flex-direction: column;
-    padding: 0 1rem;
+  .content {
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 2rem;
+    border: 2px solid;
+    border-radius: 0.5rem;
   }
 </style>
