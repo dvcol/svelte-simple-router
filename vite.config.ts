@@ -56,7 +56,8 @@ const config: UserConfig = {
     open: '/svelte-simple-router/',
   },
   test: {
-    include: ['**/*.{test,spec}.{js,ts}'],
+    include: ['test/**/*.{test,spec}.{js,ts}'],
+    exclude: ['test/setup.test.ts'],
     environment: 'jsdom',
     setupFiles: ['/test/setup.test.ts'],
     alias: {

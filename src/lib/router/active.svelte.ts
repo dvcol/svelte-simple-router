@@ -101,7 +101,7 @@ export const active: Action<HTMLElement, ActiveActionOptions | undefined> = (nod
     return names.map(n => String(n)?.toLowerCase()).includes(_name?.toLowerCase());
   });
 
-  const location = $derived(router.location?.href?.pathname);
+  const location = $derived(router.location?.path);
   const matcher = $derived(_path ? new Matcher(_path) : undefined);
   const matchPath = $derived.by(() => {
     if (_name) return false;
