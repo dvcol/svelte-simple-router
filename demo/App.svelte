@@ -380,7 +380,8 @@
         {/snippet}
 
         {#snippet error(err)}
-          <p>Default Error: {err}</p>
+          <h1>Default Error</h1>
+          <p class="error">Default Error: {err}</p>
         {/snippet}
       </RouterView>
     </div>
@@ -406,7 +407,8 @@
             {/snippet}
 
             {#snippet error(err)}
-              <p>Default Error: {err}</p>
+              <h1>Default Error</h1>
+              <p class="error">Default Error: {err}</p>
             {/snippet}
           </RouterView>
 
@@ -456,5 +458,10 @@
     padding: 1rem 2rem;
     border: 2px solid;
     border-radius: 0.5rem;
+  }
+
+  .error {
+    max-width: 30rem;
+    color: orangered;
   }
 </style>
