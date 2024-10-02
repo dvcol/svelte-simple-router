@@ -98,7 +98,14 @@ describe('resolveNewHref', () => {
 
     it('should resolve a new href in path mode with a base', () => {
       expect.assertions(2);
-      const { href, search } = resolveNewHref('/new/path', { base: '/base', query: { query: 'string' } });
+      const { href, search } = resolveNewHref('/new/path', { base: '/base', query: { query: 'string' }, current: 'http://localhost:3000/base' });
+      expect(href.toString()).toBe('http://localhost:3000/base/new/path?query=string');
+      expect(search.toString()).toBe('query=string');
+    });
+
+    it('should resolve a new href in path mode with a base when not on the base already', () => {
+      expect.assertions(2);
+      const { href, search } = resolveNewHref('/new/path', { base: '/base', query: { query: 'string' }, current: 'http://localhost:3000/other' });
       expect(href.toString()).toBe('http://localhost:3000/base/new/path?query=string');
       expect(search.toString()).toBe('query=string');
     });
@@ -158,10 +165,26 @@ describe('resolveNewHref', () => {
       expect(search.toString()).toBe('query=string');
     });
 
-    it('should resolve a new href in hash mode with a base', () => {
+    it('should resolve a new href in hash mode with a base (base is ignored)', () => {
       expect.assertions(2);
-      const { href, search } = resolveNewHref('/new/path', { base: '/base', hash: true, query: { query: 'string' } });
+      const { href, search } = resolveNewHref('/new/path', {
+        base: '/base',
+        hash: true,
+        query: { query: 'string' },
+        current: 'http://localhost:3000/base',
+      });
       expect(href.toString()).toBe('http://localhost:3000/base/#/new/path?query=string');
+      expect(search.toString()).toBe('query=string');
+    });
+
+    it('should resolve a new href in hash mode with any pathname', () => {
+      expect.assertions(2);
+      const { href, search } = resolveNewHref('/new/path', {
+        hash: true,
+        query: { query: 'string' },
+        current: 'http://localhost:3000/any/path/name',
+      });
+      expect(href.toString()).toBe('http://localhost:3000/any/path/name/#/new/path?query=string');
       expect(search.toString()).toBe('query=string');
     });
 
@@ -213,6 +236,41 @@ describe('resolveNewHref', () => {
         current: 'http://localhost:3000/#/old/path#old',
       });
       expect(href.toString()).toBe('http://localhost:3000/#/new/path');
+      expect(search.toString()).toBe('');
+    });
+
+    it('should add a trailing slash to the pathname when no query is present and no pathname exists', () => {
+      expect.assertions(2);
+      const { href, search } = resolveNewHref('/new/path', { hash: true, current: 'http://localhost:3000' });
+      expect(href.toString()).toBe('http://localhost:3000/#/new/path');
+      expect(search.toString()).toBe('');
+    });
+
+    it('should add a trailing slash to the pathname when no query is present and a hash is present', () => {
+      expect.assertions(2);
+      const { href, search } = resolveNewHref('/new/path', { hash: true, current: 'http://localhost:3000#any-hash' });
+      expect(href.toString()).toBe('http://localhost:3000/#/new/path');
+      expect(search.toString()).toBe('');
+    });
+
+    it('should add a trailing slash to the pathname when no query is present and pathname does not end with a slash', () => {
+      expect.assertions(2);
+      const { href, search } = resolveNewHref('/new/path', { hash: true, current: 'http://localhost:3000/old-path' });
+      expect(href.toString()).toBe('http://localhost:3000/old-path/#/new/path');
+      expect(search.toString()).toBe('');
+    });
+
+    it('should not add a trailing slash to the pathname when no query is present and pathname ends with a slash', () => {
+      expect.assertions(2);
+      const { href, search } = resolveNewHref('/new/path', { hash: true, current: 'http://localhost:3000/old-path/' });
+      expect(href.toString()).toBe('http://localhost:3000/old-path/#/new/path');
+      expect(search.toString()).toBe('');
+    });
+
+    it('should add a trailing slash to the search when there is a query string and pathname', () => {
+      expect.assertions(2);
+      const { href, search } = resolveNewHref('/new/path', { hash: true, current: 'http://localhost:3000/old-path?query=string' });
+      expect(href.toString()).toBe('http://localhost:3000/old-path?query=string/#/new/path');
       expect(search.toString()).toBe('');
     });
   });
