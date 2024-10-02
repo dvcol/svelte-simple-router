@@ -33,7 +33,6 @@ import {
 } from '~/models/error.model.js';
 import { Matcher, replaceTemplateParams } from '~/models/matcher.model.js';
 import { cloneRoute, toBaseRoute } from '~/models/route.model.js';
-
 import { isResolvedLocationEqual, NavigationEvent, RouterPathPriority, RouterStateConstant, toBasicRouterLocation } from '~/models/router.model.js';
 
 import { Logger, LoggerKey } from '~/utils/logger.utils.js';
@@ -736,7 +735,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    *
    * @private
    */
-  #historyWrapper(
+  async #historyWrapper(
     method: 'pushState' | 'replaceState',
     to: RouteNavigation<Name>,
     options: RouterNavigationOptions,
@@ -745,10 +744,11 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     const { state, title } = routeToHistoryState(resolved, { ...options, state: to.state });
     if (this.#listening === 'navigation') this.#internalEvent = true;
     try {
+      const routed = await this.#navigate(resolved, options);
       this.#history[method](state, title ?? '', resolved.href);
       if (title) document.title = title;
       Logger.debug(this.#log, 'State change', { method, resolved, state, title });
-      return this.#navigate(resolved, options);
+      return routed;
     } catch (error) {
       Logger.error(this.#log, 'History error', { method, resolved, state, title, error });
       if (this.#listening === 'navigation') this.#internalEvent = false;
