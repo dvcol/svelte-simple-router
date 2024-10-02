@@ -142,9 +142,10 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
 
   /**
    * If the router is listening to `popstate` (history API)  or `currententrychange` (navigation API)  events.
+   * @reactive
    * @private
    */
-  #listening: 'navigation' | 'history' | false = false;
+  #listening: 'navigation' | 'history' | false = $state(false);
 
   /**
    * Mark if the current navigation is internal for navigation listeners.
@@ -259,7 +260,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     };
   }
 
-  get options(): RouterNavigationOptions {
+  get options(): RouterNavigationOptions & Pick<RouterOptions, 'listen' | 'caseSensitive'> {
     return {
       base: this.#base,
       hash: this.#hash,
@@ -268,6 +269,8 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       metaAsState: this.#options.metaAsState,
       nameAsTitle: this.#options.nameAsTitle,
       followGuardRedirects: this.#options.followGuardRedirects,
+      caseSensitive: this.#options.caseSensitive,
+      listen: this.#listening,
     };
   }
 

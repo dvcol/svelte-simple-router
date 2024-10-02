@@ -374,7 +374,7 @@ export interface IRouter<Name extends RouteName = RouteName> {
   /**
    * Get the options used to initialize the router.
    */
-  readonly options: RouterOptions<Name>;
+  readonly options: RouterOptions<Name> & Pick<RouterOptions<Name>, 'listen' | 'caseSensitive'>;
 
   /**
    * Checks if a route with a given name exists
