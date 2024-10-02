@@ -6,11 +6,7 @@ import type { TransitionConfig } from 'svelte/transition';
 import type {
   BaseRoute,
   HistoryState,
-  LoadingListener,
-  NavigationEndListener,
-  NavigationErrorListener,
   NavigationGuard,
-  NavigationListener,
   ParsedRoute,
   ResolvedRoute,
   Route,
@@ -21,7 +17,9 @@ import type {
   RouteWildcards,
 } from '~/models/route.model.js';
 
-import { isRouteEqual } from '~/models/route.model.js';
+import { NavigationAbortedError, NavigationCancelledError } from '~/models/error.model.js';
+import { isRouteEqual, toBaseRoute } from '~/models/route.model.js';
+import { Logger } from '~/utils/index.js';
 
 export type RouterLocation<Name extends RouteName = RouteName> = {
   origin: string;
@@ -130,6 +128,112 @@ export type TransitionProps<
     wrapper: Record<string, any>;
   };
 };
+
+export type ResolvedRouteSnapshot<Name extends RouteName = RouteName> = Omit<ResolvedRoute<Name>, 'route'> & {
+  route: BaseRoute<Name>;
+};
+
+export type INavigationEventState<Name extends RouteName = RouteName> = {
+  readonly active: boolean;
+  readonly failed: boolean | unknown;
+  readonly cancelled: boolean;
+  readonly completed: boolean;
+  readonly redirected: boolean | RouteNavigation<Name>;
+};
+
+export type INavigationEvent<Name extends RouteName = RouteName> = INavigationEventState<Name> & {
+  readonly to: ResolvedRouteSnapshot<Name>;
+  readonly from: ResolvedRouterLocationSnapshot<Name>;
+  readonly uuid: string;
+};
+
+type NavigationEventStatus = keyof INavigationEventState;
+
+export class NavigationEvent<Name extends RouteName = RouteName> implements INavigationEvent<Name> {
+  readonly to: ResolvedRouteSnapshot<Name>;
+  readonly from: ResolvedRouterLocationSnapshot<Name>;
+  readonly uuid: string;
+
+  #status: NavigationEventStatus = 'active';
+  #error?: unknown;
+  #redirect?: RouteNavigation<Name>;
+
+  get active(): boolean {
+    return this.#status === 'active';
+  }
+
+  get completed(): boolean {
+    return this.#status === 'completed';
+  }
+
+  get cancelled(): boolean {
+    return this.#status === 'cancelled';
+  }
+
+  get failed(): unknown | boolean {
+    return this.#error ?? this.#status === 'failed';
+  }
+
+  get redirected(): RouteNavigation<Name> | boolean {
+    return this.#redirect ?? this.#status === 'redirected';
+  }
+
+  constructor(to: ResolvedRoute<Name>, from: ResolvedRouterLocationSnapshot<Name>) {
+    this.uuid = crypto.randomUUID();
+    this.to = { ...to, route: toBaseRoute(to.route)! };
+    this.from = from;
+  }
+
+  redirect(to: RouteNavigation<Name>): void {
+    if (!this.active) return Logger.error('Cannot redirect a navigation event that is not active', this);
+    this.#status = 'redirected';
+    this.#redirect = to;
+  }
+
+  complete(): void {
+    if (!this.active) return Logger.error('Cannot complete a navigation event that is not active', this);
+    this.#status = 'completed';
+  }
+
+  /**
+   * Cancel the current navigation event.
+   * @throws {@link NavigationCancelledError}
+   */
+  cancel(error?: unknown): void {
+    if (!this.active) return Logger.trace('Cannot cancel a navigation event that is not active', this);
+    this.#status = 'cancelled';
+    this.#error = error;
+    if (error instanceof NavigationCancelledError) throw error;
+    throw new NavigationCancelledError(this, { error });
+  }
+
+  /**
+   * Fail the current navigation event.
+   * @param error - Error to throw
+   * @throws {@link NavigationAbortedError}
+   */
+  fail(error?: unknown): void {
+    if (!this.active) return Logger.error('Cannot fail a navigation event that is not active', this);
+    this.#status = 'failed';
+    this.#error = error;
+    if (error instanceof NavigationAbortedError) throw error;
+    throw new NavigationAbortedError(this, { error });
+  }
+}
+
+export type NavigationListener<Name extends RouteName = RouteName> = (navigation: INavigationEvent<Name>) => void;
+
+export type NavigationEndListener<Name extends RouteName = RouteName> = (
+  navigation: INavigationEvent<Name>,
+  resolved: ResolvedRouterLocationSnapshot<Name>,
+) => void;
+
+export type NavigationErrorListener<Name extends RouteName = RouteName> = (
+  navigation: Error | unknown,
+  context: Partial<INavigationEvent<Name>> & { route?: BaseRoute<Name> },
+) => void;
+
+export type LoadingListener<Name extends RouteName = RouteName> = (route?: BaseRoute<Name>) => void;
 
 export type RouteContainerProps<Name extends RouteName = any> = {
   /**
@@ -350,6 +454,11 @@ export interface IRouter<Name extends RouteName = RouteName> {
    * Last navigation error that occurred.
    */
   readonly error?: unknown;
+
+  /**
+   * Current {@link INavigationEvent} if a navigation is in progress.
+   */
+  readonly routing?: INavigationEvent<Name>;
 
   /**
    * Current {@link ResolvedRoute}

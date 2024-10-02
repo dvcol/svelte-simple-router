@@ -1,5 +1,5 @@
 import type { ResolvedRoute, Route, RouteName, RouteNavigation } from '~/models/route.model.js';
-import type { ResolvedRouterLocationSnapshot } from '~/models/router.model.js';
+import type { ResolvedRouterLocationSnapshot, ResolvedRouteSnapshot } from '~/models/router.model.js';
 
 /**
  * Flags so we can combine them when checking for multiple errors. This is the internal version of
@@ -51,11 +51,15 @@ export interface NavigationFailureType<Name extends RouteName = RouteName> {
   /**
    * Route location we were navigating to
    */
-  to: RouteNavigation<Name> | ResolvedRoute<Name>;
+  to: RouteNavigation<Name> | ResolvedRoute<Name> | ResolvedRouteSnapshot<Name>;
   /**
    * Route location we were navigating from
    */
   from?: Route<Name> | ResolvedRouterLocationSnapshot<Name>;
+  /**
+   * Unique identifier of the navigation event
+   */
+  uuid?: string;
 }
 
 export interface ErrorPayload<E = unknown> {

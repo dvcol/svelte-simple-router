@@ -1,7 +1,7 @@
 import { isShallowEqual, shallowClone } from '@dvcol/common-utils/common/object';
 
 import type { IMatcher } from '~/models/matcher.model.js';
-import type { ResolvedRouterLocationSnapshot } from '~/models/router.model.js';
+import type { INavigationEvent } from '~/models/router.model.js';
 import type { AnyComponent, ComponentOrLazy } from '~/utils/svelte.utils.js';
 
 /**
@@ -218,21 +218,8 @@ export type NavigationGuardReturn<Name extends RouteName = RouteName> = void | u
  * If a guard returns an object with a `path` or `name` property, the navigation will be redirected to the provided route, if any is found and `followGuardRedirects` is enabled.
  */
 export type NavigationGuard<Name extends RouteName = RouteName> = (
-  from: ResolvedRouterLocationSnapshot<Name>,
-  to: ResolvedRoute<Name>,
+  navigation: INavigationEvent<Name>,
 ) => NavigationGuardReturn<Name> | Promise<NavigationGuardReturn<Name>>;
-
-export type NavigationListener<Name extends RouteName = RouteName> = (from: ResolvedRouterLocationSnapshot<Name>, to: ResolvedRoute<Name>) => void;
-export type NavigationEndListener<Name extends RouteName = RouteName> = (
-  from: ResolvedRouterLocationSnapshot<Name>,
-  to: ResolvedRouterLocationSnapshot<Name>,
-) => void;
-export type NavigationErrorListener<Name extends RouteName = RouteName> = (
-  error: Error | unknown,
-  context: { from?: ResolvedRouterLocationSnapshot<Name>; to?: ResolvedRoute<Name>; route?: BaseRoute<Name> },
-) => void;
-
-export type LoadingListener<Name extends RouteName = RouteName> = (route?: BaseRoute<Name>) => void;
 
 export type BaseRoute<Name extends RouteName = RouteName> = {
   /**

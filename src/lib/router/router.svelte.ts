@@ -7,21 +7,15 @@ import { raceUntil } from '@dvcol/common-utils/common/promise';
 import { computeAbsolutePath, toPathSegment } from '@dvcol/common-utils/common/string';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-import type {
-  NavigationEndListener,
-  NavigationErrorListener,
-  NavigationGuard,
-  NavigationListener,
-  ParsedRoute,
-  ResolvedRoute,
-  Route,
-  RouteName,
-  RouteNavigation,
-} from '~/models/route.model.js';
+import type { NavigationGuard, ParsedRoute, ResolvedRoute, Route, RouteName, RouteNavigation } from '~/models/route.model.js';
 
 import type {
   IHistory,
+  INavigationEvent,
   IRouter,
+  NavigationEndListener,
+  NavigationErrorListener,
+  NavigationListener,
   ResolvedRouterLocation,
   ResolvedRouterLocationSnapshot,
   RouterLocation,
@@ -39,7 +33,8 @@ import {
 } from '~/models/error.model.js';
 import { Matcher, replaceTemplateParams } from '~/models/matcher.model.js';
 import { cloneRoute, toBaseRoute } from '~/models/route.model.js';
-import { isResolvedLocationEqual, RouterPathPriority, RouterStateConstant, toBasicRouterLocation } from '~/models/router.model.js';
+
+import { isResolvedLocationEqual, NavigationEvent, RouterPathPriority, RouterStateConstant, toBasicRouterLocation } from '~/models/router.model.js';
 
 import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 import { preventNavigation, resolveNewHref, routeToHistoryState } from '~/utils/navigation.utils.js';
@@ -110,7 +105,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @reactive
    * @private
    */
-  #routing?: ReturnType<typeof crypto.randomUUID> = $state();
+  #routing?: NavigationEvent<Name> = $state();
 
   /**
    * List of navigation guards that should be executed before each navigation.
@@ -236,6 +231,15 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    */
   get error(): unknown {
     return this.#error;
+  }
+
+  /**
+   * The current routing event.
+   * This is reactive and will update when a navigation event is triggered.
+   * @reactive
+   */
+  get routing(): INavigationEvent<Name> | undefined {
+    return this.#routing;
   }
 
   /**
@@ -589,22 +593,23 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   /**
    * Execute all the navigation guards before navigating to a new route.
    *
-   * @param from - Route location to navigate from
    * @param to - Route location to navigate to
-   * @param isStillRouting - Function to check if the current promise is still running
+   * @param navigation - The current navigation event
    *
    * @private
    */
-  async #navigationGuards(from = this.snapshot, to: ResolvedRoute<Name>, isStillRouting: () => boolean): Promise<false | RouteNavigation<Name>> {
+  async #navigationGuards(to: ResolvedRoute<Name>, navigation: NavigationEvent<Name>): Promise<false | RouteNavigation<Name>> {
     let result: null | boolean | RouteNavigation<Name>;
-    result = preventNavigation(await this.#route?.beforeLeave?.(from, to), { from, to });
-    if (result || !isStillRouting()) return result;
-    result = preventNavigation(await to.route?.beforeEnter?.(from, to), { from, to });
-    if (result || !isStillRouting()) return result;
+    result = preventNavigation(await this.#route?.beforeLeave?.(navigation), navigation);
+    if (!Object.is(this.#routing, navigation)) navigation.cancel();
+    if (result) return result;
+    result = preventNavigation(await to.route?.beforeEnter?.(navigation), navigation);
+    if (!Object.is(this.#routing, navigation)) navigation.cancel();
+    if (result) return result;
     result = await raceUntil(
       Array.from(this.#beforeEachGuards).map(async guard => {
-        if (!isStillRouting()) return false;
-        return preventNavigation(await guard(from, to), { from, to });
+        if (!Object.is(this.#routing, navigation)) navigation.cancel();
+        return preventNavigation(await guard(navigation), navigation);
       }),
       (_result: boolean | RouteNavigation<Name>) => !!_result,
     ).outer;
@@ -640,29 +645,31 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     // Reset the error state
     this.#error = undefined;
 
-    // Create a new promise and store it in the routing state
-    const uuid = crypto.randomUUID();
-    this.#routing = uuid;
-    const isStillRouting = () => this.#routing === uuid;
+    // Update the routing state
+    const navigation = new NavigationEvent<Name>(to, from);
+    // Set the new navigation as the current routing event
+    this.#routing = navigation;
 
     // Broadcast the navigation start event
-    this.#onStartListeners.forEach(listener => listener(from, to));
+    this.#onStartListeners.forEach(listener => listener(navigation));
 
     try {
       // Execute navigation guards
-      const blockOrRedirect = await this.#navigationGuards(from, to, isStillRouting);
+      const blockOrRedirect = await this.#navigationGuards(to, navigation);
       // If the navigation was cancelled return the new promise
-      if (!isStillRouting()) throw new NavigationCancelledError({ from, to });
+      if (!Object.is(this.#routing, navigation)) navigation.cancel();
 
       // If a guard returns a redirect, navigate to the new location and replace state
       if (typeof blockOrRedirect === 'object' && _options.followGuardRedirects) {
-        Logger.debug(this.#log, 'Guard redirect', { from, to, redirect: blockOrRedirect });
+        Logger.debug(this.#log, 'Guard redirect', { ...navigation, redirect: blockOrRedirect });
+        navigation.redirect(blockOrRedirect);
         return this.replace(blockOrRedirect, { ..._options, followGuardRedirects: false });
       }
 
       // If the route is a redirect, navigate to the new location and replace state
       if (route?.redirect) {
-        Logger.debug(this.#log, 'Route redirect', { from, to, redirect: route.redirect });
+        Logger.debug(this.#log, 'Route redirect', { ...navigation, redirect: route.redirect });
+        navigation.redirect(route.redirect);
         return this.replace(route.redirect, _options);
       }
 
@@ -670,24 +677,29 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       this.#route = route;
       this.#location = _location;
 
-      Logger.debug(this.#log, 'Navigated to', to?.name || to?.path, { from, to });
+      Logger.debug(this.#log, 'Navigated to', to?.name || to?.path, navigation);
+      navigation.complete();
       return this.snapshot;
     } catch (error) {
+      // If the navigation was already cancelled, rethrow the error
+      if (error instanceof NavigationCancelledError) throw error;
       // If the navigation was cancelled throw cancellation error
-      if (!isStillRouting()) throw new NavigationCancelledError({ from, to }, { error });
+      if (!Object.is(this.#routing, navigation)) navigation.cancel(error);
       this.#error = error;
 
       // Broadcast the navigation error event
-      this.#onErrorListeners.forEach(listener => listener(error, { from, to }));
-      Logger.error(this.#log, 'Navigation error', { from, to, error });
+      this.#onErrorListeners.forEach(listener => listener(error, navigation));
+      Logger.error(this.#log, 'Navigation error', { ...navigation, error });
+      navigation.fail(error);
       throw error;
     } finally {
-      // Only clear the routing state if the promise is the current one
-      if (isStillRouting()) {
+      console.info('finally', Object.is(this.#routing, navigation), { routing: this.#routing, navigation });
+      // Only clear the routing state if the navigation is still active
+      if (Object.is(this.#routing, navigation)) {
         this.#routing = undefined;
 
         // Broadcast the navigation end event
-        this.#onEndListeners.forEach(listener => listener(from, this.snapshot));
+        this.#onEndListeners.forEach(listener => listener(navigation, this.snapshot));
       }
     }
   }

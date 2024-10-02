@@ -7,10 +7,16 @@ export class Logger {
 
   static colorize = ProxyLogger.colorize;
 
-  static logLevel = this.logger.logLevel;
+  static setLogLevel(logLevel: LogLevel) {
+    this.logger.logLevel = logLevel;
+  }
 
   static get timestamp() {
     return ProxyLogger.timestamp();
+  }
+
+  static get trace() {
+    return this.logger.trace;
   }
 
   static get debug() {

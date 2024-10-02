@@ -22,6 +22,7 @@
   window[RouterDebuggerConstant] = { ...window[RouterDebuggerConstant], [router.id]: router };
 
   const options = $derived(router.options);
+  const routing = $derived(router.routing);
 
   onDestroy(() => {
     Logger.info(`[${LoggerKey} Debugger]`, 'router detached from "window.router"', router);
@@ -32,6 +33,10 @@
 <div class="debug">
   <h3>Router options - {router?.id}</h3>
   <pre>{JSON.stringify(options, null, 2)}</pre>
+  {#if routing}
+    <h3>Routing</h3>
+    <pre>from '{routing.from?.location?.name ?? routing?.from?.location?.path ?? '-'}' to '{routing.to?.name ?? routing?.to?.path ?? '-'}'</pre>
+  {/if}
 </div>
 
 <style>
