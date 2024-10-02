@@ -1,23 +1,17 @@
 <script lang="ts">
   import { LogLevel } from '@dvcol/common-utils';
-  import { tick } from 'svelte';
 
-  import ErrorComponent from './Error.svelte';
-  import GoodbyeComponent from './Goodbye.svelte';
-  import HelloComponent from './Hello.svelte';
+  import ErrorComponent from './components/Error.svelte';
+  import GoodbyeComponent from './components/Goodbye.svelte';
+  import HelloComponent from './components/Hello.svelte';
+  import Loading from './components/Loading.svelte';
 
-  import Loading from './Loading.svelte';
-
-  import PathSelector from './PathSelector.svelte';
+  import DefaultRouter from './routers/DefaultRouter.svelte';
+  import NestedRouters from './routers/NestedRouters.svelte';
 
   import type { RouterOptions } from '~/models/router.model.js';
 
-  import RouterContext from '~/components/RouterContext.svelte';
-  import RouterView from '~/components/RouterView.svelte';
-  import RouteDebugger from '~/components/debug/RouteDebugger.svelte';
-  import RouterDebugger from '~/components/debug/RouterDebugger.svelte';
   import { Logger } from '~/utils/logger.utils';
-  import { transition } from '~/utils/transition.utils';
 
   const RouteName = {
     Hello: 'Hello',
@@ -34,11 +28,14 @@
     Redirect: 'Redirect',
     BeforeRedirect: 'BeforeRedirect',
     BeforeEnterError: 'BeforeEnterError',
+    BeforeLeaveError: 'BeforeLeaveError',
     SlowRoute: 'SlowRoute',
     Any: 'Any',
   } as const;
 
   type Routes = (typeof RouteName)[keyof typeof RouteName] | string;
+
+  let beforeChecked = false;
 
   const routes: RouterOptions<Routes>['routes'] = [
     {
@@ -76,7 +73,7 @@
     {
       name: RouteName.Async,
       path: '/async',
-      component: () => import('./Async.svelte'),
+      component: () => import('./components/Async.svelte'),
       loading: Loading,
       error: ErrorComponent,
       props: {
@@ -195,6 +192,9 @@
       props: {
         title: RouteName.BeforeRedirect,
       },
+      meta: {
+        redirect: RouteName.Goodbye,
+      },
     },
     {
       name: RouteName.BeforeEnterError,
@@ -205,6 +205,22 @@
       },
       props: {
         title: RouteName.BeforeEnterError,
+      },
+    },
+    {
+      name: RouteName.BeforeLeaveError,
+      path: '/before-leave',
+      component: GoodbyeComponent,
+      beforeLeave: () => {
+        if (beforeChecked) {
+          beforeChecked = false;
+          return true;
+        }
+        beforeChecked = true;
+        throw new Error('Before leave Error');
+      },
+      props: {
+        title: RouteName.BeforeLeaveError,
       },
     },
     {
@@ -228,240 +244,36 @@
     },
   ];
 
-  const options: RouterOptions<Routes> = $state({
-    listen: 'history',
-    base: '/svelte-simple-router',
-    hash: true,
-    strict: false,
-    failOnNotFound: false,
-    metaAsState: false,
-    nameAsTitle: false,
-    followGuardRedirects: true,
-    caseSensitive: false,
-    beforeEach: (from, to) => {
-      console.info('Option before each', { from, to });
-    },
-    onStart: (from, to) => {
-      console.info('Option on start', { from, to });
-    },
-    onEnd: (from, to) => {
-      console.info('Option on end', { from, to });
-    },
-    onError: (err, { from, to, route }) => {
-      console.error('Option on error', { err, from, to, route });
-    },
-    routes,
-  });
-
-  const configs = $derived(Object.entries(options).filter(([_, v]) => typeof v === 'string' || typeof v === 'boolean')) as [
-    keyof RouterOptions<Routes>,
-    string | boolean,
-  ][];
-
-  let stripQuery = $state(false);
-  let stripHash = $state(false);
-  let stripTrailingHash = $state(false);
-  let updateOnRouteChange = $state(false);
-
-  let input = $state(`${options?.base ?? ''}${options?.hash ? '/#' : ''}/hello`);
-  const onInputButton = () => {
-    console.info('onInputButton', input);
-    window.history.pushState({}, '', window.location.origin + input);
-  };
-
-  let mounted = $state(true);
-  const refresh = async () => {
-    mounted = false;
-    await tick();
-    mounted = true;
-  };
-
-  if (import.meta.env.DEV) Logger.logLevel = LogLevel.Debug;
+  if (import.meta.env.DEV) Logger.setLogLevel(LogLevel.Debug);
 </script>
 
-<div class="row">
-  <div class="column">
-    <h3>Options</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>Key</th>
-          <th>Value</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each configs as [key, value]}
-          <tr>
-            <td>{key}</td>
-            <td>
-              {#if key === 'base'}
-                <input type="text" bind:value={options[key]} />
-              {:else if key === 'listen'}
-                <select bind:value={options[key]}>
-                  <option value={'history'}>History</option>
-                  <option value={'navigation'}>Navigation</option>
-                  <option value={true}>True</option>
-                  <option value={false}>False</option>
-                </select>
-              {:else if typeof value === 'boolean'}
-                <input type="checkbox" bind:checked={options[key]} />
-              {/if}
-            </td>
-          </tr>
-        {/each}
-      </tbody>
-    </table>
-    <div>
-      <button onclick={refresh}>Refresh router</button>
-    </div>
-  </div>
-
-  <div class="column">
-    <h3>Push state</h3>
-    <div class="row">
-      <label for="stripQuery">Strip Query</label>
-      <input id="stripQuery" type="checkbox" bind:checked={stripQuery} />
-    </div>
-    <div class="row">
-      <label for="stripHash">Strip Hash</label>
-      <input id="stripHash" type="checkbox" bind:checked={stripHash} />
-    </div>
-    <div class="row">
-      <label for="stripTrailingHash">Strip Trailing Hash</label>
-      <input id="stripTrailingHash" type="checkbox" bind:checked={stripTrailingHash} />
-    </div>
-
-    <div class="row">
-      <label for="input">External Push State</label>
-      <input id="input" type="text" bind:value={input} />
-      <button onclick={onInputButton}>Go</button>
-    </div>
-  </div>
+<div class="column">
+  <DefaultRouter {routes} />
+  <NestedRouters {routes} />
 </div>
 
-{#if mounted}
-  <div class="column">
-    <div class="row">
-      <RouterView
-        options={{ ...options, listen: false }}
-        onLoading={_route => console.warn('View loading', _route)}
-        onLoaded={_route => console.info('View loaded', _route)}
-        onError={(err, { route: _route }) => console.error('View load error', { err, route: _route })}
-        onStart={(from, to) => console.info('View start', { from, to })}
-        onEnd={(from, to) => console.info('View end', { from, to })}
-        beforeEach={(from, to) => console.info('View before each', { from, to })}
-        transition={{
-          ...transition,
-          updateOnRouteChange,
-          props: {
-            container: {
-              class: 'content',
-            },
-          },
-        }}
-      >
-        <div class="column">
-          <h2>Independent Router</h2>
-
-          <PathSelector {stripQuery} {stripHash} {stripTrailingHash} />
-          <div class="row update">
-            <label for="update-on-route-change">Update transition on route change</label>
-            <input id="update-on-route-change" type="checkbox" bind:checked={updateOnRouteChange} />
-          </div>
-        </div>
-
-        <div class="column debuggers">
-          <RouterDebugger />
-          <RouteDebugger />
-        </div>
-
-        {#snippet loading()}
-          <p>Default Loading...</p>
-        {/snippet}
-
-        {#snippet error(err)}
-          <h1>Default Error</h1>
-          <p class="error">Default Error: {err}</p>
-        {/snippet}
-      </RouterView>
-    </div>
-
-    <div class="row">
-      <RouterContext {options}>
-        <div class="column">
-          <h2>Nested Router</h2>
-          <PathSelector {stripQuery} {stripHash} {stripTrailingHash} />
-        </div>
-
-        <div class="column debuggers">
-          <RouterDebugger />
-          <RouteDebugger />
-        </div>
-
-        <div class="content">
-          <RouterView {options}>
-            <h2>View default</h2>
-
-            {#snippet loading()}
-              <p>Default Loading...</p>
-            {/snippet}
-
-            {#snippet error(err)}
-              <h1>Default Error</h1>
-              <p class="error">Default Error: {err}</p>
-            {/snippet}
-          </RouterView>
-
-          <RouterView {options} name="Nested">
-            <h2>View nested</h2>
-          </RouterView>
-        </div>
-      </RouterContext>
-    </div>
-  </div>
-{/if}
-
-<style lang="scss" global>
-  .row {
-    display: flex;
-    flex: 1 1 auto;
-    flex-wrap: wrap;
-    gap: 1rem;
-  }
-
-  .update {
-    padding: 0 1rem;
-  }
-
-  .column {
-    gap: 1rem;
-    margin: auto;
-  }
-
-  .content,
+<style lang="scss">
   .column {
     display: flex;
     flex: 0 0 auto;
     flex-direction: column;
+    gap: 1rem;
+    margin: auto;
     padding: 1rem;
     border-radius: 0.5rem;
   }
 
-  .debuggers {
-    width: 30rem;
-  }
-
-  .content {
+  // stylelint-disable-next-line selector-pseudo-class-no-unknown
+  :global(.content) {
+    display: flex;
     flex: 1 1 auto;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    min-width: 30vw;
+    min-height: 30vh;
     padding: 1rem 2rem;
     border: 2px solid;
     border-radius: 0.5rem;
-  }
-
-  .error {
-    max-width: 30rem;
-    color: orangered;
   }
 </style>
