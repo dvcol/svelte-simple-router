@@ -692,7 +692,6 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       navigation.fail(error);
       throw error;
     } finally {
-      console.info('finally', Object.is(this.#routing, navigation), { routing: this.#routing, navigation });
       // Only clear the routing state if the navigation is still active
       if (Object.is(this.#routing, navigation)) {
         this.#routing = undefined;
