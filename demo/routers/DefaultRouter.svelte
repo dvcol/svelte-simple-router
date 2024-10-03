@@ -40,8 +40,8 @@
 </script>
 
 {#if mounted}
-  <h2>Simple Router</h2>
-  <div class="row">
+  <h1>Simple Router</h1>
+  <div class="container row">
     <div class="column">
       <OptionSelector bind:options bind:stripQuery bind:stripHash bind:stripTrailingHash />
       <button onclick={refresh}>Refresh router</button>
@@ -58,10 +58,10 @@
         },
       }}
     >
-      <div class="column">
+      <div class="column selector">
         <PathSelector {stripQuery} {stripHash} {stripTrailingHash} />
         <div class="row update">
-          <label for="update-on-route-change">Update transition on route change</label>
+          <label for="update-on-route-change">Update transition on any route change</label>
           <input id="update-on-route-change" type="checkbox" bind:checked={updateOnRouteChange} />
         </div>
       </div>
@@ -84,6 +84,12 @@
 {/if}
 
 <style lang="scss">
+  .container {
+    padding: 0 1rem 1rem;
+    background-color: rgba(0 0 0 / 20%);
+    border-radius: 0.5rem;
+  }
+
   .row {
     display: flex;
     flex: 1 1 auto;
@@ -100,13 +106,18 @@
     flex: 0 0 auto;
     flex-direction: column;
     gap: 1rem;
+    align-items: center;
     margin: auto;
     padding: 1rem;
     border-radius: 0.5rem;
   }
 
+  .selector {
+    flex: 1 1 40rem;
+  }
+
   .debuggers {
-    width: 30rem;
+    flex: 1 1 20rem;
   }
 
   .error {

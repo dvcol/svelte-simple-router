@@ -51,56 +51,60 @@
 </script>
 
 {#if mounted}
-  <div>
-    <h2>Nested Router</h2>
-    <div class="row">
-      <RouterContext {options}>
-        <div class="column">
-          <OptionSelector bind:options bind:stripQuery bind:stripHash bind:stripTrailingHash />
-          <button onclick={refresh}>Refresh router</button>
-        </div>
+  <h1>Nested Router</h1>
+  <div class="container row">
+    <RouterContext {options}>
+      <div class="column">
+        <OptionSelector bind:options bind:stripQuery bind:stripHash bind:stripTrailingHash />
+        <button onclick={refresh}>Refresh router</button>
+      </div>
 
-        <div class="column">
-          <PathSelector {stripQuery} {stripHash} {stripTrailingHash} />
-        </div>
+      <div class="column selector">
+        <PathSelector {stripQuery} {stripHash} {stripTrailingHash} />
+      </div>
 
-        <div class="column debuggers">
-          <RouterDebugger />
-          <RouteDebugger />
-        </div>
+      <div class="column debuggers">
+        <RouterDebugger />
+        <RouteDebugger />
+      </div>
 
-        <div class="content">
-          <RouterView
-            {options}
-            onLoading={_route => console.warn('View loading', _route)}
-            onLoaded={_route => console.info('View loaded', _route)}
-            onError={(err, { route: _route }) => console.error('View load error', { err, route: _route })}
-            onStart={navigation => console.info('View start', navigation)}
-            onEnd={(navigation, resolved) => console.info('View end', { navigation, resolved })}
-            beforeEach={navigation => console.info('View before each', navigation)}
-          >
-            <h2>View default</h2>
+      <div class="content">
+        <RouterView
+          {options}
+          onLoading={_route => console.warn('View loading', _route)}
+          onLoaded={_route => console.info('View loaded', _route)}
+          onError={(err, { route: _route }) => console.error('View load error', { err, route: _route })}
+          onStart={navigation => console.info('View start', navigation)}
+          onEnd={(navigation, resolved) => console.info('View end', { navigation, resolved })}
+          beforeEach={navigation => console.info('View before each', navigation)}
+        >
+          <h2>View default</h2>
 
-            {#snippet loading()}
-              <p>Default Loading...</p>
-            {/snippet}
+          {#snippet loading()}
+            <p>Default Loading...</p>
+          {/snippet}
 
-            {#snippet error(err)}
-              <h1>Default Error</h1>
-              <p class="error">Default Error: {err}</p>
-            {/snippet}
-          </RouterView>
+          {#snippet error(err)}
+            <h1>Default Error</h1>
+            <p class="error">Default Error: {err}</p>
+          {/snippet}
+        </RouterView>
 
-          <RouterView {options} name="Nested">
-            <h2>View nested</h2>
-          </RouterView>
-        </div>
-      </RouterContext>
-    </div>
+        <RouterView {options} name="Nested">
+          <h2>View nested</h2>
+        </RouterView>
+      </div>
+    </RouterContext>
   </div>
 {/if}
 
 <style lang="scss">
+  .container {
+    padding: 0 1rem 1rem;
+    background-color: rgba(0 0 0 / 20%);
+    border-radius: 0.5rem;
+  }
+
   .row {
     display: flex;
     flex: 1 1 auto;
@@ -113,13 +117,18 @@
     flex: 0 0 auto;
     flex-direction: column;
     gap: 1rem;
+    align-items: center;
     margin: auto;
     padding: 1rem;
     border-radius: 0.5rem;
   }
 
+  .selector {
+    flex: 1 1 40rem;
+  }
+
   .debuggers {
-    width: 30rem;
+    flex: 1 1 20rem;
   }
 
   .error {

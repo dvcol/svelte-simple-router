@@ -39,7 +39,7 @@
   };
 </script>
 
-<div id="route-selector">
+<div id="route-selector" class="container">
   <h3>Routes</h3>
   <table class="routes">
     <thead>
@@ -92,7 +92,6 @@
   }
 
   .routes {
-    max-width: 40rem;
     padding: 1rem;
     background-color: color-mix(in srgb, transparent, black 20%);
     border-radius: 0.5rem;

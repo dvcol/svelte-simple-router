@@ -255,9 +255,10 @@
 <style lang="scss">
   .column {
     display: flex;
-    flex: 0 0 auto;
+    flex: 1 1 auto;
     flex-direction: column;
     gap: 1rem;
+    align-items: center;
     margin: auto;
     padding: 1rem;
     border-radius: 0.5rem;
@@ -266,7 +267,7 @@
   // stylelint-disable-next-line selector-pseudo-class-no-unknown
   :global(.content) {
     display: flex;
-    flex: 1 1 auto;
+    flex: 1 1 20rem;
     flex-direction: column;
     align-items: center;
     justify-content: center;
