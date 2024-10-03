@@ -19,6 +19,7 @@ import type {
 
 import { NavigationAbortedError, NavigationCancelledError } from '~/models/error.model.js';
 import { isRouteEqual, toBaseRoute } from '~/models/route.model.js';
+
 import { Logger } from '~/utils/index.js';
 
 export type RouterLocation<Name extends RouteName = RouteName> = {
@@ -444,6 +445,29 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
   onError?: NavigationErrorListener<Name>;
 } & RouterNavigationOptions;
 
+/**
+ * Snapshot of the router options.
+ */
+export type RouterOptionsSnapshot<Name extends RouteName = RouteName> = RouterNavigationOptions &
+  Pick<RouterOptions<Name>, 'listen' | 'caseSensitive'>;
+
+/**
+ * Default options to initialize a {@link Router} instance.
+ */
+export const defaultOptions: Omit<RouterOptions<any>, 'history' | 'location'> & Required<Pick<RouterOptions<any>, 'history' | 'location'>> = {
+  history: globalThis?.history,
+  location: globalThis?.location,
+  listen: 'history',
+  priority: RouterPathPriority,
+  caseSensitive: false,
+  hash: false,
+  strict: false,
+  failOnNotFound: false,
+  metaAsState: false,
+  nameAsTitle: false,
+  followGuardRedirects: true,
+};
+
 export interface IRouter<Name extends RouteName = RouteName> {
   /**
    * Unique identifier of the router instance.
@@ -483,7 +507,7 @@ export interface IRouter<Name extends RouteName = RouteName> {
   /**
    * Get the options used to initialize the router.
    */
-  readonly options: RouterOptions<Name> & Pick<RouterOptions<Name>, 'listen' | 'caseSensitive'>;
+  readonly options: RouterOptionsSnapshot<Name>;
 
   /**
    * Checks if a route with a given name exists
@@ -500,11 +524,11 @@ export interface IRouter<Name extends RouteName = RouteName> {
   hasRoutePath(path: Route<Name>['path']): boolean;
 
   /**
-   * Checks if a route with a given name exists
+   * Checks if a route with a given name or path exists
    *
-   * @param nameOrPath - Name or path of the route to check
+   * @param route - Partial route with name or path
    */
-  hasRoute(nameOrPath: Name | Route<Name>['path']): boolean;
+  hasRoute(route: Pick<Route<Name>, 'name' | 'path'>): boolean;
 
   /**
    * Add a new {@link Route} to the router.
@@ -529,10 +553,9 @@ export interface IRouter<Name extends RouteName = RouteName> {
   /**
    * Remove an existing route by its name.
    *
-   * @param name - Name of the route to remove
-   * @param path - Path of the route to remove
+   * @param route - Partial route with name or path
    */
-  removeRoute({ path, name }: { name: Name; path?: Route<Name>['path'] } | { name?: Name; path: Route<Name>['path'] }): boolean;
+  removeRoute(route: Pick<Route<Name>, 'name' | 'path'>): boolean;
 
   /**
    * Remove multiple routes by their name or path.

@@ -138,7 +138,7 @@ export class RouterConfigurationError<E = unknown> extends Error {
  */
 export class RouterNameConflictError<Name extends RouteName = RouteName> extends RouterConfigurationError<Name> {
   declare readonly type: ErrorTypes.ROUTER_CONFIG_NAME_CONFLICT;
-  constructor(name: Name, message = `Route with name "${String(name)}" already exists`) {
+  constructor(name: Name, message = `A route with the name "${String(name)}" already exists`) {
     super(ErrorTypes.ROUTER_CONFIG_NAME_CONFLICT, { message, error: name });
   }
 }
@@ -148,7 +148,7 @@ export class RouterNameConflictError<Name extends RouteName = RouteName> extends
  */
 export class RouterPathConflictError<Path extends Route['path'] = string> extends RouterConfigurationError<Path> {
   declare readonly type: ErrorTypes.ROUTER_CONFIG_PATH_CONFLICT;
-  constructor(path: Path, message = `Route with path "${path}" already exists`) {
+  constructor(path: Path, message = `A route with the path "${path}" already exists`) {
     super(ErrorTypes.ROUTER_CONFIG_PATH_CONFLICT, { message, error: path });
   }
 }

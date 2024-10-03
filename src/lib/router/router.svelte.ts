@@ -21,6 +21,7 @@ import type {
   RouterLocation,
   RouterNavigationOptions,
   RouterOptions,
+  RouterOptionsSnapshot,
   RouterStateLocation,
 } from '~/models/router.model.js';
 
@@ -33,7 +34,14 @@ import {
 } from '~/models/error.model.js';
 import { Matcher, replaceTemplateParams } from '~/models/matcher.model.js';
 import { cloneRoute, toBaseRoute } from '~/models/route.model.js';
-import { isResolvedLocationEqual, NavigationEvent, RouterPathPriority, RouterStateConstant, toBasicRouterLocation } from '~/models/router.model.js';
+import {
+  defaultOptions,
+  isResolvedLocationEqual,
+  NavigationEvent,
+  RouterPathPriority,
+  RouterStateConstant,
+  toBasicRouterLocation,
+} from '~/models/router.model.js';
 
 import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 import { preventNavigation, resolveNewHref, routeToHistoryState } from '~/utils/navigation.utils.js';
@@ -263,7 +271,11 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     };
   }
 
-  get options(): RouterNavigationOptions & Pick<RouterOptions, 'listen' | 'caseSensitive'> {
+  /**
+   * Router options snapshot.
+   * This snapshot is not reactive but it's properties might be (e.g. `listen`).
+   */
+  get options(): RouterOptionsSnapshot<Name> {
     return {
       base: this.#base,
       hash: this.#hash,
@@ -305,17 +317,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
 
   constructor(options: RouterOptions<Name> = {}) {
     this.#options = {
-      history: globalThis?.history,
-      location: globalThis?.location,
-      listen: 'history',
-      priority: RouterPathPriority,
-      caseSensitive: false,
-      hash: false,
-      strict: false,
-      failOnNotFound: false,
-      metaAsState: false,
-      nameAsTitle: false,
-      followGuardRedirects: true,
+      ...defaultOptions,
       ...options,
       base: toPathSegment(options.base),
     };
@@ -333,7 +335,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     if (this.#options.onError) this.#onErrorListeners.add(this.#options.onError);
     if (this.#options.listen) this.listen();
 
-    Logger.debug(this.#log, 'Router initialized', { options: this.#options });
+    Logger.debug(this.#log, 'Router initialized', { options: this.options });
   }
 
   listen() {
@@ -373,12 +375,13 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   }
 
   /**
-   * Checks if a route with a given name exists
+   * Checks if a route with a given name or path exists
    *
-   * @param nameOrPath - Name or path of the route to check
+   * @param route - Partial route with name or path
    */
-  hasRoute(nameOrPath: Name | Route<Name>['path']): boolean {
-    return this.hasRouteName(nameOrPath as Name) || this.hasRoutePath(nameOrPath as Route<Name>['path']);
+  hasRoute({ path, name }: Pick<Route<Name>, 'name' | 'path'>): boolean {
+    if (name && this.hasRouteName(name)) return true;
+    return !!(path && this.hasRoutePath(path));
   }
 
   /**
@@ -424,10 +427,9 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   /**
    * Remove an existing route by its name.
    *
-   * @param name - Name of the route to remove
-   * @param path - Path of the route to remove
+   * @param route - Partial route with name or path
    */
-  removeRoute({ path, name }: { name: Name; path?: Route<Name>['path'] } | { name?: Name; path: Route<Name>['path'] }): boolean {
+  removeRoute({ path, name }: Pick<Route<Name>, 'name' | 'path'>): boolean {
     //  If no name or path is provided, return false
     if (!name && !path) return false;
 

@@ -1,84 +1,868 @@
-import { describe, it } from 'vitest';
+import { wait } from '@dvcol/common-utils/common/promise';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+
+import type { ParsingRelativePathError } from '@dvcol/common-utils/common/error';
+
+import type { Route } from '~/models/route.model.js';
+
+import { ErrorTypes, type NavigationNotFoundError } from '~/models/error.model.js';
+
+import { NavigationEvent } from '~/models/router.model.js';
+
+import { Router } from '~/router/router.svelte.js';
 
 describe('router', () => {
-  describe('addRoute', () => {
-    it.todo('should add a new route to the router');
-    it.todo('should add a new route to the router with no name');
-    it.todo('should add a new route to the router with children');
+  const HomeRoute: Route = {
+    name: 'home',
+    path: '/home',
+  };
 
-    it.todo('should throw a RouterNameConflictError if a route with the same name already exists');
-    it.todo('should throw a RouterPathConflictError if a route with the same path already exists');
+  const PathRoute: Route = {
+    name: 'path',
+    path: '/path',
+  };
+
+  const OtherRoute: Route = {
+    name: 'other',
+    path: '/other',
+  };
+
+  const ChildRoute: Route = {
+    name: 'child',
+    path: '/child',
+  };
+
+  const OtherChildRoute: Route = {
+    name: 'other-child',
+    path: '/other-child',
+  };
+
+  const ParentRoute: Route = {
+    name: 'parent',
+    path: '/parent',
+    children: [ChildRoute, OtherChildRoute],
+  };
+
+  const ParamRoute: Route = {
+    name: 'param',
+    path: '/param/:id/user/:firstName:?/:lastName',
+    params: {
+      id: 1,
+      firstName: 'John',
+      lastName: 'Doe',
+    },
+  };
+
+  const QueryRoute: Route = {
+    name: 'query',
+    path: '/query',
+    query: {
+      page: 1,
+      limit: 10,
+    },
+  };
+
+  const ParamQueryRoute: Route = {
+    name: 'param-query',
+    path: '/param-query/:id/user/:firstName/:lastName',
+    params: {
+      id: 1,
+      firstName: 'John',
+      lastName: 'Doe',
+    },
+    query: {
+      page: 1,
+      limit: 10,
+    },
+  };
+
+  const RedirectRoute: Route = {
+    name: 'redirect',
+    path: '/redirect',
+    redirect: {
+      name: PathRoute.name,
+    },
+  };
+
+  const WildcardRoute: Route = {
+    name: 'wildcard',
+    path: '/wildcard/*',
+    redirect: {
+      name: PathRoute.name,
+    },
+  };
+
+  const WildcardSegmentRoute: Route = {
+    name: 'wildcard-segment',
+    path: '/*/segment',
+  };
+
+  const routes: Route[] = [
+    HomeRoute,
+    PathRoute,
+    OtherRoute,
+    ParentRoute,
+    ParamRoute,
+    QueryRoute,
+    ParamQueryRoute,
+    RedirectRoute,
+    WildcardRoute,
+    WildcardSegmentRoute,
+  ];
+
+  let router: Router;
+
+  afterEach(() => {
+    router?.destroy();
+    window.location.hash = '';
+    window.history.replaceState(null, '', '/');
+    vi.clearAllMocks();
+  });
+
+  describe('constructor', () => {
+    it('should create a new router with the provided routes', () => {
+      expect.assertions(routes.length * 4);
+      router = new Router({ routes });
+      routes.forEach(route => {
+        expect(router.routes.filter((r: Route) => r.name === route.name && r.path === route.path)).toHaveLength(1);
+        expect(router.hasRoute(route)).toBeTruthy();
+        expect(router.hasRouteName(route.name)).toBeTruthy();
+        expect(router.hasRoutePath(route.path)).toBeTruthy();
+      });
+    });
+
+    it('should create a new router with the default options', async () => {
+      expect.assertions(10);
+      router = new Router({ routes });
+      // Flush the microtask queue to ensure the router is initialized
+      await wait();
+      expect(router.options.base).toBe('');
+      expect(router.options.hash).toBeFalsy();
+      expect(router.options.strict).toBeFalsy();
+      expect(router.options.failOnNotFound).toBeFalsy();
+      expect(router.options.failOnNotFound).toBeFalsy();
+      expect(router.options.metaAsState).toBeFalsy();
+      expect(router.options.nameAsTitle).toBeFalsy();
+      expect(router.options.followGuardRedirects).toBeTruthy();
+      expect(router.options.caseSensitive).toBeFalsy();
+      expect(router.options.listen).toBe('history');
+    });
+
+    it('should create a new router with the provided options', async () => {
+      expect.assertions(10);
+      router = new Router({
+        routes,
+        base: '/base',
+        hash: true,
+        strict: true,
+        failOnNotFound: true,
+        metaAsState: true,
+        nameAsTitle: true,
+        followGuardRedirects: false,
+        caseSensitive: true,
+        listen: false,
+      });
+      // Flush the microtask queue to ensure the router is initialized
+      await wait();
+      expect(router.options.base).toBe('/base');
+      expect(router.options.hash).toBeTruthy();
+      expect(router.options.strict).toBeTruthy();
+      expect(router.options.failOnNotFound).toBeTruthy();
+      expect(router.options.failOnNotFound).toBeTruthy();
+      expect(router.options.metaAsState).toBeTruthy();
+      expect(router.options.nameAsTitle).toBeTruthy();
+      expect(router.options.followGuardRedirects).toBeFalsy();
+      expect(router.options.caseSensitive).toBeTruthy();
+      expect(router.options.listen).toBeFalsy();
+    });
+  });
+
+  describe('addRoute', () => {
+    const NewRoute: Route = {
+      name: 'new',
+      path: '/new',
+    };
+
+    const NewChildRoute: Route = {
+      name: 'new-child',
+      path: '/new-child',
+    };
+
+    beforeEach(async () => {
+      router = new Router({ routes });
+      await wait();
+    });
+
+    it('should add a new route to the router', () => {
+      expect.assertions(2);
+
+      expect(router.hasRoute(NewRoute)).toBeFalsy();
+
+      router.addRoute(NewRoute);
+
+      expect(router.hasRoute(NewRoute)).toBeTruthy();
+    });
+
+    it('should add a new route to the router with no name', () => {
+      expect.assertions(2);
+
+      expect(router.hasRoute(NewRoute)).toBeFalsy();
+
+      router.addRoute({ ...NewRoute, name: undefined });
+
+      expect(router.hasRoute(NewRoute)).toBeTruthy();
+    });
+
+    it('should add a new route to the router with children', () => {
+      expect.assertions(4);
+
+      expect(router.hasRoute(NewRoute)).toBeFalsy();
+      expect(router.hasRoute(NewChildRoute)).toBeFalsy();
+
+      router.addRoute({ ...NewRoute, children: [NewChildRoute] });
+
+      expect(router.hasRoute(NewRoute)).toBeTruthy();
+      expect(router.hasRoute(NewChildRoute)).toBeTruthy();
+    });
+
+    it('should add multiple routes to the router', () => {
+      expect.assertions(4);
+
+      expect(router.hasRoute(NewRoute)).toBeFalsy();
+      expect(router.hasRoute(NewChildRoute)).toBeFalsy();
+
+      router.addRoutes([NewRoute, NewChildRoute]);
+
+      expect(router.hasRoute(NewRoute)).toBeTruthy();
+      expect(router.hasRoute(NewChildRoute)).toBeTruthy();
+    });
+
+    it('should throw a RouterNameConflictError if a route with the same name already exists', () => {
+      expect.assertions(1);
+
+      expect(() => router.addRoute(OtherRoute)).toThrow(`A route with the name "${OtherRoute.name}" already exists`);
+    });
+
+    it('should throw a RouterPathConflictError if a route with the same path already exists', () => {
+      expect.assertions(1);
+
+      expect(() => router.addRoute({ ...OtherRoute, name: undefined })).toThrow(`A route with the path "${OtherRoute.path}" already exists`);
+    });
   });
 
   describe('removeRoute', () => {
-    it.todo('should remove an existing route by its name');
-    it.todo('should remove an existing route by its path');
-    it.todo('should return false if the route does not exist');
-    it.todo('should return false if no name or path is provided');
-    it.todo('should throw a RouterNamePathMismatchError if the path provided and registered do not match');
-    it.todo('should throw a RouterNamePathMismatchError if the name provided and registered do not match');
+    beforeEach(async () => {
+      router = new Router({ routes });
+      await wait();
+    });
+
+    it('should remove an existing route by its name', () => {
+      expect.assertions(3);
+
+      expect(router.hasRoute(OtherRoute)).toBeTruthy();
+
+      expect(router.removeRoute(OtherRoute)).toBeTruthy();
+
+      expect(router.hasRoute(OtherRoute)).toBeFalsy();
+    });
+
+    it('should remove an existing route by its path', () => {
+      expect.assertions(3);
+
+      expect(router.hasRoute(OtherRoute)).toBeTruthy();
+
+      expect(router.removeRoute({ ...OtherRoute, name: undefined })).toBeTruthy();
+
+      expect(router.hasRoute(OtherRoute)).toBeFalsy();
+    });
+
+    it('should remove multiple routes', () => {
+      expect.assertions(5);
+
+      expect(router.hasRoute(PathRoute)).toBeTruthy();
+      expect(router.hasRoute(OtherRoute)).toBeTruthy();
+
+      expect(router.removeRoutes([PathRoute, OtherRoute])).toHaveLength(2);
+
+      expect(router.hasRoute(PathRoute)).toBeFalsy();
+      expect(router.hasRoute(OtherRoute)).toBeFalsy();
+    });
+
+    it('should return false if the route does not exist', () => {
+      expect.assertions(2);
+
+      const NotFound: Route = { name: 'not-found', path: '/not-found' };
+
+      expect(router.hasRoute(NotFound)).toBeFalsy();
+      expect(router.removeRoute(NotFound)).toBeFalsy();
+    });
+
+    it('should return false if no name or path is provided', () => {
+      expect.assertions(2);
+      expect(router.removeRoute({})).toBeFalsy();
+      expect(router.removeRoute({ name: undefined, path: undefined })).toBeFalsy();
+    });
+
+    it('should throw a RouterNamePathMismatchError if the path provided and registered do not match', () => {
+      expect.assertions(1);
+      expect(() => router.removeRoute({ ...OtherRoute, path: '/other-path' })).toThrow(
+        `Route path "/other-path" with name "${OtherRoute.name}" does not match registered path "${OtherRoute.path}"`,
+      );
+    });
+
+    it('should throw a RouterNamePathMismatchError if the name provided and registered do not match', () => {
+      expect.assertions(1);
+      expect(() => router.removeRoute({ ...OtherRoute, name: 'other-name' })).toThrow(
+        `Route path "${OtherRoute.path}" with name "other-name" does not match registered name "${OtherRoute.name}"`,
+      );
+    });
   });
 
-  describe('beforeEach', () => {
-    it.todo('should add a navigation guard to be called before each navigation');
-    it.todo('should remove a navigation guard when the returned function is called');
-  });
+  describe('hooks', () => {
+    describe('beforeEach', () => {
+      const beforeEachFn = vi.fn();
 
-  describe('afterEach', () => {
-    it.todo('should add a navigation guard to be called after each navigation');
-    it.todo('should remove a navigation guard when the returned function is called');
-  });
+      it('should instantiate a new router with a beforeEach navigation guard', async () => {
+        expect.assertions(2);
+        router = new Router({
+          routes,
+          beforeEach: beforeEachFn,
+        });
+        await wait();
 
-  describe('onLoading', () => {
-    it.todo('should add a navigation guard to be called when a navigation is loading');
-    it.todo('should remove a navigation guard when the returned function is called');
-  });
+        await router.push(PathRoute);
 
-  describe('onLoaded', () => {
-    it.todo('should add a navigation guard to be called when a navigation is loaded');
-    it.todo('should remove a navigation guard when the returned function is called');
-  });
+        expect(beforeEachFn).toHaveBeenCalledTimes(1);
+        expect(beforeEachFn).toHaveBeenCalledWith(expect.any(NavigationEvent));
+      });
 
-  describe('onError', () => {
-    it.todo('should add a navigation guard to be called when a navigation has an error');
-    it.todo('should remove a navigation guard when the returned function is called');
+      it('should add a navigation guard to be called before each navigation', async () => {
+        expect.assertions(2);
+
+        router = new Router({ routes });
+        await wait();
+
+        router.beforeEach(beforeEachFn);
+
+        await router.push(PathRoute);
+
+        expect(beforeEachFn).toHaveBeenCalledTimes(1);
+        expect(beforeEachFn).toHaveBeenCalledWith(expect.any(NavigationEvent));
+      });
+
+      it('should remove a navigation guard when the returned function is called', async () => {
+        expect.assertions(1);
+
+        router = new Router({ routes });
+        await wait();
+
+        const remove = router.beforeEach(beforeEachFn);
+        remove();
+
+        await router.push(PathRoute);
+
+        expect(beforeEachFn).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('onStart', () => {
+      const onStartFn = vi.fn();
+
+      it('should instantiate a new router with an onStart listener', async () => {
+        expect.assertions(2);
+        router = new Router({
+          routes,
+          onStart: onStartFn,
+        });
+        await wait();
+
+        await router.push(PathRoute);
+
+        expect(onStartFn).toHaveBeenCalledTimes(1);
+        expect(onStartFn).toHaveBeenCalledWith(expect.any(NavigationEvent));
+      });
+
+      it('should add a listener to be called when a navigation starts', async () => {
+        expect.assertions(2);
+
+        router = new Router({ routes });
+        await wait();
+
+        router.onStart(onStartFn);
+
+        await router.push(PathRoute);
+
+        expect(onStartFn).toHaveBeenCalledTimes(1);
+        expect(onStartFn).toHaveBeenCalledWith(expect.any(NavigationEvent));
+      });
+
+      it('should remove a listener when the returned function is called', async () => {
+        expect.assertions(1);
+
+        router = new Router({ routes });
+        await wait();
+
+        const remove = router.onStart(onStartFn);
+        remove();
+
+        await router.push(PathRoute);
+
+        expect(onStartFn).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('onEnd', () => {
+      const onEndFn = vi.fn();
+
+      it('should instantiate a new router with an onEnd listener', async () => {
+        expect.assertions(2);
+        router = new Router({
+          routes,
+          onEnd: onEndFn,
+        });
+        await wait();
+
+        await router.push(PathRoute);
+
+        expect(onEndFn).toHaveBeenCalledTimes(1);
+        expect(onEndFn).toHaveBeenCalledWith(expect.any(NavigationEvent), router.snapshot);
+      });
+
+      it('should add a listener to be called when a navigation ends', async () => {
+        expect.assertions(2);
+
+        router = new Router({ routes });
+        await wait();
+
+        router.onEnd(onEndFn);
+
+        await router.push(PathRoute);
+
+        expect(onEndFn).toHaveBeenCalledTimes(1);
+        expect(onEndFn).toHaveBeenCalledWith(expect.any(NavigationEvent), router.snapshot);
+      });
+
+      it('should remove a listener when the returned function is called', async () => {
+        expect.assertions(1);
+
+        router = new Router({ routes });
+        await wait();
+
+        const remove = router.onEnd(onEndFn);
+        remove();
+
+        await router.push(PathRoute);
+
+        expect(onEndFn).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('onError', () => {
+      const error = new Error('Navigation guard error');
+      const onErrorFn = vi.fn();
+      const beforeEachErrorFn = vi.fn().mockRejectedValue(error);
+
+      it('should instantiate a new router with an onError listener', async () => {
+        expect.assertions(2);
+        router = new Router({
+          routes,
+          onError: onErrorFn,
+          beforeEach: beforeEachErrorFn,
+        });
+        await wait();
+
+        try {
+          await router.push(PathRoute);
+        } catch {
+          // ignore error
+        } finally {
+          expect(onErrorFn).toHaveBeenCalledTimes(1);
+          expect(onErrorFn).toHaveBeenCalledWith(error, expect.any(NavigationEvent));
+        }
+      });
+
+      it('should add a listener to be called when a navigation has an error', async () => {
+        expect.assertions(2);
+
+        router = new Router({
+          routes,
+          beforeEach: beforeEachErrorFn,
+        });
+        await wait();
+
+        router.onError(onErrorFn);
+
+        try {
+          await router.push(PathRoute);
+        } catch {
+          // ignore error
+        } finally {
+          expect(onErrorFn).toHaveBeenCalledTimes(1);
+          expect(onErrorFn).toHaveBeenCalledWith(error, expect.any(NavigationEvent));
+        }
+      });
+
+      it('should remove a listener when the returned function is called', async () => {
+        expect.assertions(1);
+
+        router = new Router({
+          routes,
+          beforeEach: beforeEachErrorFn,
+        });
+        await wait();
+
+        const remove = router.onError(onErrorFn);
+        remove();
+
+        try {
+          await router.push(PathRoute);
+        } catch {
+          // ignore error
+        } finally {
+          expect(onErrorFn).not.toHaveBeenCalled();
+        }
+      });
+    });
   });
 
   describe('resolve', () => {
-    describe('name', () => {
-      it.todo('should resolve a route from a name');
-      it.todo('should resolve a route from a name with param parameters');
-      it.todo('should resolve a route from a name with query parameters');
-      it.todo('should resolve a route from a name with both param and query parameters');
+    describe('path mode', () => {
+      beforeEach(async () => {
+        router = new Router({ routes, listen: false, hash: false });
+        await wait();
+      });
 
-      it.todo('should resolve a route from a name and default parameters');
-      it.todo('should resolve a route from a name and override default parameters');
-      it.todo('should resolve a route and inject query parameters');
-      it.todo('should resolve a route and override query parameters');
+      it('should resolve a route from a name', async () => {
+        expect.assertions(4);
+
+        const route = await router.resolve({ name: HomeRoute.name });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(HomeRoute.name);
+        expect(route.path).toBe(HomeRoute.path);
+        expect(route.route.path).toBe(HomeRoute.path);
+      });
+
+      it('should resolve a route from a path', async () => {
+        expect.assertions(4);
+
+        const route = await router.resolve({ path: PathRoute.path });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(PathRoute.name);
+        expect(route.path).toBe(PathRoute.path);
+        expect(route.route.path).toBe(PathRoute.path);
+      });
+
+      it('should resolve a route from a partial sub-path', async () => {
+        expect.assertions(4);
+
+        const route = await router.resolve({ path: '/parent/ch' });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(ParentRoute.name);
+        expect(route.path).toBe('/parent/ch');
+        expect(route.route.name).toBe(ParentRoute.name);
+      });
+
+      it('should resolve a route from a name in strict mode', async () => {
+        expect.assertions(4);
+
+        const route = await router.resolve({ name: HomeRoute.name }, { strict: true });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(HomeRoute.name);
+        expect(route.path).toBe(HomeRoute.path);
+        expect(route.route.path).toBe(HomeRoute.path);
+      });
+
+      it('should resolve a route from a path in strict mode', async () => {
+        expect.assertions(4);
+
+        const route = await router.resolve({ path: PathRoute.path }, { strict: true });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(PathRoute.name);
+        expect(route.path).toBe(PathRoute.path);
+        expect(route.route.path).toBe(PathRoute.path);
+      });
+
+      it('should not resolve a route from a partial sub-path in strict mode', async () => {
+        expect.assertions(4);
+
+        const route = await router.resolve({ path: '/parent/ch' }, { strict: true });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBeUndefined();
+        expect(route.path).toBe('/parent/ch');
+        expect(route.route).toBeUndefined();
+      });
+
+      it('should resolve a route from a relative location', async () => {
+        expect.assertions(5);
+        await router.push(ParentRoute);
+
+        expect(router.route.name).toBe(ParentRoute.name);
+
+        const route = await router.resolve({ path: './child' });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(ChildRoute.name);
+        expect(route.path).toBe('/parent/child');
+        expect(route.route.path).toBe('/parent/child');
+      });
+
+      it('should resolve a route from a location with param parameters', async () => {
+        expect.assertions(5);
+
+        const path = '/param/2/user/Jane/Smith';
+        const route = await router.resolve({ path });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(ParamRoute.name);
+        expect(route.path).toBe(path);
+        expect(route.route.path).toBe(ParamRoute.path);
+        expect(route.params).toStrictEqual({ id: '2', firstName: 'Jane', lastName: 'Smith' });
+      });
+
+      it('should resolve a route from a name with default parameters', async () => {
+        expect.assertions(5);
+
+        const route = await router.resolve({ name: ParamRoute.name });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(ParamRoute.name);
+        expect(route.path).toBe('/param/1/user/John/Doe');
+        expect(route.route.path).toBe(ParamRoute.path);
+        expect(route.params).toStrictEqual({ id: '1', firstName: 'John', lastName: 'Doe' });
+      });
+
+      it('should resolve a route from a location with query parameters', async () => {
+        expect.assertions(5);
+
+        const route = await router.resolve({ path: QueryRoute.path, query: { page: '2', limit: '5' } });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(QueryRoute.name);
+        expect(route.path).toBe(QueryRoute.path);
+        expect(route.route.path).toBe(QueryRoute.path);
+        expect(route.query).toStrictEqual({ page: '2', limit: '5' });
+      });
+
+      it('should resolve a route from a location with default query parameters', async () => {
+        expect.assertions(5);
+
+        const route = await router.resolve({ name: QueryRoute.name });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(QueryRoute.name);
+        expect(route.path).toBe(QueryRoute.path);
+        expect(route.route.path).toBe(QueryRoute.path);
+        expect(route.query).toStrictEqual({ page: '1', limit: '10' });
+      });
+
+      it('should resolve a route from a location with both param and query parameters', async () => {
+        expect.assertions(6);
+
+        const path = '/param-query/2/user/Jane/Smith';
+        const route = await router.resolve({ path, query: { page: '2', limit: '5' } });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(ParamQueryRoute.name);
+        expect(route.path).toBe(path);
+        expect(route.route.path).toBe(ParamQueryRoute.path);
+        expect(route.params).toStrictEqual({ id: '2', firstName: 'Jane', lastName: 'Smith' });
+        expect(route.query).toStrictEqual({ page: '2', limit: '5' });
+      });
+
+      it('should resolve a route and keep the query parameters from the previous location', async () => {
+        expect.assertions(5);
+
+        await router.push({ name: QueryRoute.name, query: { page: '2', limit: '5' } });
+
+        const route = await router.resolve({ name: PathRoute.name });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(PathRoute.name);
+        expect(route.path).toBe(PathRoute.path);
+        expect(route.route.path).toBe(PathRoute.path);
+        expect(route.query).toStrictEqual({ page: '2', limit: '5' });
+      });
+
+      it('should resolve a route and strip the query parameters from the previous location', async () => {
+        expect.assertions(5);
+
+        await router.push({ name: QueryRoute.name, query: { page: '2', limit: '5' } });
+
+        const route = await router.resolve({ name: PathRoute.name, stripQuery: true });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(PathRoute.name);
+        expect(route.path).toBe(PathRoute.path);
+        expect(route.route.path).toBe(PathRoute.path);
+        expect(route.query).toStrictEqual({});
+      });
+
+      it('should resolve a route and keep the hash from the previous location', async () => {
+        expect.assertions(5);
+
+        window.location.hash = 'hash';
+        await router.push({ path: '/query', query: { page: '2', limit: '5' } });
+
+        const route = await router.resolve({ name: PathRoute.name });
+
+        expect(route.name).toBe(PathRoute.name);
+        expect(route.path).toBe(PathRoute.path);
+        expect(route.query).toStrictEqual({ page: '2', limit: '5' });
+        expect(route.route.path).toBe(PathRoute.path);
+        expect(route.href.hash).toBe('#hash');
+      });
+
+      it('should resolve a route and strip the hash from the previous location', async () => {
+        expect.assertions(5);
+
+        window.location.hash = 'hash';
+        await router.push({ path: '/query', query: { page: '2', limit: '5' } });
+
+        const route = await router.resolve({ name: PathRoute.name, stripHash: true });
+
+        expect(route.name).toBe(PathRoute.name);
+        expect(route.path).toBe(PathRoute.path);
+        expect(route.query).toStrictEqual({ page: '2', limit: '5' });
+        expect(route.route.path).toBe(PathRoute.path);
+        expect(route.href.hash).toBe('');
+      });
+
+      it('should resolve a wildcard route from a location', async () => {
+        expect.assertions(2);
+
+        const route = await router.resolve({ path: '/wildcard/something' });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(WildcardRoute.name);
+      });
+
+      it('should resolve a wildcard segment route from a location', async () => {
+        expect.assertions(2);
+
+        const route = await router.resolve({ path: '/something/segment' });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(WildcardSegmentRoute.name);
+      });
+
+      it('should fail with a NavigationNotFoundError if no path can be resolved', async () => {
+        expect.assertions(2);
+
+        let error: NavigationNotFoundError;
+        try {
+          await router.resolve({ name: '/not-found' }, { failOnNotFound: true });
+        } catch (e) {
+          error = e;
+        } finally {
+          expect(error.message).toBe('No path could be resolved from the provided location');
+          expect(error.type).toBe(ErrorTypes.NAVIGATION_NOT_FOUND);
+        }
+      });
+
+      it('should fail with a NavigationNotFoundError if a relative path reference could not be resolved', async () => {
+        expect.assertions(2);
+
+        let error: NavigationNotFoundError;
+        try {
+          await router.resolve({ path: './not-found' }, { failOnNotFound: true, from: null });
+        } catch (e) {
+          error = e;
+        } finally {
+          expect(error.message).toBe('Relative path provided but no current location could be found');
+          expect(error.type).toBe(ErrorTypes.NAVIGATION_NOT_FOUND);
+        }
+      });
+
+      it('should fail with a ParsingRelativePathError if a relative path could not be resolved', async () => {
+        expect.assertions(2);
+
+        let error: ParsingRelativePathError;
+        try {
+          await router.resolve({ path: '../../not-found' }, { failOnNotFound: true, from: { path: '/' } });
+        } catch (e) {
+          error = e;
+        } finally {
+          expect(error.message).toBe('Error parsing relative path "../../not-found" from parent path "/"');
+          expect(error.type).toBe('PARSING_RELATIVE_PATH_ERROR');
+        }
+      });
+
+      it('should fail with a NavigationNotFoundError if no route can be resolved and failOnNotFound is true', async () => {
+        expect.assertions(2);
+
+        let error: NavigationNotFoundError;
+        try {
+          await router.resolve({ path: '/not-found' }, { failOnNotFound: true });
+        } catch (e) {
+          error = e;
+        } finally {
+          expect(error.message).toBe('Navigation failed: NAVIGATION_NOT_FOUND');
+          expect(error.type).toBe(ErrorTypes.NAVIGATION_NOT_FOUND);
+        }
+      });
+
+      it('should not fail with a NavigationNotFoundError if no route can be resolved and failOnNotFound is false', async () => {
+        expect.assertions(3);
+
+        const route = await router.resolve({ path: '/not-found' }, { failOnNotFound: false });
+
+        expect(route.route).toBeUndefined();
+        expect(route.name).toBeUndefined();
+        expect(route.path).toBe('/not-found');
+      });
     });
 
-    describe('location', () => {
-      it.todo('should resolve a route from an absolute location');
+    describe('hash mode', () => {
+      beforeEach(async () => {
+        router = new Router({ routes, listen: false, hash: true });
+        await wait();
+      });
+
+      it.todo('should resolve a route from a name');
+      it.todo('should resolve a route from a path');
+      it.todo('should resolve a route from a partial sub-path');
+
+      it.todo('should resolve a route from a name in strict mode');
+      it.todo('should resolve a route from a path in strict mode');
+      it.todo('should not resolve a route from a partial sub-path in strict mode');
+
       it.todo('should resolve a route from a relative location');
+
       it.todo('should resolve a route from a location with param parameters');
+      it.todo('should resolve a route from a name with default parameters');
+
       it.todo('should resolve a route from a location with query parameters');
+      it.todo('should resolve a route from a location with default query parameters');
+
       it.todo('should resolve a route from a location with both param and query parameters');
 
-      it.todo('should resolve a route from a name and default parameters');
-      it.todo('should resolve a route from a name and override default parameters');
-      it.todo('should resolve a route and inject query parameters');
-      it.todo('should resolve a route and override query parameters');
-    });
+      it.todo('should resolve a route and keep the query parameters from the previous location');
+      it.todo('should resolve a route and strip the query parameters from the previous location');
 
-    describe('matching', () => {
-      it.todo('should fail to parse an invalid path');
-      it.todo('should fail with a NavigationNotFoundError if the route does not exist and failOnNotFound is true');
-      it.todo('should return undefined if an exact match is not found and strict is true');
-      it.todo('should return the first match if an exact match is not found and strict is false');
+      it.todo('should resolve a route and keep the trailing hash from the previous location');
+      it.todo('should resolve a route and strip the trailing hash from the previous location');
+
+      it.todo('should resolve a wildcard route from a location');
+      it.todo('should resolve a wildcard segment route from a location');
+
+      it.todo('should fail with a NavigationNotFoundError if no path can be resolved');
+      it.todo('should fail with a NavigationNotFoundError if a relative path reference could not be resolved');
+      it.todo('should fail with a ParsingRelativePathError if a relative path could not be resolved');
+
+      it.todo('should fail with a NavigationNotFoundError if no route can be resolved and failOnNotFound is true');
+      it.todo('should not fail with a NavigationNotFoundError if no route can be resolved and failOnNotFound is false');
     });
   });
 
   describe('navigate', () => {
+    router = new Router({ routes, listen: false });
+
     describe('push', () => {
       it.todo('should push a new entry to the history for a location');
       it.todo('should push a new entry to the history for a name');
@@ -91,6 +875,9 @@ describe('router', () => {
       it.todo('should throw a NavigationNotFoundError if the route does not exist and failOnNotFound is true');
 
       it.todo('should not navigate if the target route and location are the same as the current route');
+      it.todo('should redirect to a new route if the target route has a redirect');
+      it.todo('should redirect to a new route if the target route has a redirect guard and followGuardRedirect is true');
+      it.todo('should not redirect to a new route if the target route has a redirect guard and followGuardRedirect is false');
     });
 
     describe('replace', () => {
@@ -105,67 +892,37 @@ describe('router', () => {
       it.todo('should throw a NavigationNotFoundError if the route does not exist and failOnNotFound is true');
 
       it.todo('should not navigate if the target route and location are the same as the current route');
-    });
-
-    describe('resolve', () => {
-      describe('path mode', () => {
-        it.todo('should resolve a route from a name');
-        it.todo('should resolve a route from a path');
-        it.todo('should resolve a route from a hash path');
-        it.todo('should resolve a route from a sub-path');
-        it.todo('should resolve a route from a name in strict mode');
-        it.todo('should resolve a route from a path in strict mode');
-        it.todo('should not resolve a route from a sub-path in strict mode');
-        it.todo('should resolve a route from a relative location');
-        it.todo('should resolve a route from a location with param parameters');
-        it.todo('should resolve a route from a location with query parameters');
-        it.todo('should resolve a route from a location with both param and query parameters');
-        it.todo('should fail with a NavigationNotFoundError if no path can be resolved');
-        it.todo('should fail with a NavigationNotFoundError if a relative path could not be resolved');
-        it.todo('should fail with a NavigationNotFoundError if the route does not exist and failOnNotFound is true');
-      });
-
-      describe('hash mode', () => {
-        it.todo('should resolve a route from a name');
-        it.todo('should resolve a route from a path');
-        it.todo('should resolve a route from a hash path');
-        it.todo('should resolve a route from a sub-path');
-        it.todo('should resolve a route from a name in strict mode');
-        it.todo('should resolve a route from a path in strict mode');
-        it.todo('should not resolve a route from a sub-path in strict mode');
-        it.todo('should resolve a route from a relative location');
-        it.todo('should resolve a route from a location with param parameters');
-        it.todo('should resolve a route from a location with query parameters');
-        it.todo('should resolve a route from a location with both param and query parameters');
-        it.todo('should fail with a NavigationNotFoundError if no path can be resolved');
-        it.todo('should fail with a NavigationNotFoundError if a relative path could not be resolved');
-        it.todo('should fail with a NavigationNotFoundError if the route does not exist and failOnNotFound is true');
-      });
+      it.todo('should redirect to a new route if the target route has a redirect');
+      it.todo('should redirect to a new route if the target route has a redirect guard and followGuardRedirect is true');
+      it.todo('should not redirect to a new route if the target route has a redirect guard and followGuardRedirect is false');
     });
 
     describe('go', () => {
-      it.todo('should navigate forward to a location by its position in the history');
-      it.todo('should navigate backward to a location by its position in the history');
+      it.todo('should navigate forward to a location by its position in the history and update the route and location');
+      it.todo('should navigate backward to a location by its position in the history and update the route and location');
     });
 
     describe('back', () => {
-      it.todo('should navigate backward in the history');
+      it.todo('should navigate backward in the history and update the route and location');
     });
 
     describe('forward', () => {
-      it.todo('should navigate forward in the history');
+      it.todo('should navigate forward in the history and update the route and location');
     });
+  });
 
-    describe('listeners', () => {
-      it.todo('should update state when unloading a page');
-      it.todo('should update state when unloading a page when the state is different');
-      it.todo('should not update state when unloading a page if the state is the same');
-
-      it.todo('should call navigation listeners when popstate is triggered and window.navigation is undefined');
+  describe('listeners', () => {
+    describe('history', () => {
+      router = new Router({ routes, listen: 'history' });
+      it.todo('should call navigation listeners when popstate is triggered');
       it.todo('should call #navigate when popstate is triggered and a route is resolved from the hash in hash mode');
       it.todo('should call #navigate when popstate is triggered and a route is resolved from the path in path mode');
       it.todo('should call not call #navigate when popstate is triggered and a route is not resolved');
+    });
 
+    describe('navigation', () => {
+      router = new Router({ routes, listen: 'navigation' });
+      it.todo('should fallback to `history` when `navigation` is not supported');
       it.todo('should call navigation listeners when navigate is triggered and window.navigation is defined');
       it.todo('should call #navigate when navigate is triggered and a route is resolved from the hash in hash mode');
       it.todo('should call #navigate when navigate is triggered and a route is resolved from the path in path mode');
