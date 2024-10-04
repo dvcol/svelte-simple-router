@@ -73,6 +73,11 @@
   <button onclick={() => onAddRoute()}>Add</button>
 </div>
 
+<div class="row">
+  <button onclick={async () => router.back()}>Back</button>
+  <button onclick={() => router.forward()}>Forward</button>
+</div>
+
 <style lang="scss">
   .row {
     display: flex;

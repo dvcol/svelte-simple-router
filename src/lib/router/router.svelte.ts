@@ -168,6 +168,18 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     return this.#options.history;
   }
 
+  /**
+   * Navigation instance to use.
+   * @private
+   */
+  get #navigation(): Navigation | undefined {
+    return this.#options.navigation;
+  }
+
+  /**
+   * Browser location instance to use.
+   * @private
+   */
   get #browser(): Location {
     return this.#options.location;
   }
@@ -201,8 +213,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @private
    */
   get #useNavigationApi(): boolean {
-    if (typeof window === 'undefined') return false;
-    if (!window?.navigation) return false;
+    if (!this.#navigation) return false;
     return this.#options.listen === true || this.#options.listen === 'navigation';
   }
 
@@ -331,16 +342,16 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     //  If already listening, exit
     if (this.#listening) return;
     if (typeof window === 'undefined') return;
-    if (this.#useNavigationApi) window.navigation?.addEventListener('currententrychange', this.#navigateListener);
+    if (this.#useNavigationApi) this.#navigation?.addEventListener('currententrychange', this.#navigateListener);
     else window.addEventListener('popstate', this.#navigateListener);
     this.#listening = this.#useNavigationApi ? 'navigation' : 'history';
-    Logger.debug(this.#log, 'Router listening', { listening: this.#listening }, window.navigation);
+    Logger.debug(this.#log, 'Router listening', { listening: this.#listening });
   }
 
   destroy() {
     if (typeof window === 'undefined') return;
     window.removeEventListener('popstate', this.#navigateListener);
-    window.navigation?.removeEventListener('currententrychange', this.#navigateListener);
+    this.#navigation?.removeEventListener('currententrychange', this.#navigateListener);
     this.#listening = false;
     Logger.debug(this.#log, 'Router destroyed', { listening: this.#listening });
   }
@@ -790,20 +801,20 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * Go back in history if possible by calling `history.back()`.
    * Equivalent to `router.go(-1)`.
    */
-  back(): Promise<ResolvedRouterLocationSnapshot<Name>> {
+  async back(): Promise<ResolvedRouterLocationSnapshot<Name>> {
     this.#history.back();
     if (!this.#listening) return this.sync();
-    return Promise.resolve(this.snapshot);
+    return this.snapshot;
   }
 
   /**
    * Go forward in history if possible by calling `history.forward()`.
    * Equivalent to `router.go(1)`.
    */
-  forward(): Promise<ResolvedRouterLocationSnapshot<Name>> {
+  async forward(): Promise<ResolvedRouterLocationSnapshot<Name>> {
     this.#history.forward();
     if (!this.#listening) return this.sync();
-    return Promise.resolve(this.snapshot);
+    return this.snapshot;
   }
 
   /**
@@ -812,9 +823,9 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    *
    * @param delta - The position in the history to which you want to move, relative to the current page
    */
-  go(delta: number): Promise<ResolvedRouterLocationSnapshot<Name>> {
+  async go(delta: number): Promise<ResolvedRouterLocationSnapshot<Name>> {
     this.#history.go(delta);
     if (!this.#listening) return this.sync();
-    return Promise.resolve(this.snapshot);
+    return this.snapshot;
   }
 }

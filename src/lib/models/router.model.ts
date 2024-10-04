@@ -1,3 +1,5 @@
+/// <reference types="navigation-api-types" />
+
 import { isShallowEqual } from '@dvcol/common-utils/common/object';
 
 import type { Snippet } from 'svelte';
@@ -379,16 +381,23 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
    * History instance to use.
    *
    * @see [MDN for more information](https://developer.mozilla.org/docs/Web/API/History)
-   * @default global.history
+   * @default globalThis.history
    */
   history?: IHistory<Name>;
   /**
    * Location instance to use.
    *
    * @see [MDN for more information](https://developer.mozilla.org/docs/Web/API/Location)
-   * @default global.location
+   * @default globalThis.location
    */
   location?: Location;
+  /**
+   * Navigation instance to use.
+   *
+   * @see [MDN for more information](https://developer.mozilla.org/docs/Web/API/Navigation)
+   * @default window.navigation
+   */
+  navigation?: Navigation;
   /**
    * Initial list of routes that should be added to the router.
    */
@@ -457,6 +466,7 @@ export type RouterOptionsSnapshot<Name extends RouteName = RouteName> = RouterNa
 export const defaultOptions: Omit<RouterOptions<any>, 'history' | 'location'> & Required<Pick<RouterOptions<any>, 'history' | 'location'>> = {
   history: globalThis?.history,
   location: globalThis?.location,
+  navigation: typeof window !== 'undefined' ? window.navigation : undefined,
   listen: 'history',
   priority: RouterPathPriority,
   caseSensitive: false,
