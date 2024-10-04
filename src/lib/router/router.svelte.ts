@@ -150,21 +150,10 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   #listening: 'navigation' | 'history' | false = $state(false);
 
   /**
-   * Mark if the current navigation is internal for navigation listeners.
-   * @reactive
-   * @private
-   */
-  #internalEvent = $state(false);
-
-  /**
    * Event listener for the `navigate` or `popstate` event.
    * @private
    */
   #navigateListener: (event: PopStateEvent | NavigationCurrentEntryChangeEvent) => void = async () => {
-    if (this.#internalEvent) {
-      this.#internalEvent = false;
-      return;
-    }
     const routerState: RouterStateLocation<Name> = this.#history.state?.[RouterStateConstant];
     if (routerState && this.#location?.href?.toString() === routerState.href?.toString()) return;
     await this.sync();
@@ -753,17 +742,15 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     options: RouterNavigationOptions,
   ): Promise<ResolvedRouterLocationSnapshot<Name>> {
     const resolved = this.resolve(to, options);
-    if (this.#listening === 'navigation') this.#internalEvent = true;
+    const routed = await this.#navigate(resolved, options);
+    const { state, title } = routeToHistoryState(routed, { ...options, state: to.state });
     try {
-      const routed = await this.#navigate(resolved, options);
-      const { state, title } = routeToHistoryState(routed, { ...options, state: to.state });
       this.#history[method](state, title ?? '', routed.location?.href);
       if (title) document.title = title;
-      Logger.debug(this.#log, 'State change', { method, routed, state, title });
+      Logger.debug(this.#log, 'State change', { method, resolved, routed, state, title });
       return routed;
     } catch (error) {
-      Logger.error(this.#log, 'History error', { method, resolved, error });
-      if (this.#listening === 'navigation') this.#internalEvent = false;
+      Logger.error(this.#log, 'History error', { method, error, resolved, routed, state, title });
       throw error;
     }
   }
@@ -803,18 +790,20 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * Go back in history if possible by calling `history.back()`.
    * Equivalent to `router.go(-1)`.
    */
-  back(): ReturnType<Router['go']> {
+  back(): Promise<ResolvedRouterLocationSnapshot<Name>> {
     this.#history.back();
-    if (!this.#listening) this.sync();
+    if (!this.#listening) return this.sync();
+    return Promise.resolve(this.snapshot);
   }
 
   /**
    * Go forward in history if possible by calling `history.forward()`.
    * Equivalent to `router.go(1)`.
    */
-  forward(): ReturnType<Router['go']> {
+  forward(): Promise<ResolvedRouterLocationSnapshot<Name>> {
     this.#history.forward();
-    if (!this.#listening) this.sync();
+    if (!this.#listening) return this.sync();
+    return Promise.resolve(this.snapshot);
   }
 
   /**
@@ -823,8 +812,9 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    *
    * @param delta - The position in the history to which you want to move, relative to the current page
    */
-  go(delta: number): void {
+  go(delta: number): Promise<ResolvedRouterLocationSnapshot<Name>> {
     this.#history.go(delta);
-    if (!this.#listening) this.sync();
+    if (!this.#listening) return this.sync();
+    return Promise.resolve(this.snapshot);
   }
 }

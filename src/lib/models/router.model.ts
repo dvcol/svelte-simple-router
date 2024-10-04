@@ -659,13 +659,13 @@ export interface IRouter<Name extends RouteName = RouteName> {
    * Go back in history if possible by calling `history.back()`.
    * Equivalent to `router.go(-1)`.
    */
-  back(): ReturnType<IRouter['go']>;
+  back(): Promise<ResolvedRouterLocationSnapshot<Name>>;
 
   /**
    * Go forward in history if possible by calling `history.forward()`.
    * Equivalent to `router.go(1)`.
    */
-  forward(): ReturnType<IRouter['go']>;
+  forward(): Promise<ResolvedRouterLocationSnapshot<Name>>;
 
   /**
    * Allows you to move forward or backward through the history.
@@ -673,7 +673,7 @@ export interface IRouter<Name extends RouteName = RouteName> {
    *
    * @param delta - The position in the history to which you want to move, relative to the current page
    */
-  go(delta: number): void;
+  go(delta: number): Promise<ResolvedRouterLocationSnapshot<Name>>;
 
   /**
    * Teardown function to clean up the router instance.
