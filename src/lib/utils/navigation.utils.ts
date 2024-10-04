@@ -1,13 +1,14 @@
 import { toPathSegment } from '@dvcol/common-utils/common/string';
 
-import type { HistoryState, NavigationGuardReturn, ResolvedRoute, RouteName, RouteNavigation, RouteQuery } from '~/models/route.model.js';
-import type { RouterState } from '~/models/router.model.js';
+import type { HistoryState, NavigationGuardReturn, RouteName, RouteNavigation, RouteQuery } from '~/models/route.model.js';
+import type { ResolvedRouterLocationSnapshot, RouterState } from '~/models/router.model.js';
 
 import { NavigationAbortedError, type NavigationFailureType } from '~/models/error.model.js';
+import { replaceTitleParams } from '~/models/matcher.model.js';
 import { RouterScrollConstant, RouterStateConstant } from '~/models/router.model.js';
 
 export const routeToHistoryState = <Name extends RouteName = RouteName>(
-  { route, href, query, params, name, path }: Partial<ResolvedRoute<Name>>,
+  { route, location }: Partial<ResolvedRouterLocationSnapshot<Name>>,
   {
     metaAsState,
     nameAsTitle,
@@ -23,6 +24,7 @@ export const routeToHistoryState = <Name extends RouteName = RouteName>(
   state: RouterState<Name>;
   title?: string;
 } => {
+  const { href, query, params, name, path } = location ?? {};
   const _name = name ?? route?.name;
   const _path = path ?? route?.path;
   const title: string | undefined = route?.title ?? (nameAsTitle ? _name?.toString() : undefined);
@@ -40,7 +42,7 @@ export const routeToHistoryState = <Name extends RouteName = RouteName>(
       [RouterStateConstant]: routerState,
       [RouterScrollConstant]: scrollState,
     },
-    title,
+    title: title?.length ? replaceTitleParams(title, params) : title,
   };
 };
 

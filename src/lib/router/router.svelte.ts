@@ -353,7 +353,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     window.removeEventListener('popstate', this.#navigateListener);
     window.navigation?.removeEventListener('currententrychange', this.#navigateListener);
     this.#listening = false;
-    Logger.debug(this.#log, 'Router stopped listening', { listening: this.#listening });
+    Logger.debug(this.#log, 'Router destroyed', { listening: this.#listening });
   }
 
   /**
@@ -618,6 +618,17 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   }
 
   /**
+   * Internal method to redirect to a new navigation location.
+   * @param to - Route location to navigate to
+   * @param options - Additional options to pass to the resolver
+   * @private
+   */
+  async #redirect(to: RouteNavigation<Name>, options: RouterNavigationOptions = {}): Promise<ResolvedRouterLocationSnapshot<Name>> {
+    const resolved = this.resolve(to, options);
+    return this.#navigate(resolved, options);
+  }
+
+  /**
    * Navigate to a new URL by updating the current location and route.
    *
    * @param to - Route location to navigate to
@@ -664,14 +675,14 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       if (typeof blockOrRedirect === 'object' && _options.followGuardRedirects) {
         Logger.debug(this.#log, 'Guard redirect', { ...navigation, redirect: blockOrRedirect });
         navigation.redirect(blockOrRedirect);
-        return this.replace(blockOrRedirect, { ..._options, followGuardRedirects: false });
+        return this.#redirect(blockOrRedirect, { ..._options, followGuardRedirects: false });
       }
 
       // If the route is a redirect, navigate to the new location and replace state
       if (route?.redirect) {
         Logger.debug(this.#log, 'Route redirect', { ...navigation, redirect: route.redirect });
         navigation.redirect(route.redirect);
-        return this.replace(route.redirect, _options);
+        return this.#redirect(route.redirect, _options);
       }
 
       // Update the current route and location
@@ -742,16 +753,16 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     options: RouterNavigationOptions,
   ): Promise<ResolvedRouterLocationSnapshot<Name>> {
     const resolved = this.resolve(to, options);
-    const { state, title } = routeToHistoryState(resolved, { ...options, state: to.state });
     if (this.#listening === 'navigation') this.#internalEvent = true;
     try {
       const routed = await this.#navigate(resolved, options);
-      this.#history[method](state, title ?? '', resolved.href);
+      const { state, title } = routeToHistoryState(routed, { ...options, state: to.state });
+      this.#history[method](state, title ?? '', routed.location?.href);
       if (title) document.title = title;
-      Logger.debug(this.#log, 'State change', { method, resolved, state, title });
+      Logger.debug(this.#log, 'State change', { method, routed, state, title });
       return routed;
     } catch (error) {
-      Logger.error(this.#log, 'History error', { method, resolved, state, title, error });
+      Logger.error(this.#log, 'History error', { method, resolved, error });
       if (this.#listening === 'navigation') this.#internalEvent = false;
       throw error;
     }

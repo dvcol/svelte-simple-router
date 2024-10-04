@@ -223,8 +223,15 @@ export type NavigationGuard<Name extends RouteName = RouteName> = (
 
 export type BaseRoute<Name extends RouteName = RouteName> = {
   /**
-   * Path of the record. Should start with `/` unless the record is the child of
-   * another record.
+   * Path of the record.
+   *
+   * Should start with `/` unless the record is the child of another record.
+   *
+   * Supports:
+   * - wildcards `*`
+   * - parameters `:param`.
+   * - optional parameters `:param:?`.
+   * - typed parameters `:{string}:param` or `:{number}:param`.
    *
    * @example `/users/:id` matches `/users/1` as well as `/users/name`.
    */
@@ -235,6 +242,15 @@ export type BaseRoute<Name extends RouteName = RouteName> = {
   name?: Name;
   /**
    * Title of the route record. Used for the document title.
+   *
+   * Supports:
+   * - parameters `:param`.
+   * - optional parameters `:param:?`.
+   * - typed parameters `:{string}:param` or `:{number}:param`.
+   *
+   * Note: Parameters need to match the following regex: `/:(\w|[:?{}])+/g`.
+   *
+   * @example `:count:? My Title :route:?` with parameters `{ count: '(1) ', route: '- home' }` will render `(1) My Title - home`.
    */
   title?: string;
   /**

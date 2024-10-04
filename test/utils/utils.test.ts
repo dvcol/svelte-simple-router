@@ -1,35 +1,44 @@
 import { describe, expect, it } from 'vitest';
 
-import type { ResolvedRoute, Route } from '~/models/route.model.js';
+import type { Route } from '~/models/route.model.js';
 
 import { NavigationAbortedError, type NavigationFailureType } from '~/models/error.model.js';
 import { cloneRoute, isRouteEqual } from '~/models/route.model.js';
 
-import { isLocationEqual, type RouterLocation, RouterScrollConstant, type RouterState, RouterStateConstant } from '~/models/router.model.js';
+import {
+  isLocationEqual,
+  type ResolvedRouterLocationSnapshot,
+  type RouterLocation,
+  RouterScrollConstant,
+  type RouterState,
+  RouterStateConstant,
+} from '~/models/router.model.js';
 import { isRouteNavigation, preventNavigation, resolveNewHref, routeToHistoryState } from '~/utils/navigation.utils.js';
 
 describe('routeToHistoryState', () => {
-  const resolved: Partial<ResolvedRoute> = {
-    name: 'user',
-    path: '/path/user/1234',
-    href: new URL('http://localhost:3000/base/path/user/1234?query=string'),
-    query: { query: 'string' },
-    params: { id: '1234' },
+  const resolved: Partial<ResolvedRouterLocationSnapshot> = {
     route: {
       name: 'user',
       path: '/path/user/:id',
       title: 'User Route',
       meta: { key: 'value' },
     },
+    location: {
+      name: 'user',
+      path: '/path/user/1234',
+      href: new URL('http://localhost:3000/base/path/user/1234?query=string'),
+      query: { query: 'string' },
+      params: { id: '1234' },
+    },
   };
 
   const expected: RouterState = {
     [RouterStateConstant]: {
-      name: resolved.name,
-      path: resolved.path,
-      href: resolved.href.toString(),
-      query: resolved.query,
-      params: resolved.params,
+      name: resolved.location.name,
+      path: resolved.location.path,
+      href: resolved.location.href.toString(),
+      query: resolved.location.query,
+      params: resolved.location.params,
     },
     [RouterScrollConstant]: { x: globalThis?.scrollX, y: globalThis?.scrollY },
   };
@@ -58,11 +67,11 @@ describe('routeToHistoryState', () => {
     expect(title).toBe(resolved.route.title);
   });
 
-  it('should return a history state object and title with name as title', () => {
+  it('should return a history state object and title with nameAsTitle', () => {
     expect.assertions(2);
     const { state, title } = routeToHistoryState({ ...resolved, route: { ...resolved.route, title: undefined } }, { nameAsTitle: true });
     expect(state).toStrictEqual(expected);
-    expect(title).toBe(resolved.name);
+    expect(title).toBe(resolved.location.name);
   });
 
   it('should return a history state object and custom scroll position', () => {
@@ -77,6 +86,29 @@ describe('routeToHistoryState', () => {
     const { state, title } = routeToHistoryState(resolved, { state: { existing: 'state' } });
     expect(state).toStrictEqual({ ...expected, existing: 'state' });
     expect(title).toBe(resolved.route.title);
+  });
+
+  it('should inject params into the title', () => {
+    expect.assertions(3);
+
+    const { state, title } = routeToHistoryState({
+      ...resolved,
+      location: { ...resolved.location, params: { notification: '(10)', suffix: 12 } },
+      route: { ...resolved.route, title: ':notification:? User Route - (:suffix) :optional:?' },
+    });
+    expect(state).toStrictEqual({
+      ...expected,
+      [RouterStateConstant]: { ...expected[RouterStateConstant], params: { notification: '(10)', suffix: 12 } },
+    });
+    expect(title).toBe('(10) User Route - (12)');
+
+    expect(
+      routeToHistoryState({
+        ...resolved,
+        location: { ...resolved.location, params: { optional: 'My Path', suffix: 12 } },
+        route: { ...resolved.route, title: ':notification:? User Route - (:suffix) :optional:?' },
+      }).title,
+    ).toBe('User Route - (12) My Path');
   });
 });
 

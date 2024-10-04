@@ -38,6 +38,26 @@ const templateWildcardSegmentReplace = '/([^/]+)/';
 const templateWildcardOrParamRegex = /\/((\*)|(:[^/]+))/g;
 const templateWildcardOrParamPrefixRegex = /^\/:?/g;
 
+const titleParamRegexPrefix = /:{number|string}:/g;
+const titleParamReplacePrefix = ':';
+const titleParamRegex = /:(\w|[:?{}])+/g;
+
+const replacer = (match: string, params: RouteParams, slice = 2) => {
+  let paramName = match.slice(slice);
+  const optional = paramName.endsWith(':?');
+  if (optional) paramName = paramName.slice(0, -2);
+  return { param: paramName, value: params[paramName], optional };
+};
+
+export const replaceTitleParams = (title: string, params: RouteParams = {}) =>
+  title
+    ?.replace(titleParamRegexPrefix, titleParamReplacePrefix)
+    .replace(titleParamRegex, match => {
+      const { value, optional } = replacer(match, params, 1);
+      return String(value ?? (optional ? '' : match));
+    })
+    .trim();
+
 /**
  * Replaces template params with their values
  * @param template
@@ -46,16 +66,14 @@ const templateWildcardOrParamPrefixRegex = /^\/:?/g;
  */
 export const replaceTemplateParams = (template: string, params: RouteParams = {}) =>
   template?.replace(templateParamRegexPrefix, templateParamReplacePrefix).replace(templateParamRegex, match => {
-    let paramName = match.slice(2);
-    const optional = paramName.endsWith(':?');
-    if (optional) paramName = paramName.slice(0, -2);
+    const { param, value, optional } = replacer(match, params);
 
-    if (params[paramName] === undefined) {
+    if (value === undefined) {
       if (optional) return '';
-      throw new ParsingMissingRequiredParamError({ template, missing: paramName, params });
+      throw new ParsingMissingRequiredParamError({ template, missing: param, params });
     }
 
-    return `/${params[paramName]}`;
+    return `/${value}`;
   });
 
 /**
