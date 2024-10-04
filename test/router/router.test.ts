@@ -3,11 +3,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ParsingRelativePathError } from '@dvcol/common-utils/common/error';
 
-import type { Route } from '~/models/route.model.js';
+import type { NavigationAbortedError, NavigationNotFoundError } from '~/models/error.model.js';
 
-import { ErrorTypes, type NavigationNotFoundError } from '~/models/error.model.js';
+import type { Route, RouteParams, RouteQuery } from '~/models/route.model.js';
 
-import { NavigationEvent } from '~/models/router.model.js';
+import { ErrorTypes } from '~/models/error.model.js';
+
+import { NavigationEvent, RouterScrollConstant, RouterStateConstant } from '~/models/router.model.js';
 
 import { Router } from '~/router/router.svelte.js';
 
@@ -76,6 +78,12 @@ describe('router', () => {
     },
   };
 
+  const TitleRoute: Route = {
+    name: 'title',
+    path: '/title',
+    title: ':notification:? My Title :subtitle:?',
+  };
+
   const RedirectRoute: Route = {
     name: 'redirect',
     path: '/redirect',
@@ -105,6 +113,7 @@ describe('router', () => {
     ParamRoute,
     QueryRoute,
     ParamQueryRoute,
+    TitleRoute,
     RedirectRoute,
     WildcardRoute,
     WildcardSegmentRoute,
@@ -526,12 +535,7 @@ describe('router', () => {
   });
 
   describe('resolve', () => {
-    describe('path mode', () => {
-      beforeEach(async () => {
-        router = new Router({ routes, listen: false, hash: false });
-        await wait();
-      });
-
+    const common = () => {
       it('should resolve a route from a name', async () => {
         expect.assertions(4);
 
@@ -703,36 +707,6 @@ describe('router', () => {
         expect(route.query).toStrictEqual({});
       });
 
-      it('should resolve a route and keep the hash from the previous location', async () => {
-        expect.assertions(5);
-
-        window.location.hash = 'hash';
-        await router.push({ path: '/query', query: { page: '2', limit: '5' } });
-
-        const route = await router.resolve({ name: PathRoute.name });
-
-        expect(route.name).toBe(PathRoute.name);
-        expect(route.path).toBe(PathRoute.path);
-        expect(route.query).toStrictEqual({ page: '2', limit: '5' });
-        expect(route.route.path).toBe(PathRoute.path);
-        expect(route.href.hash).toBe('#hash');
-      });
-
-      it('should resolve a route and strip the hash from the previous location', async () => {
-        expect.assertions(5);
-
-        window.location.hash = 'hash';
-        await router.push({ path: '/query', query: { page: '2', limit: '5' } });
-
-        const route = await router.resolve({ name: PathRoute.name, stripHash: true });
-
-        expect(route.name).toBe(PathRoute.name);
-        expect(route.path).toBe(PathRoute.path);
-        expect(route.query).toStrictEqual({ page: '2', limit: '5' });
-        expect(route.route.path).toBe(PathRoute.path);
-        expect(route.href.hash).toBe('');
-      });
-
       it('should resolve a wildcard route from a location', async () => {
         expect.assertions(2);
 
@@ -816,6 +790,45 @@ describe('router', () => {
         expect(route.name).toBeUndefined();
         expect(route.path).toBe('/not-found');
       });
+    };
+
+    describe('path mode', () => {
+      beforeEach(async () => {
+        router = new Router({ routes, listen: false, hash: false });
+        await wait();
+      });
+
+      common();
+
+      it('should resolve a route and keep the hash from the previous location', async () => {
+        expect.assertions(5);
+
+        window.location.hash = 'hash';
+        await router.push({ path: '/query', query: { page: '2', limit: '5' } });
+
+        const route = await router.resolve({ name: PathRoute.name });
+
+        expect(route.name).toBe(PathRoute.name);
+        expect(route.path).toBe(PathRoute.path);
+        expect(route.query).toStrictEqual({ page: '2', limit: '5' });
+        expect(route.route.path).toBe(PathRoute.path);
+        expect(route.href.hash).toBe('#hash');
+      });
+
+      it('should resolve a route and strip the hash from the previous location', async () => {
+        expect.assertions(5);
+
+        window.location.hash = 'hash';
+        await router.push({ path: '/query', query: { page: '2', limit: '5' } });
+
+        const route = await router.resolve({ name: PathRoute.name, stripHash: true });
+
+        expect(route.name).toBe(PathRoute.name);
+        expect(route.path).toBe(PathRoute.path);
+        expect(route.query).toStrictEqual({ page: '2', limit: '5' });
+        expect(route.route.path).toBe(PathRoute.path);
+        expect(route.href.hash).toBe('');
+      });
     });
 
     describe('hash mode', () => {
@@ -824,78 +837,315 @@ describe('router', () => {
         await wait();
       });
 
-      it.todo('should resolve a route from a name');
-      it.todo('should resolve a route from a path');
-      it.todo('should resolve a route from a partial sub-path');
+      common();
 
-      it.todo('should resolve a route from a name in strict mode');
-      it.todo('should resolve a route from a path in strict mode');
-      it.todo('should not resolve a route from a partial sub-path in strict mode');
+      it('should resolve a route and keep the trailing hash from the previous location', async () => {
+        expect.assertions(5);
 
-      it.todo('should resolve a route from a relative location');
+        window.location.hash = '#/other#trailing-hash';
+        await router.push({ path: '/query', query: { page: '2', limit: '5' } });
 
-      it.todo('should resolve a route from a location with param parameters');
-      it.todo('should resolve a route from a name with default parameters');
+        const route = await router.resolve({ name: PathRoute.name });
 
-      it.todo('should resolve a route from a location with query parameters');
-      it.todo('should resolve a route from a location with default query parameters');
+        expect(route.name).toBe(PathRoute.name);
+        expect(route.path).toBe(PathRoute.path);
+        expect(route.query).toStrictEqual({ page: '2', limit: '5' });
+        expect(route.route.path).toBe(PathRoute.path);
+        expect(route.href.hash).toBe('#/path?page=2&limit=5#trailing-hash');
+      });
 
-      it.todo('should resolve a route from a location with both param and query parameters');
+      it('should resolve a route and strip the trailing hash from the previous location', async () => {
+        expect.assertions(5);
 
-      it.todo('should resolve a route and keep the query parameters from the previous location');
-      it.todo('should resolve a route and strip the query parameters from the previous location');
+        window.location.hash = '#/other#trailing-hash';
+        await router.push({ path: '/query', query: { page: '2', limit: '5' } });
 
-      it.todo('should resolve a route and keep the trailing hash from the previous location');
-      it.todo('should resolve a route and strip the trailing hash from the previous location');
+        const route = await router.resolve({ name: PathRoute.name, stripTrailingHash: true });
 
-      it.todo('should resolve a wildcard route from a location');
-      it.todo('should resolve a wildcard segment route from a location');
-
-      it.todo('should fail with a NavigationNotFoundError if no path can be resolved');
-      it.todo('should fail with a NavigationNotFoundError if a relative path reference could not be resolved');
-      it.todo('should fail with a ParsingRelativePathError if a relative path could not be resolved');
-
-      it.todo('should fail with a NavigationNotFoundError if no route can be resolved and failOnNotFound is true');
-      it.todo('should not fail with a NavigationNotFoundError if no route can be resolved and failOnNotFound is false');
+        expect(route.name).toBe(PathRoute.name);
+        expect(route.path).toBe(PathRoute.path);
+        expect(route.query).toStrictEqual({ page: '2', limit: '5' });
+        expect(route.route.path).toBe(PathRoute.path);
+        expect(route.href.hash).toBe('#/path?page=2&limit=5');
+      });
     });
   });
 
   describe('navigate', () => {
-    router = new Router({ routes, listen: false });
-
-    describe('push', () => {
-      it.todo('should push a new entry to the history for a location');
-      it.todo('should push a new entry to the history for a name');
-      it.todo('should push a new entry to the history with a title');
-      it.todo('should push a new entry to the history with a state');
-      it.todo('should push a new entry to the history with a title and state');
-      it.todo('should call #navigate when push is called');
-      it.todo('should throw a NavigationCancelledError if the navigation is cancelled by new navigation');
-      it.todo('should throw a NavigationAbortedError if the navigation is aborted by a navigation guard');
-      it.todo('should throw a NavigationNotFoundError if the route does not exist and failOnNotFound is true');
-
-      it.todo('should not navigate if the target route and location are the same as the current route');
-      it.todo('should redirect to a new route if the target route has a redirect');
-      it.todo('should redirect to a new route if the target route has a redirect guard and followGuardRedirect is true');
-      it.todo('should not redirect to a new route if the target route has a redirect guard and followGuardRedirect is false');
+    const getState = (
+      route: Route,
+      { params = {}, query = {} }: { params?: RouteParams; query?: RouteQuery } = {},
+      scrollState: { x: number; y: number } = { x: globalThis?.scrollX, y: globalThis?.scrollY },
+    ) => ({
+      [RouterStateConstant]: {
+        href: `${window.location.origin}${route.path}`,
+        name: route.name,
+        path: route.path,
+        params,
+        query,
+      },
+      [RouterScrollConstant]: scrollState,
     });
 
-    describe('replace', () => {
-      it.todo('should replace the current entry in the history with a location');
-      it.todo('should replace the current entry in the history with a name');
-      it.todo('should replace the current entry in the history with a title');
-      it.todo('should replace the current entry in the history with a state');
-      it.todo('should replace the current entry in the history with a title and state');
-      it.todo('should call #navigate when replace is called');
-      it.todo('should throw a NavigationCancelledError if the navigation is cancelled by new navigation');
-      it.todo('should throw a NavigationAbortedError if the navigation is aborted by a navigation guard');
-      it.todo('should throw a NavigationNotFoundError if the route does not exist and failOnNotFound is true');
+    const SlowRoute: Route = {
+      name: 'slow',
+      path: '/slow',
+      beforeEnter: async () => {
+        await wait(500);
+      },
+    };
 
-      it.todo('should not navigate if the target route and location are the same as the current route');
-      it.todo('should redirect to a new route if the target route has a redirect');
-      it.todo('should redirect to a new route if the target route has a redirect guard and followGuardRedirect is true');
-      it.todo('should not redirect to a new route if the target route has a redirect guard and followGuardRedirect is false');
+    const AbortedRoute: Route = {
+      name: 'aborted',
+      path: '/aborted',
+      beforeEnter: async () => {
+        return false;
+      },
+    };
+
+    const RedirectRouteGuard: Route = {
+      name: 'redirect-guard',
+      path: '/redirect-guard',
+      beforeEnter: async () => {
+        return { name: PathRoute.name };
+      },
+    };
+
+    const SpyGuardRoute: Route = {
+      name: 'spy-guard',
+      path: '/spy-guard',
+      beforeEnter: vi.fn().mockResolvedValue(true),
+    };
+
+    const _routes: Route[] = [...routes, SlowRoute, AbortedRoute, RedirectRouteGuard, SpyGuardRoute];
+
+    beforeEach(async () => {
+      router = new Router({ routes: _routes, listen: false });
+      await wait();
     });
+
+    const common = (method: 'push' | 'replace') => {
+      const spy = vi.spyOn(window.history, `${method}State`);
+
+      it(`should call ${method} on history for a location`, async () => {
+        expect.assertions(5);
+
+        expect(spy).not.toHaveBeenCalled();
+        expect(router.route).toBeUndefined();
+
+        await router[method](PathRoute);
+
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(getState(PathRoute), '', `${window.location.origin}${PathRoute.path}`);
+        expect(router.route.name).toBe(PathRoute.name);
+      });
+
+      it(`should call ${method} on history for a name`, async () => {
+        expect.assertions(5);
+
+        expect(spy).not.toHaveBeenCalled();
+        expect(router.route).toBeUndefined();
+
+        await router[method]({ name: PathRoute.name });
+
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(getState(PathRoute), '', `${window.location.origin}${PathRoute.path}`);
+        expect(router.route.name).toBe(PathRoute.name);
+      });
+
+      it(`should call ${method} on history with a title`, async () => {
+        expect.assertions(4);
+
+        const oldTitle = 'Old title';
+        document.title = oldTitle;
+        expect(document.title).toBe(oldTitle);
+
+        await router[method](TitleRoute);
+
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(getState(TitleRoute), 'My Title', `${window.location.origin}${TitleRoute.path}`);
+        expect(document.title).toBe('My Title');
+
+        document.title = '';
+      });
+
+      it(`should call ${method} on history with a title and params`, async () => {
+        expect.assertions(4);
+
+        const oldTitle = 'Old title';
+        document.title = oldTitle;
+        expect(document.title).toBe(oldTitle);
+
+        const params = { notification: '(1)', subtitle: '- subtitle' };
+        await router[method]({ name: TitleRoute.name, params });
+
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(getState(TitleRoute, { params }), '(1) My Title - subtitle', `${window.location.origin}${TitleRoute.path}`);
+        expect(document.title).toBe('(1) My Title - subtitle');
+
+        document.title = '';
+      });
+
+      it(`should call ${method} on history with nameAsTitle`, async () => {
+        expect.assertions(4);
+
+        const oldTitle = 'Old title';
+        document.title = oldTitle;
+
+        expect(document.title).toBe(oldTitle);
+        await router[method]({ name: PathRoute.name }, { nameAsTitle: true });
+
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(getState(PathRoute), PathRoute.name, `${window.location.origin}${PathRoute.path}`);
+        expect(document.title).toBe(PathRoute.name);
+
+        document.title = '';
+      });
+
+      it(`should call ${method} on history with a state`, async () => {
+        expect.assertions(2);
+
+        const state = { key: 'value' };
+
+        await router[method]({ name: PathRoute.name, state });
+
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith({ ...state, ...getState(PathRoute) }, '', `${window.location.origin}${PathRoute.path}`);
+      });
+
+      it(`should navigate when the method is called`, async () => {
+        expect.assertions(4);
+
+        expect(router.route).toBeUndefined();
+
+        await router[method](PathRoute);
+
+        expect(router.route.name).toBe(PathRoute.name);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(getState(PathRoute), '', `${window.location.origin}${PathRoute.path}`);
+      });
+
+      it('should throw a NavigationCancelledError if the navigation is cancelled by new navigation', async () => {
+        expect.assertions(7);
+
+        const [promise] = await Promise.allSettled([router[method](SlowRoute), router[method](PathRoute)]);
+
+        expect('reason' in promise).toBeTruthy();
+        expect(promise.status).toBe('rejected');
+        expect((promise as PromiseRejectedResult).reason.message).toBe('Navigation failed: NAVIGATION_CANCELLED');
+        expect((promise as PromiseRejectedResult).reason.type).toBe(ErrorTypes.NAVIGATION_CANCELLED);
+        expect(router.route.name).toBe(PathRoute.name);
+
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(getState(PathRoute), '', `${window.location.origin}${PathRoute.path}`);
+      });
+
+      it('should throw a NavigationAbortedError if the navigation is aborted by a navigation guard', async () => {
+        expect.assertions(5);
+
+        let error: NavigationAbortedError;
+        try {
+          await router[method](AbortedRoute);
+        } catch (e) {
+          error = e;
+        } finally {
+          expect(error).toBeDefined();
+          expect(error.message).toBe('Navigation failed: NAVIGATION_ABORTED');
+          expect(error.type).toBe(ErrorTypes.NAVIGATION_ABORTED);
+          expect(router.route).toBeUndefined();
+          expect(spy).not.toHaveBeenCalled();
+        }
+      });
+
+      it('should throw a NavigationNotFoundError if the route does not exist and failOnNotFound is true', async () => {
+        expect.assertions(3);
+
+        let error: NavigationNotFoundError;
+        try {
+          await router[method]({ name: '/not-found' }, { failOnNotFound: true });
+        } catch (e) {
+          error = e;
+        } finally {
+          expect(error).toBeDefined();
+          expect(error.type).toBe(ErrorTypes.NAVIGATION_NOT_FOUND);
+          expect(spy).not.toHaveBeenCalled();
+        }
+      });
+
+      it('should not throw a NavigationNotFoundError if the route does not exist and failOnNotFound is false', async () => {
+        expect.assertions(3);
+
+        await router[method]({ path: '/not-found' }, { failOnNotFound: false });
+
+        expect(router.route).toBeUndefined();
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(getState({ path: '/not-found' }), '', `${window.location.origin}/not-found`);
+      });
+
+      it('should not navigate if the target route and location are the same as the current route', async () => {
+        expect.assertions(7);
+
+        expect(router.route).toBeUndefined();
+
+        await router[method](SpyGuardRoute);
+
+        expect(SpyGuardRoute.beforeEnter).toHaveBeenCalledTimes(1);
+        expect(router.route.name).toBe(SpyGuardRoute.name);
+        expect(spy).toHaveBeenCalledTimes(1);
+
+        await router[method](SpyGuardRoute);
+
+        expect(SpyGuardRoute.beforeEnter).toHaveBeenCalledTimes(1);
+        expect(router.route.name).toBe(SpyGuardRoute.name);
+        expect(spy).toHaveBeenCalledTimes(2);
+      });
+
+      it('should redirect to a new route if the target route has a redirect', async () => {
+        expect.assertions(6);
+
+        expect(router.route).toBeUndefined();
+
+        await router[method](RedirectRoute);
+
+        expect(router.route.name).toBe(RedirectRoute.redirect.name);
+        expect(router.route.path).toBe(PathRoute.path);
+        expect(router.route.path).toBe(PathRoute.path);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(getState(PathRoute), '', `${window.location.origin}${PathRoute.path}`);
+      });
+
+      it('should redirect to a new route if the target route has a redirect guard and followGuardRedirect is true', async () => {
+        expect.assertions(6);
+
+        expect(router.route).toBeUndefined();
+
+        await router[method](RedirectRouteGuard, { followGuardRedirects: true });
+
+        expect(router.route.name).toBe(PathRoute.name);
+        expect(router.route.path).toBe(PathRoute.path);
+        expect(router.route.path).toBe(PathRoute.path);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(getState(PathRoute), '', `${window.location.origin}${PathRoute.path}`);
+      });
+
+      it('should not redirect to a new route if the target route has a redirect guard and followGuardRedirect is false', async () => {
+        expect.assertions(6);
+
+        expect(router.route).toBeUndefined();
+
+        await router[method](RedirectRouteGuard, { followGuardRedirects: false });
+
+        expect(router.route.name).toBe(RedirectRouteGuard.name);
+        expect(router.route.path).toBe(RedirectRouteGuard.path);
+        expect(router.route.path).toBe(RedirectRouteGuard.path);
+        expect(spy).toHaveBeenCalledTimes(1);
+        expect(spy).toHaveBeenCalledWith(getState(RedirectRouteGuard), '', `${window.location.origin}${RedirectRouteGuard.path}`);
+      });
+    };
+
+    describe('push', () => common('push'));
+
+    describe('replace', () => common('replace'));
 
     describe('go', () => {
       it.todo('should navigate forward to a location by its position in the history and update the route and location');
