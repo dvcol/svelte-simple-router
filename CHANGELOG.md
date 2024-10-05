@@ -2,6 +2,35 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/dvcol/svelte-simple-router/compare/v1.1.2...v1.2.0) (2024-10-05)
+
+
+### Features
+
+* **redirect:** rework redirect flow and supports title param injection ([c73cd30](https://github.com/dvcol/svelte-simple-router/commit/c73cd30cd77b104443e88675900c385375d83175))
+* **router:** push/replace state after in memory routing ([a589e28](https://github.com/dvcol/svelte-simple-router/commit/a589e28c0c5debf3cbce85507c2c00382f3c9325))
+* **router:** rework navigation event & listeners ([dc914c2](https://github.com/dvcol/svelte-simple-router/commit/dc914c21bc162279ab79a280f74f87954a3e1148))
+* **transition:** enable transition on every route change ([ee41f9d](https://github.com/dvcol/svelte-simple-router/commit/ee41f9d307422318dcd7828a365119ebafa8db75))
+
+
+### Bug Fixes
+
+* **active:** inverse matching logic & add UT ([4caa895](https://github.com/dvcol/svelte-simple-router/commit/4caa895315713889fc8f5a7f0803a3b33fb20f8b))
+* **active:** use path instead of href for location matching ([add0a23](https://github.com/dvcol/svelte-simple-router/commit/add0a23d1b5d8903c8f7cc55ea22ab5cfdc97b91))
+* **lazy:** add lazy import wrapper to explicit mark lazy components ([c1d0aff](https://github.com/dvcol/svelte-simple-router/commit/c1d0affac60750f6c3f2e5abcd99b455334fbec1))
+* **lint:** fix eslint & svelte check errors ([f6e6996](https://github.com/dvcol/svelte-simple-router/commit/f6e6996380ebef93821876752caa03708e887f45))
+* **logging:** pass log level to router instance ([1a673c0](https://github.com/dvcol/svelte-simple-router/commit/1a673c01133765415d10cb7b7dbdd9d456f84992))
+* **RouteComponent:** delay properties update until component resolve ([bf75f01](https://github.com/dvcol/svelte-simple-router/commit/bf75f01270567b990261b74c44ebed25899ac05d))
+* **RouteContainer:** code split and fix prop injection ([e96a818](https://github.com/dvcol/svelte-simple-router/commit/e96a818a9eac77c01ec0a1756f8b700961775270))
+* **router:** decouple router from window ([3dac944](https://github.com/dvcol/svelte-simple-router/commit/3dac94418bb1665dc1d3cfae0c643769e8028fff))
+* **router:** make back/forward/go await navigation before returning ([3dae60f](https://github.com/dvcol/svelte-simple-router/commit/3dae60fd7a0f9efe8b98f1cb61d790c051074e53))
+* **router:** make listening state reactive ([0b5b098](https://github.com/dvcol/svelte-simple-router/commit/0b5b0984c97d7edbdc8fbf360a21810bf31736dc))
+* **routing:** remove double router children rendering ([5ca97ab](https://github.com/dvcol/svelte-simple-router/commit/5ca97ab605b67349f3b93f992e061240d9bcd5cc))
+* **transition:** adds container and only freeze during exit transition ([403d07c](https://github.com/dvcol/svelte-simple-router/commit/403d07c887d37ea15204ca440910ab025d47bf76))
+* **transition:** freeze size while transitionning ([84f4f01](https://github.com/dvcol/svelte-simple-router/commit/84f4f01884a052df967eafa26103ff53092248a9))
+* **transition:** remove key to prevent unnecessary renders ([0316a55](https://github.com/dvcol/svelte-simple-router/commit/0316a553054597b2a36a796aa81c1af0cad8d4a1))
+* **utils:** adds trailing slash to pathname in hash mode ([9eee5ae](https://github.com/dvcol/svelte-simple-router/commit/9eee5ae6c8da46b2ed9ccbc5196234378d89b003))
+
 ### [1.1.2](https://github.com/dvcol/svelte-simple-router/compare/v1.1.1...v1.1.2) (2024-09-25)
 
 
