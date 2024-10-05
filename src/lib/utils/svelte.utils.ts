@@ -10,13 +10,13 @@ export type LazyComponentImport<
   Props extends Record<string, any> = any,
   Exports extends Record<string, any> = any,
   Bindings extends keyof Props | string = string,
-> = () => Promise<{ default: AnyComponent<Props, Exports, Bindings> }>;
+> = (() => Promise<{ default: AnyComponent<Props, Exports, Bindings> }>) & { _isLazyComponent?: boolean };
 
 export type ComponentOrLazy<
   Props extends Record<string, any> = any,
   Exports extends Record<string, any> = any,
   Bindings extends keyof Props | string = string,
-> = AnyComponent<Props, Exports, Bindings> | LazyComponentImport<Props, Exports, Bindings>;
+> = (AnyComponent<Props, Exports, Bindings> | LazyComponentImport<Props, Exports, Bindings>) & { _isLazyComponent?: boolean };
 
 export const isLazyComponent = <
   Props extends Record<string, any> = any,
@@ -24,7 +24,20 @@ export const isLazyComponent = <
   Bindings extends keyof Props | string = string,
 >(
   component?: ComponentOrLazy<Props, Exports, Bindings>,
-): component is LazyComponentImport<Props, Exports, Bindings> => !!(component && typeof component === 'function' && component.name === 'component');
+): component is LazyComponentImport<Props, Exports, Bindings> =>
+  !!(component && typeof component === 'function' && (component._isLazyComponent || component.name === 'component'));
+
+export const toLazyComponent = <
+  Props extends Record<string, any> = any,
+  Exports extends Record<string, any> = any,
+  Bindings extends keyof Props | string = string,
+>(
+  fn: () => Promise<unknown>,
+): LazyComponentImport<Props, Exports, Bindings> => {
+  const component = fn as LazyComponentImport<Props, Exports, Bindings>;
+  component._isLazyComponent = true;
+  return component;
+};
 
 export const resolveComponent = async <
   Props extends Record<string, any> = any,
@@ -51,7 +64,7 @@ export const resolveComponent = async <
       return awaited.default;
     } catch (error) {
       onError?.(error);
-      throw error;
+      return undefined;
     }
   }
   onLoaded?.(component);

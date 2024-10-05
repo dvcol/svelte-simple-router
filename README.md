@@ -375,7 +375,7 @@ The `router` ([dynamically](https://github.com/dvcol/svelte-simple-router/blob/1
 
 ### Lazy routing
 
-The `Route` object supports lazy loading of the route component.
+The `Route` object supports lazy loading of the route component(s).
 
 When the `component` property is a lazy import, the router will resolve the matched component before rendering it.
 
@@ -383,9 +383,14 @@ While the component is being resolved, the `loading` component will be rendered 
 
 Similarly, if an error occurs during the component resolution, the `error` component will be rendered if any, the `error` snippet if any, or nothing.
 
+The router will try to infer if a component is a lazy import by checking it's name, but for more complex cases, you can use the `toLazyComponent` wrapper.
+Nested lazy components require the wrapper to be used or the function to be manually named `component`. 
+
 ```svelte
 <script lang="ts">
     import { RouterView } from '@dvcol/svelte-simple-router/components';
+    import { toLazyComponent } from '@dvcol/svelte-simple-router/utils';
+    
     import type { Route, RouterOptions } from '@dvcol/svelte-simple-router/models';
     
     const routes: Readonly<Route[]> = [
@@ -400,6 +405,14 @@ Similarly, if an error occurs during the component resolution, the `error` compo
             name: 'lazy-snippet',
             path: '/lazy-snippet',
             component: () => import('./LazyComponent.svelte')
+        },
+        {
+            name: 'lazy-nested',
+            path: '/lazy-nested',
+            components: {
+                default: toLazyComponent(() => import('./LazyComponent.svelte')),
+                nested: toLazyComponent(() => import('./NestedComponent.svelte')),
+            }
         }
     ] as const;
 </script>
