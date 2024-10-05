@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { RouterOptions } from '~';
+  import type { RouterOptions } from '~/models/router.model.js';
 
   let {
     options = $bindable({

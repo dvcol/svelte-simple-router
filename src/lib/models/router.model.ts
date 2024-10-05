@@ -398,6 +398,7 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
   navigation?: Navigation;
   /**
    * Log level of the router.
+   * - `-1` - Silent
    * - `0` - Error
    * - `1` - Warn
    * - `2` - Info
@@ -405,7 +406,7 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
    *
    * @default 1 - Warn
    */
-  logLevel?: LogLevel;
+  logLevel?: LogLevel | keyof typeof LogLevel;
   /**
    * Initial list of routes that should be added to the router.
    */

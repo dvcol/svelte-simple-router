@@ -1,4 +1,4 @@
-import { LogLevel, ProxyLogger } from '@dvcol/common-utils/common/logger';
+import { LogLevel, ProxyLogger, toLogLevel } from '@dvcol/common-utils/common/logger';
 
 export const LoggerKey = 'SSR Router' as const;
 
@@ -7,8 +7,9 @@ export class Logger {
 
   static colorize = ProxyLogger.colorize;
 
-  static setLogLevel(logLevel: LogLevel) {
-    this.logger.logLevel = logLevel;
+  static setLogLevel(logLevel: LogLevel | keyof typeof LogLevel) {
+    if (typeof logLevel === 'string') this.logger.logLevel = toLogLevel(logLevel);
+    else this.logger.logLevel = logLevel;
   }
 
   static get timestamp() {

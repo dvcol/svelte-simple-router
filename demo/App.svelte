@@ -9,7 +9,8 @@
 
   import type { RouterOptions } from '~/models/router.model.js';
 
-  import { toLazyComponent } from '~/utils/svelte.utils';
+  import { LogLevel } from '~/utils/logger.utils.js';
+  import { toLazyComponent } from '~/utils/svelte.utils.js';
 
   const RouteName = {
     Hello: 'Hello',
@@ -244,7 +245,7 @@
 </script>
 
 <div class="column">
-  <DefaultRouter {routes} logLevel={import.meta.env.DEV ? 3 : 2} />
+  <DefaultRouter {routes} logLevel={import.meta.env.DEV ? LogLevel.Debug : LogLevel.Info} />
   <NestedRouters {routes} />
 </div>
 

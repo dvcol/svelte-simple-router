@@ -9,7 +9,7 @@
   import RouterView from '~/components/RouterView.svelte';
   import RouteDebugger from '~/components/debug/RouteDebugger.svelte';
   import RouterDebugger from '~/components/debug/RouterDebugger.svelte';
-  import { transition } from '~/utils/transition.utils';
+  import { transition } from '~/utils/transition.utils.js';
 
   const opts: Partial<RouterOptions> = $props();
 
