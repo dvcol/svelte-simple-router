@@ -3,9 +3,9 @@
 
   import type { IRouter, RouterViewProps } from '~/models/router.model.js';
 
-  import { Logger, LoggerKey } from '~';
   import RouteTransition from '~/components/RouteTransition.svelte';
   import { type ComponentProps, toBaseRoute } from '~/models/route.model.js';
+  import { Logger, LoggerKey } from '~/utils/logger.utils.js';
   import { type AnyComponent, type ComponentOrLazy, resolveComponent } from '~/utils/svelte.utils.js';
 
   const {

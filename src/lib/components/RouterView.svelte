@@ -10,7 +10,7 @@
 </script>
 
 {#snippet view(_router: IRouter)}
-  {@render outerChildren?.(router)}
+  {@render outerChildren?.(_router)}
   <RouteContainer {..._props} />
 {/snippet}
 
