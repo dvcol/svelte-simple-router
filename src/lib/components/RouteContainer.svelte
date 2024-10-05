@@ -19,7 +19,6 @@
     onStart,
     onEnd,
     // snippets
-    children,
     loading: loadingSnippet,
     error: errorSnippet,
   }: RouteContainerProps = $props();
@@ -81,7 +80,6 @@
     {onLoading}
     {onLoaded}
     {onError}
-    {children}
     {errorSnippet}
     {loadingSnippet}
   />

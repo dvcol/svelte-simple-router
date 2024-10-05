@@ -3,6 +3,7 @@
 
   import type { IRouter, RouterViewProps } from '~/models/router.model.js';
 
+  import { Logger, LoggerKey } from '~';
   import RouteTransition from '~/components/RouteTransition.svelte';
   import { type ComponentProps, toBaseRoute } from '~/models/route.model.js';
   import { type AnyComponent, type ComponentOrLazy, resolveComponent } from '~/utils/svelte.utils.js';
@@ -14,6 +15,7 @@
     loading,
     error,
     // route
+    name,
     route,
     router,
     transition,
@@ -22,7 +24,6 @@
     onLoaded,
     onError,
     // snippets
-    children,
     errorSnippet,
     loadingSnippet,
   }: {
@@ -32,6 +33,7 @@
     loading?: Component;
     error?: Component;
     // router
+    name?: string;
     route: IRouter['route'];
     router: IRouter;
     transition?: RouterViewProps['transition'];
@@ -93,6 +95,10 @@
       _error = err;
       ResolvedComponent = error;
       _loading = false;
+      Logger.error([`[${LoggerKey} View`, name ? ` ${name}` : '', router ? ` - ${router.id}` : '', ']'].join(''), 'Fail to load', {
+        err,
+        route: toBaseRoute(route),
+      });
       return onError?.(err, { route: _route });
     };
   });
@@ -105,17 +111,13 @@
 
 {#snippet view()}
   {#if ResolvedComponent}
-    <ResolvedComponent error={_error} {..._properties}>
-      {@render children?.(router)}
-    </ResolvedComponent>
+    <ResolvedComponent error={_error} {..._properties} />
   {:else if _error}
     {@render errorSnippet?.(_error)}
   {:else if _loading}
     {@render loadingSnippet?.(router)}
   {/if}
 {/snippet}
-
-{@render children?.(router)}
 
 {#if transition}
   <RouteTransition key={transitionKey} {transition}>
