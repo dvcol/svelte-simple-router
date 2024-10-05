@@ -11,7 +11,7 @@
   import RouteDebugger from '~/components/debug/RouteDebugger.svelte';
   import RouterDebugger from '~/components/debug/RouterDebugger.svelte';
 
-  const { routes }: { routes: RouterOptions['routes'] } = $props();
+  const opts: Partial<RouterOptions> = $props();
 
   let options: RouterOptions = $state({
     listen: 'history',
@@ -35,7 +35,7 @@
     onError: (err, navigation) => {
       console.error('Option on error', { err, ...navigation });
     },
-    routes,
+    ...opts,
   });
 
   let stripQuery = $state(false);

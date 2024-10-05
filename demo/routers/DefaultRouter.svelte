@@ -11,7 +11,7 @@
   import RouterDebugger from '~/components/debug/RouterDebugger.svelte';
   import { transition } from '~/utils/transition.utils';
 
-  const { routes }: { routes: RouterOptions['routes'] } = $props();
+  const opts: Partial<RouterOptions> = $props();
 
   let options: RouterOptions = $state({
     listen: 'navigation',
@@ -23,7 +23,7 @@
     nameAsTitle: false,
     followGuardRedirects: true,
     caseSensitive: false,
-    routes,
+    ...opts,
   });
 
   let stripQuery = $state(false);

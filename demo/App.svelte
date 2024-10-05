@@ -1,6 +1,4 @@
 <script lang="ts">
-  import { LogLevel } from '@dvcol/common-utils';
-
   import ErrorComponent from './components/Error.svelte';
   import GoodbyeComponent from './components/Goodbye.svelte';
   import HelloComponent from './components/Hello.svelte';
@@ -11,7 +9,7 @@
 
   import type { RouterOptions } from '~/models/router.model.js';
 
-  import { Logger } from '~/utils/logger.utils';
+  import { toLazyComponent } from '~/utils/svelte.utils';
 
   const RouteName = {
     Hello: 'Hello',
@@ -59,7 +57,7 @@
       path: '/nested',
       components: {
         default: HelloComponent,
-        Nested: GoodbyeComponent,
+        Nested: toLazyComponent(() => import('./components/Goodbye.svelte')),
       },
       properties: {
         default: {
@@ -243,12 +241,10 @@
       },
     },
   ];
-
-  if (import.meta.env.DEV) Logger.setLogLevel(LogLevel.Debug);
 </script>
 
 <div class="column">
-  <DefaultRouter {routes} />
+  <DefaultRouter {routes} logLevel={import.meta.env.DEV ? 3 : 2} />
   <NestedRouters {routes} />
 </div>
 
