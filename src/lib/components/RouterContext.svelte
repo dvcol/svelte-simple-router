@@ -24,14 +24,13 @@
     return _router;
   };
 
-  const innerRouter: IRouter | undefined = !outerRouter ? createInnerRouter(router) : undefined;
+  const innerRouter: IRouter | undefined = outerRouter ? undefined : createInnerRouter(router);
   const resolvedRouter: IRouter = (outerRouter ?? innerRouter)!;
 
   onDestroy(() => {
     if (!innerRouter) return;
     innerRouter.destroy();
-    setContext(RouterContextSymbol, null);
-    Logger.debug(`[${LoggerKey} Context]`, 'Router Context unset:', innerRouter);
+    Logger.debug(`[${LoggerKey} Context]`, 'Router Context destroyed', innerRouter);
   });
 </script>
 

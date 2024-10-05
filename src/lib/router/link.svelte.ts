@@ -3,7 +3,7 @@ import type { CommonRouteNavigation, RouteNavigation } from '~/models/route.mode
 import type { RouterNavigationOptions } from '~/models/router.model.js';
 
 import { useRouter } from '~/router/use-router.svelte.js';
-import { Logger } from '~/utils/logger.utils.js';
+import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 
 const isAnchorTarget = (target: EventTarget | null): target is HTMLAnchorElement => {
   return target instanceof HTMLAnchorElement;
@@ -109,7 +109,7 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
 
   let _options = options;
 
-  const navigate = (event: MouseEvent | KeyboardEvent) => {
+  const navigate = async (event: MouseEvent | KeyboardEvent) => {
     // if the target is an anchor element and the event is not a valid navigation event, we return
     if (isNotValidAnchorNavigation(event)) return;
 
@@ -142,7 +142,11 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
     addIfFound(navigationOptions, 'nameAsTitle', _options.nameAsTitle ?? parseBooleanAttribute(node, 'name-as-title'));
     addIfFound(navigationOptions, 'followGuardRedirects', _options.followGuardRedirects ?? parseBooleanAttribute(node, 'follow-guard-redirects'));
 
-    return router[replace ? 'replace' : 'push'](navigation, navigationOptions);
+    try {
+      return await router[replace ? 'replace' : 'push'](navigation, navigationOptions);
+    } catch (error) {
+      Logger.error(`[${LoggerKey} Link - ${router.id}] Failed to navigate`, { node, error, navigation, navigationOptions });
+    }
   };
 
   node.addEventListener('click', navigate);

@@ -323,6 +323,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     };
     if (this.#options.routes) this.addRoutes(this.#options.routes);
     this.#init();
+    if (this.#options?.logLevel !== undefined) Logger.setLogLevel(this.#options.logLevel);
     Logger.debug(this.#log, 'Router created', { options: this.#options });
   }
 
@@ -335,7 +336,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     if (this.#options.onError) this.#onErrorListeners.add(this.#options.onError);
     if (this.#options.listen) this.listen();
 
-    Logger.debug(this.#log, 'Router initialized', { options: this.options });
+    Logger.info(this.#log, 'Router initialized', { options: this.options });
   }
 
   listen() {
@@ -353,7 +354,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     window.removeEventListener('popstate', this.#navigateListener);
     this.#navigation?.removeEventListener('currententrychange', this.#navigateListener);
     this.#listening = false;
-    Logger.debug(this.#log, 'Router destroyed', { listening: this.#listening });
+    Logger.info(this.#log, 'Router destroyed', { listening: this.#listening });
   }
 
   /**
@@ -673,14 +674,14 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
 
       // If a guard returns a redirect, navigate to the new location and replace state
       if (typeof blockOrRedirect === 'object' && _options.followGuardRedirects) {
-        Logger.debug(this.#log, 'Guard redirect', { ...navigation, redirect: blockOrRedirect });
+        Logger.info(this.#log, 'Guard redirect', { ...navigation, redirect: blockOrRedirect });
         navigation.redirect(blockOrRedirect);
         return this.#redirect(blockOrRedirect, { ..._options, followGuardRedirects: false });
       }
 
       // If the route is a redirect, navigate to the new location and replace state
       if (route?.redirect) {
-        Logger.debug(this.#log, 'Route redirect', { ...navigation, redirect: route.redirect });
+        Logger.info(this.#log, 'Route redirect', { ...navigation, redirect: route.redirect });
         navigation.redirect(route.redirect);
         return this.#redirect(route.redirect, _options);
       }
@@ -689,7 +690,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       this.#route = route;
       this.#location = _location;
 
-      Logger.debug(this.#log, 'Navigated to', to?.name || to?.path, navigation);
+      Logger.info(this.#log, 'Navigated to', to?.name || to?.path, navigation);
       navigation.complete();
       return this.snapshot;
     } catch (error) {

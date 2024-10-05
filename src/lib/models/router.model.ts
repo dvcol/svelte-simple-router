@@ -19,6 +19,8 @@ import type {
   RouteWildcards,
 } from '~/models/route.model.js';
 
+import type { LogLevel } from '~/utils/logger.utils.js';
+
 import { NavigationAbortedError, NavigationCancelledError } from '~/models/error.model.js';
 import { isRouteEqual, toBaseRoute } from '~/models/route.model.js';
 
@@ -288,10 +290,6 @@ export type RouteContainerProps<Name extends RouteName = any> = {
    * @see {@link RouteComponent.error}
    */
   error?: Snippet<[unknown]>;
-  /**
-   * Children to render when the router is ready.
-   */
-  children?: Snippet<[IRouter<Name>]>;
 };
 
 export type RouterViewProps<Name extends RouteName = any> = RouterContextProps<Name> & RouteContainerProps<Name>;
@@ -398,6 +396,16 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
    * @default window.navigation
    */
   navigation?: Navigation;
+  /**
+   * Log level of the router.
+   * - `0` - Error
+   * - `1` - Warn
+   * - `2` - Info
+   * - `3` - Debug
+   *
+   * @default 1 - Warn
+   */
+  logLevel?: LogLevel;
   /**
    * Initial list of routes that should be added to the router.
    */

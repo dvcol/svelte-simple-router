@@ -35,3 +35,5 @@ export class Logger {
     return this.logger.error;
   }
 }
+
+export { LogLevel } from '@dvcol/common-utils/common/logger';
