@@ -12,26 +12,26 @@
       nameAsTitle: false,
       followGuardRedirects: true,
       caseSensitive: false,
-      beforeEach: (from, to) => {
-        console.info('Option before each', { from, to });
+      beforeEach: navigation => {
+        console.info('Option before each', navigation);
       },
-      onStart: (from, to) => {
-        console.info('Option on start', { from, to });
+      onStart: navigation => {
+        console.info('Option on start', navigation);
       },
-      onEnd: (from, to) => {
-        console.info('Option on end', { from, to });
+      onEnd: (navigation, resolved) => {
+        console.info('Option on end', { navigation, resolved });
       },
-      onError: (err, { from, to, route }) => {
-        console.error('Option on error', { err, from, to, route });
+      onError: (err, navigation) => {
+        console.error('Option on error', { err, ...navigation });
       },
     }),
     stripQuery = $bindable(false),
     stripHash = $bindable(false),
     stripTrailingHash = $bindable(false),
-  }: { options: RouterOptions<Routes> } = $props();
+  }: { options: RouterOptions; stripQuery?: boolean; stripHash?: boolean; stripTrailingHash?: boolean } = $props();
 
   const configs = $derived(Object.entries(options).filter(([_, v]) => typeof v === 'string' || typeof v === 'boolean')) as [
-    keyof RouterOptions<Routes>,
+    keyof RouterOptions,
     string | boolean,
   ][];
 

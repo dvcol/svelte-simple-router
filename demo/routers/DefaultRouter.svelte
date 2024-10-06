@@ -4,7 +4,7 @@
   import OptionSelector from './OptionSelector.svelte';
   import PathSelector from './PathSelector.svelte';
 
-  import type { RouterOptions } from '~/models/router.model.js';
+  import type { IRouter, RouterOptions } from '~/models/router.model.js';
 
   import RouterView from '~/components/RouterView.svelte';
   import RouteDebugger from '~/components/debug/RouteDebugger.svelte';
@@ -30,6 +30,9 @@
   let stripHash = $state(false);
   let stripTrailingHash = $state(false);
   let updateOnRouteChange = $state(false);
+  let routingSnippet = $state(false);
+  let loadingSnippet = $state(true);
+  let errorSnippet = $state(true);
 
   let mounted = $state(true);
   const refresh = async () => {
@@ -38,6 +41,27 @@
     mounted = true;
   };
 </script>
+
+{#snippet routing(router: IRouter)}
+  <div class="column">
+    <p>Routing ...</p>
+    <p>
+      from <span class="routing">{router?.routing?.from?.location?.name ?? '-'}</span> to
+      <span class="routing">{router?.routing?.to?.name ?? '-'}</span>
+    </p>
+  </div>
+{/snippet}
+
+{#snippet loading()}
+  <div class="column">
+    <p>Default Loading...</p>
+  </div>
+{/snippet}
+
+{#snippet error(err: unknown)}
+  <h1>Default Error</h1>
+  <p class="error">Default Error: {err}</p>
+{/snippet}
 
 {#if mounted}
   <h1>Simple Router</h1>
@@ -57,6 +81,9 @@
           },
         },
       }}
+      routing={routingSnippet ? routing : undefined}
+      loading={loadingSnippet ? loading : undefined}
+      error={errorSnippet ? error : undefined}
     >
       <div class="column selector">
         <PathSelector {stripQuery} {stripHash} {stripTrailingHash} />
@@ -64,21 +91,24 @@
           <label for="update-on-route-change">Update transition on any route change</label>
           <input id="update-on-route-change" type="checkbox" bind:checked={updateOnRouteChange} />
         </div>
+        <div class="row update">
+          <label for="routing-snippet">Enable default routing snippet</label>
+          <input id="routing-snippet" type="checkbox" bind:checked={routingSnippet} />
+        </div>
+        <div class="row update">
+          <label for="loading-snippet">Enable default loading snippet</label>
+          <input id="loading-snippet" type="checkbox" bind:checked={loadingSnippet} />
+        </div>
+        <div class="row update">
+          <label for="error-snippet">Enable default error snippet</label>
+          <input id="error-snippet" type="checkbox" bind:checked={errorSnippet} />
+        </div>
       </div>
 
       <div class="column debuggers">
         <RouterDebugger />
         <RouteDebugger />
       </div>
-
-      {#snippet loading()}
-        <p>Default Loading...</p>
-      {/snippet}
-
-      {#snippet error(err)}
-        <h1>Default Error</h1>
-        <p class="error">Default Error: {err}</p>
-      {/snippet}
     </RouterView>
   </div>
 {/if}
@@ -122,6 +152,10 @@
 
   .error {
     max-width: 30rem;
+    color: red;
+  }
+
+  .routing {
     color: orangered;
   }
 </style>

@@ -129,8 +129,8 @@ export type TransitionProps<
     out?: T['out'];
   };
   props?: {
-    container: Record<string, any>;
-    wrapper: Record<string, any>;
+    container?: Record<string, any>;
+    wrapper?: Record<string, any>;
   };
 };
 
@@ -274,6 +274,10 @@ export type RouteContainerProps<Name extends RouteName = any> = {
    * Navigation end listener passed to the router instance.
    */
   onEnd?: NavigationEndListener<Name>;
+  /**
+   * Routing snippet to display while the route is being resolved.
+   */
+  routing?: Snippet<[IRouter<Name>]>;
   /**
    * Loading snippet to display while the route is loading.
    * Route loading component will take precedence over this.

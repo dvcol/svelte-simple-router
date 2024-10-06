@@ -93,7 +93,7 @@
 
   // stylelint-disable-next-line selector-pseudo-class-no-unknown
   :global(.active) {
-    color: red;
+    color: orangered;
   }
 
   .routes {

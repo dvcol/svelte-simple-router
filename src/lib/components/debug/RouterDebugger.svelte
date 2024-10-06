@@ -23,6 +23,7 @@
 
   const options = $derived(router.options);
   const routing = $derived(router.routing);
+  const location = $derived(router.location);
 
   onDestroy(() => {
     Logger.info(`[${LoggerKey} Debugger]`, 'router detached from "window.router"', router);
@@ -33,9 +34,15 @@
 <div class="debug">
   <h3>Router options - {router?.id}</h3>
   <pre>{JSON.stringify(options, null, 2)}</pre>
+
+  <h3>Routing</h3>
   {#if routing}
-    <h3>Routing</h3>
-    <pre>from '{routing.from?.location?.name ?? routing?.from?.location?.path ?? '-'}' to '{routing.to?.name ?? routing?.to?.path ?? '-'}'</pre>
+    <p>
+      From <span class="route">{routing.from?.location?.name ?? routing?.from?.location?.path ?? '-'}</span> to
+      <span class="route">{routing.to?.name ?? routing?.to?.path ?? '-'}</span>
+    </p>
+  {:else}
+    <p>Navigated to <span class="route">{location?.name ?? location?.path}</span></p>
   {/if}
 </div>
 
@@ -49,6 +56,11 @@
 
     h3 {
       margin-top: 0;
+    }
+
+    .route {
+      color: orangered;
+      font-weight: bold;
     }
   }
 </style>

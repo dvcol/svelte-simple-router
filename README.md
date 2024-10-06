@@ -428,6 +428,14 @@ Nested lazy components require the wrapper to be used or the function to be manu
 </RouterView>
 ```
 
+Note that loading indicator only trigger once the route has been resolved and not on initial navigation.
+If you want to show a loading indicator on initial navigation, you can use the `routing` snippet instead.
+
+This means navigation will be a three-step process:
+- The `routing` snippet will be rendered.
+- Then the `loading` component will be rendered.
+- Then the route component or error component will be rendered.
+
 ### Routes
 
 - Route path supports parameters. Parameters are defined by a colon followed by the parameter name.

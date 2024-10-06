@@ -29,6 +29,7 @@
     BeforeEnterError: 'BeforeEnterError',
     BeforeLeaveError: 'BeforeLeaveError',
     SlowRoute: 'SlowRoute',
+    SlowRouteSlowLoading: 'SlowRouteSlowLoading',
     Any: 'Any',
   } as const;
 
@@ -233,6 +234,18 @@
       props: {
         title: RouteName.SlowRoute,
       },
+    },
+    {
+      name: RouteName.SlowRouteSlowLoading,
+      path: '/slow-route-loading',
+      component: () =>
+        new Promise(resolve => {
+          setTimeout(() => resolve({ default: HelloComponent }), 3000);
+        }),
+      beforeEnter: () =>
+        new Promise(resolve => {
+          setTimeout(() => resolve(), 2000);
+        }),
     },
     {
       name: RouteName.Any,

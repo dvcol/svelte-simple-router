@@ -26,6 +26,7 @@
     // snippets
     errorSnippet,
     loadingSnippet,
+    routingSnippet,
   }: {
     // components
     properties?: ComponentProps;
@@ -45,12 +46,13 @@
     children?: RouterViewProps['children'];
     errorSnippet?: RouterViewProps['error'];
     loadingSnippet?: RouterViewProps['loading'];
+    routingSnippet?: RouterViewProps['routing'];
   } = $props();
 
   // Resolve route, loading or error component to be rendered
   let ResolvedComponent = $state<Component>();
   let _error = $state();
-  let _loading = $state();
+  let _loading = $state(false);
 
   // Generate a unique identifier for each loading state, to prevent cancelled navigations from updating the view
   const routeUUID: string = $derived.by(() => {
@@ -58,8 +60,16 @@
     return '';
   });
 
+  // Extract routing state
+  const routing = $derived(router?.routing?.active);
+
   // Trigger transition on route change or component update
-  const transitionKey = $derived(transition?.updateOnRouteChange ? [ResolvedComponent, routeUUID] : ResolvedComponent);
+  const transitionKey = $derived.by(() => {
+    const _keys: any[] = [ResolvedComponent];
+    if (transition?.updateOnRouteChange) _keys.push(routeUUID);
+    if (routingSnippet) _keys.push(routing);
+    return _keys;
+  });
 
   // Delay properties update until component is resolved
   let _properties: ComponentProps | undefined = $state();
@@ -82,6 +92,7 @@
       if (routeUUID !== _uuid) return;
       ResolvedComponent = _component;
       _properties = properties;
+      _error = undefined;
       _loading = false;
       return onLoaded?.(_route);
     };
@@ -92,8 +103,8 @@
     const _uuid = routeUUID;
     return (err: unknown) => {
       if (routeUUID !== _uuid) return;
-      _error = err;
       ResolvedComponent = error;
+      _error = err;
       _loading = false;
       Logger.error([`[${LoggerKey} View`, name ? ` ${name}` : '', router ? ` - ${router.id}` : '', ']'].join(''), 'Fail to load', {
         err,
@@ -109,13 +120,21 @@
   });
 </script>
 
-{#snippet view()}
+{#snippet routed()}
   {#if ResolvedComponent}
     <ResolvedComponent error={_error} {..._properties} />
-  {:else if _error}
-    {@render errorSnippet?.(_error)}
   {:else if _loading}
     {@render loadingSnippet?.(router)}
+  {:else if _error}
+    {@render errorSnippet?.(_error)}
+  {/if}
+{/snippet}
+
+{#snippet view()}
+  {#if routing && routingSnippet}
+    {@render routingSnippet(router)}
+  {:else}
+    {@render routed()}
   {/if}
 {/snippet}
 

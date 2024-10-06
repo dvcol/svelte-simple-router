@@ -19,6 +19,7 @@
     onStart,
     onEnd,
     // snippets
+    routing: routingSnippet,
     loading: loadingSnippet,
     error: errorSnippet,
   }: RouteContainerProps = $props();
@@ -82,6 +83,7 @@
     {onError}
     {errorSnippet}
     {loadingSnippet}
+    {routingSnippet}
   />
 {:else}
   <h3 style="color: red">Router not found</h3>
