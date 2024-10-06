@@ -6,7 +6,7 @@ import RouterContext from './RouterContext.test.svelte';
 import RouterView from './RouterView.test.svelte';
 import RouterViewNested from './RouterViewNested.test.svelte';
 
-import { routes } from './stub/routes';
+import { routes } from './stub/routes.js';
 
 import { Router } from '~/router/router.svelte.js';
 
@@ -128,6 +128,33 @@ describe('routerView', () => {
         const message = errorComponent.querySelector('p[data-testid="error-message"]');
         expect(message).toBeDefined();
         expect(message?.textContent).toBe('Default Error');
+      });
+
+      it('should render a routing snippet', async () => {
+        expect.assertions(5);
+
+        await router.push({ path: '/goodbye' });
+        render(component, { router });
+        const routing$ = router.push({ name: 'routing' });
+        await wait(100);
+
+        const routing = screen.getByTestId('default-routing');
+        expect(routing).toBeDefined();
+        const from = routing.querySelector('span[data-testid="routing-from"]');
+        console.info('from', routing.innerHTML);
+        expect(from?.textContent).toBe('goodbye');
+        const to = routing.querySelector('span[data-testid="routing-to"]');
+        expect(to?.textContent).toBe('routing');
+
+        await routing$;
+
+        const loading = screen.getByTestId('default-loading');
+        expect(loading).toBeDefined();
+
+        await wait(200);
+
+        const hello = screen.getByTestId('hello-component');
+        expect(hello).toBeDefined();
       });
     };
 

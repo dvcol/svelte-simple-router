@@ -18,4 +18,11 @@
       {/if}
     </div>
   {/snippet}
+  {#snippet routing(_router)}
+    <div data-testid="default-routing">
+      <h1>Default Routing</h1>
+      <span data-testid="routing-from">{_router?.routing?.from?.location?.name}</span>
+      <span data-testid="routing-to">{_router?.routing?.to?.name}</span>
+    </div>
+  {/snippet}
 </RouterView>

@@ -66,4 +66,17 @@ export const routes: Route[] = [
     },
     meta: { key: 'Nested' },
   },
+  {
+    name: 'routing',
+    path: '/routing',
+    props: { title: 'Routing' },
+    meta: { key: 'Routing' },
+    component: async () => {
+      await wait(200);
+      return import('./HelloComponent.test.svelte');
+    },
+    beforeEnter: async () => {
+      await wait(200);
+    },
+  },
 ];
