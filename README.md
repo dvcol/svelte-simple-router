@@ -17,7 +17,6 @@
   </a>
 </p>
 
-> <Web Extension Template> description here
 ## Prerequisites
 
 - svelte >= 5.0.0

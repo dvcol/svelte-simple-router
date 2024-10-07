@@ -2,6 +2,7 @@
   import ErrorComponent from './components/Error.svelte';
   import GoodbyeComponent from './components/Goodbye.svelte';
   import HelloComponent from './components/Hello.svelte';
+  import Links from './components/Links.svelte';
   import Loading from './components/Loading.svelte';
 
   import DefaultRouter from './routers/DefaultRouter.svelte';
@@ -260,6 +261,7 @@
 <div class="column">
   <DefaultRouter {routes} logLevel={import.meta.env.DEV ? LogLevel.Debug : LogLevel.Info} />
   <NestedRouters {routes} />
+  <Links />
 </div>
 
 <style lang="scss">
