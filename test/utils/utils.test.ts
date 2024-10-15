@@ -128,6 +128,16 @@ describe('resolveNewHref', () => {
       expect(search.toString()).toBe('query=string');
     });
 
+    it('should resolve a new href in path mode with a query and target query', () => {
+      expect.assertions(2);
+      const { href, search } = resolveNewHref('/new/path?number=2&query', {
+        query: { query: 'string' },
+        current: 'http://localhost:3000/old/path?old=value',
+      });
+      expect(href.toString()).toBe('http://localhost:3000/new/path?old=value&query=string&number=2');
+      expect(search.toString()).toBe('old=value&query=string&number=2');
+    });
+
     it('should resolve a new href in path mode with a base', () => {
       expect.assertions(2);
       const { href, search } = resolveNewHref('/new/path', { base: '/base', query: { query: 'string' }, current: 'http://localhost:3000/base' });
@@ -195,6 +205,13 @@ describe('resolveNewHref', () => {
       const { href, search } = resolveNewHref('/new/path', { hash: true, query: { query: 'string' } });
       expect(href.toString()).toBe('http://localhost:3000/#/new/path?query=string');
       expect(search.toString()).toBe('query=string');
+    });
+
+    it('should resolve a new href in path mode with a query and target query', () => {
+      expect.assertions(2);
+      const { href, search } = resolveNewHref('/new/path?number=2&query', { hash: true, query: { query: 'string' } });
+      expect(href.toString()).toBe('http://localhost:3000/#/new/path?query=string&number=2');
+      expect(search.toString()).toBe('query=string&number=2');
     });
 
     it('should resolve a new href in hash mode with a base (base is ignored)', () => {

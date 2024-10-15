@@ -75,10 +75,15 @@ export const resolveNewHref = (
 
   // If we have a query params, we override the current query params
   if (query) Object.entries(query).forEach(([key, value]) => search.set(key, String(value)));
+
+  const [_target, _query] = target.split('?');
+  // If the target includes query params, we parse them and merge them with the current query params
+  if (_query?.length) new URLSearchParams(_query).forEach((value, key) => value && search.set(key, value));
+
   // if we have a hash, we override the current hash
   if (hash) {
     const trailingHash = href.hash.split('#')?.slice(2).join('#') ?? '';
-    href.hash = `#${target}`;
+    href.hash = `#${_target}`;
     const strSearch = search.toString();
     if (strSearch) href.hash += `?${strSearch}`;
     if (trailingHash?.length && !stripTrailingHash) href.hash += `#${trailingHash}`;
@@ -86,7 +91,7 @@ export const resolveNewHref = (
     if (href.search && !href.search?.endsWith('/')) href.search += '/';
     if (!href.search?.length && !href.pathname?.endsWith('/')) href.pathname += '/';
   } else {
-    href.pathname = [base, target]
+    href.pathname = [base, _target]
       .filter(Boolean)
       .map(s => toPathSegment(s))
       .join('');
