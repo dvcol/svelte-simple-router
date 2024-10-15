@@ -2,6 +2,7 @@ import type { Action } from 'svelte/action';
 import type { CommonRouteNavigation, RouteNavigation } from '~/models/route.model.js';
 import type { RouterNavigationOptions } from '~/models/router.model.js';
 
+import { NavigationCancelledError } from '~/models/index.js';
 import { useRouter } from '~/router/use-router.svelte.js';
 import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 
@@ -145,7 +146,11 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
     try {
       return await router[replace ? 'replace' : 'push'](navigation, navigationOptions);
     } catch (error) {
-      Logger.error(`[${LoggerKey} Link - ${router.id}] Failed to navigate`, { node, error, navigation, navigationOptions });
+      if (error instanceof NavigationCancelledError) {
+        Logger.warn(`[${LoggerKey} Link - ${router.id}] Navigation cancelled`, { node, error, navigation, navigationOptions });
+      } else {
+        Logger.error(`[${LoggerKey} Link - ${router.id}] Failed to navigate`, { node, error, navigation, navigationOptions });
+      }
     }
   };
 

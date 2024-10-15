@@ -1,7 +1,7 @@
 /// <reference types="navigation-api-types" />
 
 import { randomHex } from '@dvcol/common-utils';
-
+import { debounce } from '@dvcol/common-utils/common/debounce';
 import { raceUntil } from '@dvcol/common-utils/common/promise';
 
 import { computeAbsolutePath, toPathSegment } from '@dvcol/common-utils/common/string';
@@ -719,8 +719,10 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   /**
    * Sync the router with the current location.
    * @private
+   * @internal
    */
-  async sync(): Promise<ResolvedRouterLocationSnapshot<Name>> {
+  async #sync(): Promise<ResolvedRouterLocationSnapshot<Name>> {
+    Logger.debug(this.#log, 'Syncing router');
     let path: string = this.#browser.pathname;
     if (this.#base && !path.startsWith(this.#base)) {
       this.#location = undefined;
@@ -733,6 +735,12 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     const resolve = this.resolve({ path });
     return this.#navigate(resolve);
   }
+
+  /**
+   * Sync the router with the current location.
+   * @debounced
+   */
+  sync: () => Promise<ResolvedRouterLocationSnapshot<Name>> = debounce(this.#sync.bind(this), 0);
 
   /**
    * Internal method to update the history state and navigate to a new URL.

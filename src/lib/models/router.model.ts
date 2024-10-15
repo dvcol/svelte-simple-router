@@ -205,7 +205,7 @@ export class NavigationEvent<Name extends RouteName = RouteName> implements INav
    * @throws {@link NavigationCancelledError}
    */
   cancel(error?: unknown): void {
-    if (!this.active) return Logger.trace('Cannot cancel a navigation event that is not active', this);
+    if (!this.active) return Logger.error('Cannot cancel a navigation event that is not active', this);
     this.#status = 'cancelled';
     this.#error = error;
     if (error instanceof NavigationCancelledError) throw error;
