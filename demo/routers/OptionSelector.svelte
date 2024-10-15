@@ -4,6 +4,7 @@
   let {
     options = $bindable({
       listen: 'history',
+      update: 'replace',
       base: '/svelte-simple-router',
       hash: true,
       strict: false,
@@ -45,6 +46,9 @@
     listen: `In 'navigation' or 'history' mode, the router listen to popstate or navigation events. If both demo routers are not in the same mode (e.g., 'hash' or 'path'), routing conflicts may occur.`,
     hash: `In 'navigation' or 'history' mode, the router listen to popstate or navigation events. If both demo routers are not in the same mode (e.g., 'hash' or 'path'), routing conflicts may occur.`,
   };
+
+  // convert pascal case to title case
+  const toTitleCase = (str: string) => str.replace(/([A-Z])/g, ' $1').replace(/^./, _str => _str.toUpperCase());
 </script>
 
 <div class="row">
@@ -60,7 +64,7 @@
       <tbody>
         {#each configs as [key, value]}
           <tr title={title[key]}>
-            <td>{key}</td>
+            <td>{toTitleCase(key)}</td>
             <td>
               {#if key === 'base'}
                 <input type="text" bind:value={options[key]} />
@@ -69,6 +73,12 @@
                   <option value={'history'}>History</option>
                   <option value={'navigation'}>Navigation</option>
                   <option value={true}>True</option>
+                  <option value={false}>False</option>
+                </select>
+              {:else if key === 'update'}
+                <select bind:value={options[key]}>
+                  <option value={'replace'}>Replace</option>
+                  <option value={'push'}>Push</option>
                   <option value={false}>False</option>
                 </select>
               {:else if typeof value === 'boolean'}

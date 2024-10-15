@@ -426,12 +426,21 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
    *
    * Warning: If set to 'navigation' and multiple router instances are listening to the same navigation events, it may cause conflicts (especially for redirects).
    *
+   * @see {@link RouterOptions.update}
    * @see [Navigation API](https://developer.mozilla.org/docs/Web/API/Navigation)
    * @see [History API](https://developer.mozilla.org/docs/Web/API/History)
    *
-   * @default history
+   * @default false
    */
   listen?: boolean | 'navigation' | 'history';
+  /**
+   * Where to update (push or replace) the history state when syncing the router with external events.
+   *
+   * @see {@link RouterOptions.listen}
+   *
+   * @default replace
+   */
+  update?: false | 'push' | 'replace';
   /**
    * A sorting function to sort the routes when resolving.
    * By default, the routes are sorted by length of the path and then by reverse alphabetical order (to keep wildcards at the end).
@@ -484,6 +493,7 @@ export const defaultOptions: Omit<RouterOptions<any>, 'history' | 'location'> & 
   location: globalThis?.location,
   navigation: typeof window !== 'undefined' ? window.navigation : undefined,
   listen: 'history',
+  update: false,
   priority: RouterPathPriority,
   caseSensitive: false,
   hash: false,

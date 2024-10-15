@@ -154,10 +154,9 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @private
    */
   #navigateListener: (event: PopStateEvent | NavigationCurrentEntryChangeEvent) => void = async () => {
-    const routerState: RouterStateLocation<Name> = this.#history.state?.[RouterStateConstant];
-    if (routerState && this.#location?.href?.toString() === routerState.href?.toString()) return;
-    await this.sync();
-    Logger.debug(this.#log, 'Navigate listener', this.snapshot, routerState);
+    if (this.#matchState) return;
+    await this.#sync();
+    Logger.debug(this.#log, 'Navigate listener', this.snapshot);
   };
 
   /**
@@ -166,6 +165,22 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    */
   get #history(): IHistory<Name> {
     return this.#options.history;
+  }
+
+  /**
+   * State object from the history API.
+   * @private
+   */
+  get #state(): RouterStateLocation<Name> | undefined {
+    return this.#history.state?.[RouterStateConstant];
+  }
+
+  /**
+   * Check if the current location matches the state in the history.
+   * @private
+   */
+  get #matchState(): boolean {
+    return !!(this.#state?.href?.toString() && this.#location?.href?.toString());
   }
 
   /**
@@ -331,7 +346,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   }
 
   async #init() {
-    await this.sync();
+    await this.#sync();
 
     if (this.#options.beforeEach) this.#beforeEachGuards.add(this.#options.beforeEach);
     if (this.#options.onStart) this.#onStartListeners.add(this.#options.onStart);
@@ -729,11 +744,12 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
 
   /**
    * Sync the router with the current location.
+   *
+   * @param update - Whether to push or replace the current location to the history state.
+   * @defaults {@link type RouterOptions.update} or 'replace'
    * @private
-   * @internal
    */
-  async #sync(): Promise<ResolvedRouterLocationSnapshot<Name>> {
-    Logger.debug(this.#log, 'Syncing router');
+  async #sync(update: 'push' | 'replace' | false = this.#options.update ?? 'replace'): Promise<ResolvedRouterLocationSnapshot<Name>> {
     let path: string = this.#browser.pathname;
     if (this.#base && !path.startsWith(this.#base)) {
       this.#location = undefined;
@@ -743,6 +759,9 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     if (this.#hash) path = this.#browser.hash.slice(1);
     else if (this.#base) path = path.slice(this.#base.length);
     if (!path) path = '/';
+    Logger.debug(this.#log, 'Syncing router ...', { update, path });
+    if (update === 'push') return this.push({ path });
+    if (update === 'replace') return this.replace({ path });
     const resolve = this.resolve({ path });
     return this.#navigate(resolve);
   }
