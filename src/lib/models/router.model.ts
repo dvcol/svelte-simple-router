@@ -14,6 +14,7 @@ import type {
   Route,
   RouteName,
   RouteNavigation,
+  RouteNavigationOptions,
   RouteParams,
   RouteQuery,
   RouteWildcards,
@@ -465,12 +466,14 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
    * A navigation listener that is executed when an error occurs during navigation.
    */
   onError?: NavigationErrorListener<Name>;
-} & RouterNavigationOptions;
+} & RouterNavigationOptions &
+  RouteNavigationOptions;
 
 /**
  * Snapshot of the router options.
  */
 export type RouterOptionsSnapshot<Name extends RouteName = RouteName> = RouterNavigationOptions &
+  RouteNavigationOptions &
   Pick<RouterOptions<Name>, 'listen' | 'caseSensitive'>;
 
 /**
@@ -488,6 +491,9 @@ export const defaultOptions: Omit<RouterOptions<any>, 'history' | 'location'> & 
   failOnNotFound: false,
   metaAsState: false,
   nameAsTitle: false,
+  stripQuery: false,
+  stripHash: false,
+  stripTrailingHash: false,
   followGuardRedirects: true,
 };
 

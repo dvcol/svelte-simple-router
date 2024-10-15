@@ -25,22 +25,7 @@ export type RouteQuery = Record<string, RouteParamValue>;
 export type RouteParams = Record<string, RouteParamValue>;
 export type RouteWildcards = Record<string, string>;
 
-export type CommonRouteNavigation = {
-  /**
-   * Query parameters of the location.
-   */
-  query?: RouteQuery;
-  /**
-   * Params of the location.
-   */
-  params?: RouteParams;
-  /**
-   * State to save using the History API.
-   * This cannot contain any reactive values and some primitives like Symbols are forbidden.
-   *
-   * @see [MDN for more information](https://developer.mozilla.org/en-US/docs/Web/API/History/state)
-   */
-  state?: HistoryState;
+export type RouteNavigationOptions = {
   /**
    * Strip current query parameters when navigating.
    * @default false
@@ -58,6 +43,24 @@ export type CommonRouteNavigation = {
    * @default false
    */
   stripTrailingHash?: boolean;
+};
+
+export type CommonRouteNavigation = RouteNavigationOptions & {
+  /**
+   * Query parameters of the location.
+   */
+  query?: RouteQuery;
+  /**
+   * Params of the location.
+   */
+  params?: RouteParams;
+  /**
+   * State to save using the History API.
+   * This cannot contain any reactive values and some primitives like Symbols are forbidden.
+   *
+   * @see [MDN for more information](https://developer.mozilla.org/en-US/docs/Web/API/History/state)
+   */
+  state?: HistoryState;
 };
 
 /**

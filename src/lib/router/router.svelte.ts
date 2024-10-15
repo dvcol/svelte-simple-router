@@ -285,6 +285,9 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       nameAsTitle: this.#options.nameAsTitle,
       followGuardRedirects: this.#options.followGuardRedirects,
       caseSensitive: this.#options.caseSensitive,
+      stripHash: this.#options.stripHash,
+      stripQuery: this.#options.stripQuery,
+      stripTrailingHash: this.#options.stripTrailingHash,
       listen: this.#listening,
     };
   }
@@ -532,7 +535,15 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       hash = this.options?.hash,
     }: Omit<RouterNavigationOptions, 'metaAsState' | 'nameAsTitle'> & { from?: Route<Name> } = {},
   ): ResolvedRoute<Name> {
-    const { query, params, path, name, stripQuery, stripHash, stripTrailingHash } = to;
+    const {
+      query,
+      params,
+      path,
+      name,
+      stripQuery = this.options.stripQuery,
+      stripHash = this.options.stripHash,
+      stripTrailingHash = this.options.stripTrailingHash,
+    } = to;
 
     let _path: string | undefined = path;
     //  if 'name' is present, use namedRoutes to resolve path

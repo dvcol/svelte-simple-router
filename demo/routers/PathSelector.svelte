@@ -8,6 +8,12 @@
 
   const { stripQuery, stripHash, stripTrailingHash }: { stripQuery?: boolean; stripHash?: boolean; stripTrailingHash?: boolean } = $props();
 
+  const navOptions = $derived({
+    stripQuery: stripQuery ? true : undefined,
+    stripHash: stripHash ? true : undefined,
+    stripTrailingHash: stripTrailingHash ? true : undefined,
+  });
+
   const router = useRouter();
 
   const routes: Route[] = $derived(router?.routes ?? []);
@@ -16,7 +22,7 @@
     console.info('onRouterButton', path);
     if (!router) return Logger.error('Router not found');
     try {
-      const route = await router.push({ path, stripQuery, stripHash, stripTrailingHash });
+      const route = await router.push({ path, ...navOptions });
       console.info('Route', route);
     } catch (err: any) {
       console.error(err, err?.from, err?.to);
@@ -53,7 +59,7 @@
     </thead>
     <tbody>
       {#each routes as { name, path, redirect, meta }}
-        <tr use:link={{ name, stripHash, stripTrailingHash, stripQuery }} use:active={{ name, class: 'active', exact: true }}>
+        <tr use:link={{ name, ...navOptions }} use:active={{ name, class: 'active', exact: true }}>
           <td>{name}</td>
           <td>{path}</td>
           <td>{redirect?.name ?? redirect?.path ?? meta?.redirect ?? '-'}</td>

@@ -9,20 +9,17 @@
   import RouterView from '~/components/RouterView.svelte';
   import RouteDebugger from '~/components/debug/RouteDebugger.svelte';
   import RouterDebugger from '~/components/debug/RouterDebugger.svelte';
+  import { defaultOptions } from '~/models/router.model.js';
   import { transition } from '~/utils/transition.utils.js';
 
   const opts: Partial<RouterOptions> = $props();
 
   let options: RouterOptions = $state({
+    ...defaultOptions,
     listen: 'navigation',
+    update: 'replace',
     base: '/svelte-simple-router',
     hash: true,
-    strict: false,
-    failOnNotFound: false,
-    metaAsState: false,
-    nameAsTitle: false,
-    followGuardRedirects: true,
-    caseSensitive: false,
     ...opts,
   });
 
