@@ -10,6 +10,7 @@ import type {
   HistoryState,
   NavigationGuard,
   ParsedRoute,
+  PartialRoute,
   ResolvedRoute,
   Route,
   RouteName,
@@ -21,6 +22,8 @@ import type {
 } from '~/models/route.model.js';
 
 import type { LogLevel } from '~/utils/logger.utils.js';
+
+import type { AnySnippet } from '~/utils/svelte.utils.js';
 
 import { NavigationAbortedError, NavigationCancelledError } from '~/models/error.model.js';
 import { isRouteEqual, toBaseRoute } from '~/models/route.model.js';
@@ -72,6 +75,7 @@ export const isResolvedLocationEqual = <Name extends RouteName = RouteName>(
 ): boolean => isRouteEqual(a?.route, b?.route) && isLocationEqual(a?.location, b?.location);
 
 export const RouterContextSymbol = Symbol('SvelteSimpleRouterContext');
+export const RouterViewSymbol = Symbol('SvelteSimpleRouterView');
 
 export const RouterStateConstant = '__SVELTE_SIMPLE_ROUTER_STATE__' as const;
 export const RouterScrollConstant = '__SVELTE_SIMPLE_ROUTER_SCROLL__' as const;
@@ -278,7 +282,7 @@ export type RouteContainerProps<Name extends RouteName = any> = {
   /**
    * Routing snippet to display while the route is being resolved.
    */
-  routing?: Snippet<[IRouter<Name>]>;
+  routing?: Snippet<[IRouter<Name>['routing']]>;
   /**
    * Loading snippet to display while the route is loading.
    * Route loading component will take precedence over this.
@@ -286,7 +290,7 @@ export type RouteContainerProps<Name extends RouteName = any> = {
    * @see {@link RouteComponents.loadings}
    * @see {@link RouteComponent.loading}
    */
-  loading?: Snippet<[IRouter<Name>]>;
+  loading?: Snippet<[IRouter<Name>['route']]>;
   /**
    * Error snippet to display if the route fails to load.
    * Route error component will take precedence over this.
@@ -298,6 +302,16 @@ export type RouteContainerProps<Name extends RouteName = any> = {
 };
 
 export type RouterViewProps<Name extends RouteName = any> = RouterContextProps<Name> & RouteContainerProps<Name>;
+export type RouteViewProps<Name extends RouteName = any> = {
+  /**
+   * Route to inject into the router.
+   */
+  route: PartialRoute<Name>;
+  /**
+   * Children to render when the router is ready.
+   */
+  children?: AnySnippet;
+} & Pick<RouterViewProps<Name>, 'loading' | 'error'>;
 
 export type RouterScrollPosition = { x: number; y: number };
 export type RouterStateLocation<Name extends RouteName = RouteName> = {

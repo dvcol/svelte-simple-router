@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { type Component } from 'svelte';
+  import { type Component, type Snippet } from 'svelte';
 
   import type { IRouter, RouterViewProps } from '~/models/router.model.js';
 
   import RouteTransition from '~/components/RouteTransition.svelte';
-  import { type ComponentProps, toBaseRoute } from '~/models/route.model.js';
+  import { type ComponentProps, type Route, toBaseRoute } from '~/models/route.model.js';
   import { Logger, LoggerKey } from '~/utils/logger.utils.js';
-  import { type AnyComponent, type ComponentOrLazy, resolveComponent } from '~/utils/svelte.utils.js';
+  import { type AnyComponent, type AnySnippet, isSnippet, resolveComponent } from '~/utils/svelte.utils.js';
 
   const {
     // components
@@ -30,9 +30,9 @@
   }: {
     // components
     properties?: ComponentProps;
-    component?: ComponentOrLazy;
-    loading?: Component;
-    error?: Component;
+    component?: Route['component'];
+    loading?: Route['loading'];
+    error?: Route['error'];
     // router
     name?: string;
     route: IRouter['route'];
@@ -50,7 +50,7 @@
   } = $props();
 
   // Resolve route, loading or error component to be rendered
-  let ResolvedComponent = $state<Component>();
+  let ResolvedComponent = $state<Component | Snippet<[unknown]>>();
   let _error = $state();
   let _loading = $state(false);
 
@@ -88,7 +88,7 @@
   const _onLoaded = $derived.by(() => {
     const _route = toBaseRoute(route);
     const _uuid = routeUUID;
-    return (_component?: AnyComponent) => {
+    return (_component?: AnyComponent | AnySnippet) => {
       if (routeUUID !== _uuid) return;
       ResolvedComponent = _component;
       _properties = properties;
@@ -122,9 +122,13 @@
 
 {#snippet routed()}
   {#if ResolvedComponent}
-    <ResolvedComponent error={_error} {..._properties} />
+    {#if isSnippet(ResolvedComponent)}
+      {@render ResolvedComponent(_error ?? (_loading ? route : _properties))}
+    {:else}
+      <ResolvedComponent error={_error} {..._properties} />
+    {/if}
   {:else if _loading}
-    {@render loadingSnippet?.(router)}
+    {@render loadingSnippet?.(route)}
   {:else if _error}
     {@render errorSnippet?.(_error)}
   {/if}
@@ -132,7 +136,7 @@
 
 {#snippet view()}
   {#if routing && routingSnippet}
-    {@render routingSnippet(router)}
+    {@render routingSnippet(router.routing)}
   {:else}
     {@render routed()}
   {/if}

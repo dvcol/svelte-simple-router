@@ -1,5 +1,6 @@
 import { isShallowEqual, shallowClone } from '@dvcol/common-utils/common/object';
 
+import type { Snippet } from 'svelte';
 import type { IMatcher } from '~/models/matcher.model.js';
 import type { INavigationEvent } from '~/models/router.model.js';
 import type { AnyComponent, ComponentOrLazy } from '~/utils/svelte.utils.js';
@@ -98,15 +99,15 @@ export type RouteComponent = {
   /**
    * Component to display when the URL matches this route.
    */
-  component: ComponentOrLazy;
+  component: ComponentOrLazy | Snippet<unknown[]>;
   /**
    * Loading component to display while the component is being loaded.
    */
-  loading?: AnyComponent;
+  loading?: AnyComponent | Snippet;
   /**
    * Error component to display if the component fails to load.
    */
-  error?: AnyComponent;
+  error?: AnyComponent | Snippet;
   /**
    * Allow passing down params as props to the component rendered by `router`.
    */
@@ -137,15 +138,15 @@ export type RouteComponents<Name extends RouteName = RouteName> = {
   /**
    * Components to display when the URL matches this route.
    */
-  components: Partial<Record<Name | 'default', ComponentOrLazy>>;
+  components: Partial<Record<Name | 'default', ComponentOrLazy | Snippet>>;
   /**
    * Loading components to display while the components are being loaded.
    */
-  loadings?: Partial<Record<Name | 'default', AnyComponent>>;
+  loadings?: Partial<Record<Name | 'default', AnyComponent | Snippet>>;
   /**
    * Error components to display if the components fail to load.
    */
-  errors?: Partial<Record<Name | 'default', AnyComponent>>;
+  errors?: Partial<Record<Name | 'default', AnyComponent | Snippet>>;
   /**
    * Allow passing down params as props to the component rendered by `router`.
    */
@@ -178,7 +179,7 @@ export type RouteRedirect<Name extends RouteName = RouteName> = {
    * before any navigation guard and triggers a new navigation with the new
    * target location.
    */
-  redirect?: RouteNavigation<Name>;
+  redirect: RouteNavigation<Name>;
   /**
    * Props are forbidden in this case.
    */
@@ -272,29 +273,36 @@ export type BaseRoute<Name extends RouteName = RouteName> = {
   params?: RouteParams;
 };
 
+type RouteLogic<Name extends RouteName = RouteName> = {
+  /**
+   * Array of nested routes.
+   */
+  children?: Route<Name>[];
+  /**
+   * Parent route record.
+   */
+  parent?: Route<Name>;
+  /**
+   * Matcher function to match the route to a location.
+   */
+  matcher?: IMatcher;
+  /**
+   * Before Enter guard specific to this record.
+   */
+  beforeEnter?: NavigationGuard<Name>;
+  /**
+   * Before Leave guard specific to this record.
+   */
+  beforeLeave?: NavigationGuard<Name>;
+};
+
 export type Route<Name extends RouteName = RouteName> = BaseRoute<Name> &
-  (RouteRedirect<Name> | RouteComponent | RouteComponents<Name>) & {
-    /**
-     * Array of nested routes.
-     */
-    children?: Route<Name>[];
-    /**
-     * Parent route record.
-     */
-    parent?: Route<Name>;
-    /**
-     * Matcher function to match the route to a location.
-     */
-    matcher?: IMatcher;
-    /**
-     * Before Enter guard specific to this record.
-     */
-    beforeEnter?: NavigationGuard<Name>;
-    /**
-     * Before Leave guard specific to this record.
-     */
-    beforeLeave?: NavigationGuard<Name>;
-  };
+  RouteLogic<Name> &
+  (RouteRedirect<Name> | RouteComponent | RouteComponents<Name>);
+
+export type PartialRoute<Name extends RouteName = RouteName> = BaseRoute<Name> &
+  RouteLogic<Name> &
+  Partial<RouteRedirect<Name> | RouteComponent | RouteComponents<Name>>;
 
 export const cloneRoute = <Name extends RouteName = RouteName>(route: Route<Name>): Route<Name> =>
   shallowClone<Route<Name>, keyof Route<Name>>(route, 2, ['parent', 'component', 'components', 'loading', 'loadings', 'error', 'errors']);

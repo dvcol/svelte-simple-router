@@ -1,6 +1,8 @@
 <script lang="ts">
   import { tick } from 'svelte';
 
+  import DynamicRouteView from '../components/DynamicRouteView.svelte';
+
   import OptionSelector from './OptionSelector.svelte';
   import PathSelector from './PathSelector.svelte';
 
@@ -31,6 +33,7 @@
   let routingSnippet = $state(false);
   let loadingSnippet = $state(true);
   let errorSnippet = $state(true);
+  let routeView = $state(true);
 
   let mounted = $state(true);
   const refresh = async () => {
@@ -40,12 +43,12 @@
   };
 </script>
 
-{#snippet routing(router: IRouter)}
+{#snippet routing(_routing: IRouter['routing'])}
   <div class="column">
     <p>Routing ...</p>
     <p>
-      from <span class="routing">{router?.routing?.from?.location?.name ?? '-'}</span> to
-      <span class="routing">{router?.routing?.to?.name ?? '-'}</span>
+      from <span class="routing">{_routing?.from?.location?.name ?? '-'}</span> to
+      <span class="routing">{_routing?.to?.name ?? '-'}</span>
     </p>
   </div>
 {/snippet}
@@ -83,6 +86,9 @@
       loading={loadingSnippet ? loading : undefined}
       error={errorSnippet ? error : undefined}
     >
+      {#if routeView}
+        <DynamicRouteView />
+      {/if}
       <div class="column selector">
         <PathSelector {stripQuery} {stripHash} {stripTrailingHash} />
         <div class="row update">
@@ -100,6 +106,10 @@
         <div class="row update">
           <label for="error-snippet">Enable default error snippet</label>
           <input id="error-snippet" type="checkbox" bind:checked={errorSnippet} />
+        </div>
+        <div class="row update">
+          <label for="routeView">Route View Component</label>
+          <input id="routeView" type="checkbox" bind:checked={routeView} />
         </div>
       </div>
 

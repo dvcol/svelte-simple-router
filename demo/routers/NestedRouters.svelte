@@ -1,6 +1,8 @@
 <script lang="ts">
   import { tick } from 'svelte';
 
+  import DynamicRouteView from '../components/DynamicRouteView.svelte';
+
   import OptionSelector from './OptionSelector.svelte';
   import PathSelector from './PathSelector.svelte';
 
@@ -88,6 +90,8 @@
 
         <RouterView {options} name="Nested">
           <h2>View nested</h2>
+
+          <DynamicRouteView />
         </RouterView>
       </div>
     </RouterContext>

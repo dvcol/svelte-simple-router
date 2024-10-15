@@ -1,4 +1,4 @@
-import type { Component } from 'svelte';
+import type { Component, Snippet } from 'svelte';
 
 export type AnyComponent<
   Props extends Record<string, any> = any,
@@ -27,6 +27,16 @@ export const isLazyComponent = <
 ): component is LazyComponentImport<Props, Exports, Bindings> =>
   !!(component && typeof component === 'function' && (component._isLazyComponent || component.name === 'component'));
 
+export type AnySnippet = Snippet<any>;
+
+export const isSnippet = <
+  Props extends Record<string, any> = any,
+  Exports extends Record<string, any> = any,
+  Bindings extends keyof Props | string = string,
+>(
+  componentOrSnippet: ComponentOrLazy<Props, Exports, Bindings> | AnySnippet,
+): componentOrSnippet is AnySnippet => componentOrSnippet?.length === 1;
+
 export const toLazyComponent = <
   Props extends Record<string, any> = any,
   Exports extends Record<string, any> = any,
@@ -44,19 +54,19 @@ export const resolveComponent = async <
   Exports extends Record<string, any> = any,
   Bindings extends keyof Props | string = string,
 >(
-  component?: ComponentOrLazy<Props, Exports, Bindings>,
+  component?: ComponentOrLazy<Props, Exports, Bindings> | AnySnippet,
   {
     onLoading,
     onLoaded,
     onError,
   }: {
     onLoading?: () => void;
-    onLoaded?: (component?: Component<Props, Exports, Bindings>) => void;
+    onLoaded?: (component?: Component<Props, Exports, Bindings> | AnySnippet) => void;
     onError?: (error: unknown) => void;
   } = {},
-): Promise<Component<Props, Exports, Bindings> | undefined> => {
+): Promise<Component<Props, Exports, Bindings> | AnySnippet | undefined> => {
   if (!component) return component;
-  if (isLazyComponent(component)) {
+  if (!isSnippet(component) && isLazyComponent(component)) {
     onLoading?.();
     try {
       const awaited = await component();
