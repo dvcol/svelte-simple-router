@@ -209,6 +209,18 @@ describe('resolveNewHref', () => {
       expect(search.toString()).toBe('query=string');
     });
 
+    it('should resolve a new href in hash mode with a base when not on the base already', () => {
+      expect.assertions(2);
+      const { href, search } = resolveNewHref('/new/path', {
+        base: '/base',
+        hash: true,
+        query: { query: 'string' },
+        current: 'http://localhost:3000/other',
+      });
+      expect(href.toString()).toBe('http://localhost:3000/base/#/new/path?query=string');
+      expect(search.toString()).toBe('query=string');
+    });
+
     it('should resolve a new href in hash mode with any pathname', () => {
       expect.assertions(2);
       const { href, search } = resolveNewHref('/new/path', {

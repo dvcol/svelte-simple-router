@@ -82,6 +82,7 @@ export const resolveNewHref = (
     const strSearch = search.toString();
     if (strSearch) href.hash += `?${strSearch}`;
     if (trailingHash?.length && !stripTrailingHash) href.hash += `#${trailingHash}`;
+    if (base) href.pathname = toPathSegment(base, true);
     if (href.search && !href.search?.endsWith('/')) href.search += '/';
     if (!href.search?.length && !href.pathname?.endsWith('/')) href.pathname += '/';
   } else {
