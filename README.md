@@ -353,6 +353,65 @@ Note that although the inner route map are reactive, adding or removing routes w
 
 To force a re-synchronization, you can call the [`sync` method](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L453) on the router instance.
 
+You can also use the `RouteView` component to declare routes dynamically.
+When the component is added to the component tree, the routes will be added to the router instance.
+When the component is removed from the component tree, the routes will be removed from the router instance.
+
+RouteView can be passed a `route` object and will add it to the closest router instance.
+Additionally, if the component/components/redirect are missing, it will try to infer them from the component's children and snippets.
+When inside a named `RouterView`, the children will be added to the components object under the `name` key (provided or discovered through context).
+
+RouteView supports the same error and loading snippets as the RouterView component.
+In addition, named children can be passed as snippets to the component and will be injected into the `components` object.
+If a snippet with the same `name` as the `RouterView` is found, the children will be injected into the `components` object under the `default` key instead.
+
+**Note**: 
+Inputs are not reactive, so you will need to un-mout and remount the component to trigger a route update.
+It is recommended to use the router instance directly if you need to frequently update routes.
+
+```svelte  
+<script lang="ts">
+  import { RouterView, RouterContext, RouteView} from '@dvcol/svelte-simple-router/components';
+
+  import type { PartialRoute } from '@dvcol/svelte-simple-router/models';
+  
+  import ParentComponent from '~/components/hello/ParentComponent.svelte';
+  import ChildComponent from '~/components/goodbye/ChildComponent.svelte';
+
+  const parent: PartialRoute = {
+    name: 'parent',
+    path: '/parent',
+  };
+  
+  const child: PartialRoute = {
+    name: 'child',
+    path: '/parent/child',
+  };
+  
+</script>
+
+<RouterContext {options}>
+  <RouterView>
+    <RouteView route={parent}>
+        <!-- Will render the children in this 'default' RouterView -->
+        <ParentComponent />
+        
+        <!-- Will render this snippet in the 'nested' RouterView -->
+        {#snippet nested()}
+            <ChildComponent />
+        {/snippet}
+    </RouteView>
+  </RouterView>
+  
+  <RouterView name="nested">
+    <RouteView route={parent}>
+        <!-- Will render the children in this 'nested' RouterView, and nothing in the default when  on '/parent/child' -->
+        <ChildComponent />
+    </RouteView>
+  </RouterView>
+</RouterContext>
+```
+
 ### Guards and listeners
 
 The `route and `router` supports several navigation guards and listeners:
