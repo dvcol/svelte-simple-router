@@ -1,17 +1,16 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-
-  import type { PartialRoute } from '~/models/route.model.js';
+  import type { PartialRoute, Route } from '~/models/route.model.js';
 
   import RouteView from '~/components/RouteView.svelte';
 
-  const { children }: { children?: Snippet } = $props();
+  const { children, uuid, ..._props }: { children?: Snippet; uuid?: string } & Record<string, Route['component']> = $props();
 
-  const name = 'RouteView';
+  const name = `RouteView${uuid ? `-${uuid}` : ''}`;
 
   const route: PartialRoute = {
     name,
-    path: '/route-view',
+    path: `/route-view${uuid ? `/${uuid}` : ''}`,
     props: {
       title: name,
     },
@@ -19,9 +18,7 @@
       title: 'Params',
     },
     params: {
-      get date() {
-        return new Date().toISOString();
-      },
+      date: new Date().toISOString(),
     },
     query: {
       type: 'dynamic',
@@ -35,7 +32,7 @@
   };
 </script>
 
-<RouteView {route}>
+<RouteView {route} {..._props}>
   <h1>RouteView</h1>
   <p>Children injected into RouteView</p>
   {@render children?.()}
@@ -46,7 +43,7 @@
     </div>
   {/snippet}
 
-  {#snippet error(err)}
+  {#snippet error(err: Error)}
     <h1>Default Error</h1>
     <p class="error">Default Error {err}</p>
   {/snippet}

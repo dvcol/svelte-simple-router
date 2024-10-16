@@ -66,6 +66,13 @@
         <RouteDebugger />
       </div>
 
+      <DynamicRouteView />
+      <DynamicRouteView uuid="snippets">
+        {#snippet Nested()}
+          <p>Nested Snippet from default view</p>
+        {/snippet}
+      </DynamicRouteView>
+
       <div class="content">
         <RouterView
           {options}
@@ -91,7 +98,12 @@
         <RouterView {options} name="Nested">
           <h2>View nested</h2>
 
-          <DynamicRouteView />
+          <DynamicRouteView uuid="named" />
+          <DynamicRouteView uuid="named-snippet">
+            {#snippet Nested()}
+              <p>Nested Snippet from nested view</p>
+            {/snippet}
+          </DynamicRouteView>
         </RouterView>
       </div>
     </RouterContext>

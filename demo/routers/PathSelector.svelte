@@ -16,7 +16,7 @@
 
   const router = useRouter();
 
-  const routes: Route[] = $derived(router?.routes ?? []);
+  const routes: Route[] = $derived([...(router?.routes ?? [])].sort((a, b) => a.name.localeCompare(b.name)));
 
   const onRouterButton = async (path: string) => {
     console.info('onRouterButton', path);
