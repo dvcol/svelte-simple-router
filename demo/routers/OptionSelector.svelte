@@ -4,7 +4,8 @@
   let {
     options = $bindable({
       listen: 'history',
-      update: 'replace',
+      syncUpdate: 'replace',
+      syncDebounce: 0,
       base: '/svelte-simple-router',
       hash: true,
       strict: false,
@@ -75,7 +76,7 @@
                   <option value={true}>True</option>
                   <option value={false}>False</option>
                 </select>
-              {:else if key === 'update'}
+              {:else if key === 'syncUpdate'}
                 <select bind:value={options[key]}>
                   <option value={'replace'}>Replace</option>
                   <option value={'push'}>Push</option>

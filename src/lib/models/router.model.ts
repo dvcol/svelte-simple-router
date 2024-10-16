@@ -448,13 +448,23 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
    */
   listen?: boolean | 'navigation' | 'history';
   /**
-   * Where to update (push or replace) the history state when syncing the router with external events.
+   * Whether to update (push or replace) the history state when syncing the router with external events.
    *
    * @see {@link RouterOptions.listen}
    *
    * @default replace
    */
-  update?: false | 'push' | 'replace';
+  syncUpdate?: false | 'push' | 'replace';
+
+  /**
+   * Time in milliseconds to debounce the router sync with the current location.
+   * This is useful to avoid multiple syncs when the location changes rapidly.
+   *
+   * @see {@link RouterOptions.listen}
+   *
+   * @default 0
+   */
+  syncDebounce?: number;
   /**
    * A sorting function to sort the routes when resolving.
    * By default, the routes are sorted by length of the path and then by reverse alphabetical order (to keep wildcards at the end).
@@ -497,7 +507,7 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
  */
 export type RouterOptionsSnapshot<Name extends RouteName = RouteName> = RouterNavigationOptions &
   RouteNavigationOptions &
-  Pick<RouterOptions<Name>, 'listen' | 'caseSensitive'>;
+  Pick<RouterOptions<Name>, 'listen' | 'caseSensitive' | 'syncUpdate' | 'syncDebounce'>;
 
 /**
  * Default options to initialize a {@link Router} instance.
@@ -507,7 +517,8 @@ export const defaultOptions: Omit<RouterOptions<any>, 'history' | 'location'> & 
   location: globalThis?.location,
   navigation: typeof window !== 'undefined' ? window.navigation : undefined,
   listen: 'history',
-  update: false,
+  syncUpdate: 'replace',
+  syncDebounce: 0,
   priority: RouterPathPriority,
   caseSensitive: false,
   hash: false,
@@ -581,7 +592,7 @@ export interface IRouter<Name extends RouteName = RouteName> {
    *
    * @param route - Partial route with name or path
    */
-  hasRoute(route: Pick<Route<Name>, 'name' | 'path'>): boolean;
+  hasRoute(route: Pick<Route<Name>, 'name' | 'path'> | { name: Name; path?: string }): boolean;
 
   /**
    * Add a new {@link Route} to the router.
@@ -608,7 +619,7 @@ export interface IRouter<Name extends RouteName = RouteName> {
    *
    * @param route - Partial route with name or path
    */
-  removeRoute(route: Pick<Route<Name>, 'name' | 'path'>): boolean;
+  removeRoute(route: Pick<Route<Name>, 'name' | 'path'> | { name: Name; path?: string }): boolean;
 
   /**
    * Remove multiple routes by their name or path.

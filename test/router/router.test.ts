@@ -6,15 +6,13 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import type { ParsingRelativePathError } from '@dvcol/common-utils/common/error';
 import type { MockInstance } from 'vitest';
-
 import type { NavigationAbortedError, NavigationNotFoundError } from '~/models/error.model.js';
 
 import type { Route, RouteParams, RouteQuery } from '~/models/route.model.js';
+import type { RouterOptions } from '~/models/router.model.js';
 
 import { ErrorTypes } from '~/models/error.model.js';
-
 import { NavigationEvent, RouterScrollConstant, RouterStateConstant } from '~/models/router.model.js';
-
 import { Router } from '~/router/router.svelte.js';
 
 describe('router', () => {
@@ -124,18 +122,48 @@ describe('router', () => {
   ];
 
   let router: Router;
+  let resolve: MockInstance;
+  let sync: MockInstance;
+  let push: MockInstance;
+  let replace: MockInstance;
+
+  const getRouter = async (options: RouterOptions = { routes }, clearInit = false) => {
+    const _router = new Router(options);
+    // Flush the microtask queue to ensure the router is initialized
+    await wait();
+    resolve = vi.spyOn(_router, 'resolve');
+    sync = vi.spyOn(_router, 'sync');
+    push = vi.spyOn(_router, 'push');
+    replace = vi.spyOn(_router, 'replace');
+    if (clearInit) vi.clearAllMocks();
+    return _router;
+  };
+
+  const listeners = new Set<EventListener>();
+  const navigation = {
+    addEventListener: (type: string, fn: EventListener) => listeners.add(fn),
+    removeEventListener: (type: string, fn: EventListener) => listeners.delete(fn),
+    dispatchEvent: (event: Event) => listeners.forEach(fn => fn(event)),
+  } as unknown as Navigation;
+
+  const addNavigationEventListener = vi.spyOn(navigation, 'addEventListener');
+  const removeNavigationEventListener = vi.spyOn(navigation, 'removeEventListener');
+
+  const addWindowEventListener = vi.spyOn(window, 'addEventListener');
+  const removeWindowEventListener = vi.spyOn(window, 'removeEventListener');
 
   afterEach(() => {
     router?.destroy();
+    router = undefined;
     window.location.hash = '';
     window.history.replaceState(null, '', '/');
     vi.clearAllMocks();
   });
 
   describe('constructor', () => {
-    it('should create a new router with the provided routes', () => {
+    it('should create a new router with the provided routes', async () => {
       expect.assertions(routes.length * 4);
-      router = new Router({ routes });
+      router = await getRouter();
       routes.forEach(route => {
         expect(router.routes.filter((r: Route) => r.name === route.name && r.path === route.path)).toHaveLength(1);
         expect(router.hasRoute(route)).toBeTruthy();
@@ -146,9 +174,7 @@ describe('router', () => {
 
     it('should create a new router with the default options', async () => {
       expect.assertions(10);
-      router = new Router({ routes });
-      // Flush the microtask queue to ensure the router is initialized
-      await wait();
+      router = await getRouter();
       expect(router.options.base).toBe('');
       expect(router.options.hash).toBeFalsy();
       expect(router.options.strict).toBeFalsy();
@@ -163,7 +189,7 @@ describe('router', () => {
 
     it('should create a new router with the provided options', async () => {
       expect.assertions(10);
-      router = new Router({
+      router = await getRouter({
         routes,
         base: '/base',
         hash: true,
@@ -175,8 +201,6 @@ describe('router', () => {
         caseSensitive: true,
         listen: false,
       });
-      // Flush the microtask queue to ensure the router is initialized
-      await wait();
       expect(router.options.base).toBe('/base');
       expect(router.options.hash).toBeTruthy();
       expect(router.options.strict).toBeTruthy();
@@ -202,8 +226,7 @@ describe('router', () => {
     };
 
     beforeEach(async () => {
-      router = new Router({ routes });
-      await wait();
+      router = await getRouter();
     });
 
     it('should add a new route to the router', () => {
@@ -265,8 +288,7 @@ describe('router', () => {
 
   describe('removeRoute', () => {
     beforeEach(async () => {
-      router = new Router({ routes });
-      await wait();
+      router = await getRouter();
     });
 
     it('should remove an existing route by its name', () => {
@@ -333,15 +355,18 @@ describe('router', () => {
 
   describe('hooks', () => {
     describe('beforeEach', () => {
-      const beforeEachFn = vi.fn();
+      let beforeEachFn: MockInstance;
+
+      beforeEach(() => {
+        beforeEachFn = vi.fn();
+      });
 
       it('should instantiate a new router with a beforeEach navigation guard', async () => {
         expect.assertions(2);
-        router = new Router({
+        router = await getRouter({
           routes,
           beforeEach: beforeEachFn,
         });
-        await wait();
 
         await router.push(PathRoute);
 
@@ -351,9 +376,7 @@ describe('router', () => {
 
       it('should add a navigation guard to be called before each navigation', async () => {
         expect.assertions(2);
-
-        router = new Router({ routes });
-        await wait();
+        router = await getRouter();
 
         router.beforeEach(beforeEachFn);
 
@@ -365,9 +388,7 @@ describe('router', () => {
 
       it('should remove a navigation guard when the returned function is called', async () => {
         expect.assertions(1);
-
-        router = new Router({ routes });
-        await wait();
+        router = await getRouter();
 
         const remove = router.beforeEach(beforeEachFn);
         remove();
@@ -379,15 +400,18 @@ describe('router', () => {
     });
 
     describe('onStart', () => {
-      const onStartFn = vi.fn();
+      let onStartFn: MockInstance;
+
+      beforeEach(() => {
+        onStartFn = vi.fn();
+      });
 
       it('should instantiate a new router with an onStart listener', async () => {
         expect.assertions(2);
-        router = new Router({
+        router = await getRouter({
           routes,
           onStart: onStartFn,
         });
-        await wait();
 
         await router.push(PathRoute);
 
@@ -397,9 +421,7 @@ describe('router', () => {
 
       it('should add a listener to be called when a navigation starts', async () => {
         expect.assertions(2);
-
-        router = new Router({ routes });
-        await wait();
+        router = await getRouter();
 
         router.onStart(onStartFn);
 
@@ -411,9 +433,7 @@ describe('router', () => {
 
       it('should remove a listener when the returned function is called', async () => {
         expect.assertions(1);
-
-        router = new Router({ routes });
-        await wait();
+        router = await getRouter();
 
         const remove = router.onStart(onStartFn);
         remove();
@@ -425,15 +445,18 @@ describe('router', () => {
     });
 
     describe('onEnd', () => {
-      const onEndFn = vi.fn();
+      let onEndFn: MockInstance;
+
+      beforeEach(() => {
+        onEndFn = vi.fn();
+      });
 
       it('should instantiate a new router with an onEnd listener', async () => {
         expect.assertions(2);
-        router = new Router({
+        router = await getRouter({
           routes,
           onEnd: onEndFn,
         });
-        await wait();
 
         await router.push(PathRoute);
 
@@ -444,8 +467,7 @@ describe('router', () => {
       it('should add a listener to be called when a navigation ends', async () => {
         expect.assertions(2);
 
-        router = new Router({ routes });
-        await wait();
+        router = await getRouter();
 
         router.onEnd(onEndFn);
 
@@ -458,8 +480,7 @@ describe('router', () => {
       it('should remove a listener when the returned function is called', async () => {
         expect.assertions(1);
 
-        router = new Router({ routes });
-        await wait();
+        router = await getRouter();
 
         const remove = router.onEnd(onEndFn);
         remove();
@@ -477,12 +498,11 @@ describe('router', () => {
 
       it('should instantiate a new router with an onError listener', async () => {
         expect.assertions(2);
-        router = new Router({
+        router = await getRouter({
           routes,
           onError: onErrorFn,
           beforeEach: beforeEachErrorFn,
         });
-        await wait();
 
         try {
           await router.push(PathRoute);
@@ -497,11 +517,10 @@ describe('router', () => {
       it('should add a listener to be called when a navigation has an error', async () => {
         expect.assertions(2);
 
-        router = new Router({
+        router = await getRouter({
           routes,
           beforeEach: beforeEachErrorFn,
         });
-        await wait();
 
         router.onError(onErrorFn);
 
@@ -518,11 +537,10 @@ describe('router', () => {
       it('should remove a listener when the returned function is called', async () => {
         expect.assertions(1);
 
-        router = new Router({
+        router = await getRouter({
           routes,
           beforeEach: beforeEachErrorFn,
         });
-        await wait();
 
         const remove = router.onError(onErrorFn);
         remove();
@@ -798,8 +816,7 @@ describe('router', () => {
 
     describe('path mode', () => {
       beforeEach(async () => {
-        router = new Router({ routes, listen: false, hash: false });
-        await wait();
+        router = await getRouter({ routes, listen: false, hash: false });
       });
 
       common();
@@ -837,8 +854,7 @@ describe('router', () => {
 
     describe('hash mode', () => {
       beforeEach(async () => {
-        router = new Router({ routes, listen: false, hash: true });
-        await wait();
+        router = await getRouter({ routes, listen: false, hash: true });
       });
 
       common();
@@ -924,8 +940,8 @@ describe('router', () => {
     const _routes: Route[] = [...routes, SlowRoute, AbortedRoute, RedirectRouteGuard, SpyGuardRoute];
 
     beforeEach(async () => {
-      router = new Router({ routes: _routes, listen: false });
-      await wait();
+      // clear init mock to test navigate behavior only
+      router = await getRouter({ routes: _routes, listen: false }, true);
     });
 
     const common = (method: 'push' | 'replace') => {
@@ -1215,10 +1231,9 @@ describe('router', () => {
     it('should sync the router with the current location in hash mode', async () => {
       expect.assertions(5);
 
-      router = new Router({ routes, listen: false, hash: true });
-      await wait();
+      router = await getRouter({ routes, listen: false, hash: true });
 
-      expect(window.location.hash).toBe('');
+      expect(window.location.hash).toBe('#/');
       expect(router.route).toBeUndefined();
 
       window.location.hash = `#${PathRoute.path}`;
@@ -1233,8 +1248,7 @@ describe('router', () => {
     it('should sync the router with the current location in path mode', async () => {
       expect.assertions(5);
 
-      router = new Router({ routes, listen: false, hash: false });
-      await wait();
+      router = await getRouter({ routes, listen: false, hash: false });
 
       expect(window.location.pathname).toBe('/');
       expect(router.route).toBeUndefined();
@@ -1252,8 +1266,7 @@ describe('router', () => {
       it('should sync the router with the current location if the base path matches in path mode', async () => {
         expect.assertions(4);
 
-        router = new Router({ routes, listen: false, hash: false, base: '/base' });
-        await wait();
+        router = await getRouter({ routes, listen: false, hash: false, base: '/base' });
 
         expect(window.location.pathname).toBe('/');
         expect(router.route).toBeUndefined();
@@ -1269,8 +1282,7 @@ describe('router', () => {
       it('should not sync the router with the current location if the base path does not match in path mode', async () => {
         expect.assertions(4);
 
-        router = new Router({ routes, listen: false, hash: false, base: '/base' });
-        await wait();
+        router = await getRouter({ routes, listen: false, hash: false, base: '/base' });
 
         expect(window.location.pathname).toBe('/');
         expect(router.route).toBeUndefined();
@@ -1286,8 +1298,7 @@ describe('router', () => {
       it('should sync the router with the current location if the base path matches in hash mode', async () => {
         expect.assertions(4);
 
-        router = new Router({ routes, listen: false, hash: true, base: '/base' });
-        await wait();
+        router = await getRouter({ routes, listen: false, hash: true, base: '/base' });
 
         expect(window.location.hash).toBe('');
         expect(router.route).toBeUndefined();
@@ -1304,8 +1315,7 @@ describe('router', () => {
       it('should not sync the router with the current location if the base path does not match in hash mode', async () => {
         expect.assertions(4);
 
-        router = new Router({ routes, listen: false, hash: true, base: '/base' });
-        await wait();
+        router = await getRouter({ routes, listen: false, hash: true, base: '/base' });
 
         expect(window.location.hash).toBe('');
         expect(router.route).toBeUndefined();
@@ -1321,58 +1331,53 @@ describe('router', () => {
   });
 
   describe('listeners', () => {
-    let sync: MockInstance;
-
     describe('history', () => {
-      beforeEach(async () => {
-        router = new Router({ routes, listen: 'history' });
-        await wait();
-        sync = vi.spyOn(router, 'sync');
-      });
-
       it('should subscribe to popstate events when the router is instantiated', async () => {
         expect.assertions(6);
-        const addEventListener = vi.spyOn(window, 'addEventListener');
-        const removeEventListener = vi.spyOn(window, 'removeEventListener');
 
-        router = new Router({ routes, listen: 'history' });
-        await wait();
+        router = await getRouter({ routes, listen: 'history' });
 
         expect(router.options.listen).toBe('history');
 
-        expect(addEventListener).toHaveBeenCalledTimes(1);
-        expect(addEventListener).toHaveBeenCalledWith('popstate', expect.any(Function));
+        expect(addWindowEventListener).toHaveBeenCalledTimes(1);
+        expect(addWindowEventListener).toHaveBeenCalledWith('popstate', expect.any(Function));
 
-        expect(removeEventListener).not.toHaveBeenCalled();
+        expect(removeWindowEventListener).not.toHaveBeenCalled();
         await router.destroy();
 
-        expect(removeEventListener).toHaveBeenCalledTimes(1);
-        expect(removeEventListener).toHaveBeenCalledWith('popstate', expect.any(Function));
+        expect(removeWindowEventListener).toHaveBeenCalledTimes(1);
+        expect(removeWindowEventListener).toHaveBeenCalledWith('popstate', expect.any(Function));
       });
 
       it('should call sync when popstate is triggered', async () => {
-        expect.assertions(5);
+        expect.assertions(6);
 
+        router = await getRouter({ routes, listen: 'history' });
         expect(sync).not.toHaveBeenCalled();
 
         window.dispatchEvent(new PopStateEvent('popstate'));
         await wait();
 
-        expect(sync).toHaveBeenCalledTimes(1);
+        // popstate is ignored because the state is already synced
+        expect(sync).not.toHaveBeenCalled();
         expect(router.route).toBeUndefined();
 
         window.history.pushState(null, '', PathRoute.path);
         window.dispatchEvent(new PopStateEvent('popstate'));
         await wait();
 
-        expect(sync).toHaveBeenCalledTimes(2);
+        expect(sync).toHaveBeenCalledTimes(1);
+        expect(replace).toHaveBeenCalledWith({ path: PathRoute.path });
         expect(router.route.name).toBe(PathRoute.name);
       });
 
       it('should not call sync when popstate is triggered and the state is already synced', async () => {
-        expect.assertions(3);
+        expect.assertions(4);
+
+        router = await getRouter({ routes, listen: 'history' });
 
         await router.push(PathRoute);
+        expect(resolve).toHaveBeenCalledWith(PathRoute, router.options);
         expect(sync).not.toHaveBeenCalled();
 
         expect(router.route.name).toBe(PathRoute.name);
@@ -1386,83 +1391,71 @@ describe('router', () => {
     });
 
     describe('navigation', () => {
-      const listeners = new Set<EventListener>();
-      const navigation = {
-        addEventListener: (type: string, fn: EventListener) => listeners.add(fn),
-        removeEventListener: (type: string, fn: EventListener) => listeners.delete(fn),
-        dispatchEvent: (event: Event) => listeners.forEach(fn => fn(event)),
-      } as unknown as Navigation;
-
-      const addEventListener = vi.spyOn(navigation, 'addEventListener');
-      const removeEventListener = vi.spyOn(navigation, 'removeEventListener');
-
-      beforeEach(async () => {
-        router = new Router({ routes, navigation, listen: 'navigation' });
-        await wait();
-        sync = vi.spyOn(router, 'sync');
-      });
-
       it('should subscribe to currententrychange events when the router is instantiated', async () => {
         expect.assertions(6);
 
-        expect(router.options.listen).toBe('navigation');
-        expect(addEventListener).toHaveBeenCalledTimes(1);
-        expect(addEventListener).toHaveBeenCalledWith('currententrychange', expect.any(Function));
+        router = await getRouter({ routes, navigation, listen: 'navigation' });
 
-        expect(removeEventListener).not.toHaveBeenCalled();
+        expect(router.options.listen).toBe('navigation');
+        expect(addNavigationEventListener).toHaveBeenCalledTimes(1);
+        expect(addNavigationEventListener).toHaveBeenCalledWith('currententrychange', expect.any(Function));
+
+        expect(removeNavigationEventListener).not.toHaveBeenCalled();
         await router.destroy();
 
-        expect(removeEventListener).toHaveBeenCalledTimes(1);
-        expect(removeEventListener).toHaveBeenCalledWith('currententrychange', expect.any(Function));
+        expect(removeNavigationEventListener).toHaveBeenCalledTimes(1);
+        expect(removeNavigationEventListener).toHaveBeenCalledWith('currententrychange', expect.any(Function));
       });
 
       it('should fallback to `history` when `navigation` is not supported', async () => {
         expect.assertions(7);
-        vi.clearAllMocks();
 
-        const addWindowEventListener = vi.spyOn(window, 'addEventListener');
-        const removeWindowEventListener = vi.spyOn(window, 'removeEventListener');
-
-        router = new Router({ routes, listen: 'navigation', navigation: null });
-        await wait();
+        router = await getRouter({ routes, listen: 'navigation', navigation: null });
 
         expect(router.options.listen).toBe('history');
         expect(addWindowEventListener).toHaveBeenCalledTimes(1);
         expect(addWindowEventListener).toHaveBeenCalledWith('popstate', expect.any(Function));
 
-        expect(addEventListener).not.toHaveBeenCalled();
+        expect(addNavigationEventListener).not.toHaveBeenCalled();
 
         await router.destroy();
 
         expect(removeWindowEventListener).toHaveBeenCalledTimes(1);
         expect(removeWindowEventListener).toHaveBeenCalledWith('popstate', expect.any(Function));
-        expect(removeEventListener).not.toHaveBeenCalled();
+        expect(addNavigationEventListener).not.toHaveBeenCalled();
       });
 
       it('should call navigation listeners when currententrychange is triggered', async () => {
-        expect.assertions(5);
+        expect.assertions(6);
+
+        router = await getRouter({ routes, navigation, listen: 'navigation' });
 
         expect(sync).not.toHaveBeenCalled();
 
+        // currententrychange is ignored because the state is already synced
         navigation.dispatchEvent(new CustomEvent('currententrychange'));
         await wait();
 
-        expect(sync).toHaveBeenCalledTimes(1);
+        expect(sync).not.toHaveBeenCalled();
         expect(router.route).toBeUndefined();
 
         window.history.pushState(null, '', PathRoute.path);
         navigation.dispatchEvent(new CustomEvent('currententrychange'));
         await wait();
 
-        expect(sync).toHaveBeenCalledTimes(2);
+        expect(sync).toHaveBeenCalledTimes(1);
+        expect(replace).toHaveBeenCalledWith({ path: PathRoute.path });
         expect(router.route.name).toBe(PathRoute.name);
       });
 
       it('should not call sync when currententrychange is triggered and the state is already synced', async () => {
-        expect.assertions(3);
+        expect.assertions(4);
+
+        router = await getRouter({ routes, navigation, listen: 'navigation' });
 
         await router.push(PathRoute);
         expect(sync).not.toHaveBeenCalled();
+        expect(resolve).toHaveBeenCalledWith(PathRoute, router.options);
 
         expect(router.route.name).toBe(PathRoute.name);
 
@@ -1471,6 +1464,69 @@ describe('router', () => {
         await wait();
 
         expect(sync).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('sync', () => {
+      it('should not update the state when a navigation is redirected', async () => {
+        expect.assertions(8);
+
+        router = await getRouter({ routes, navigation, listen: 'navigation', syncUpdate: false });
+
+        const path = '/wildcard/something';
+        window.history.pushState(null, '', path);
+        navigation.dispatchEvent(new CustomEvent('currententrychange'));
+        await wait();
+
+        expect(sync).toHaveBeenCalledTimes(1);
+        expect(resolve).toHaveBeenCalledTimes(2);
+        expect(resolve).toHaveBeenCalledWith({ path });
+        expect(resolve).toHaveBeenCalledWith({ name: PathRoute.name }, router.options);
+        expect(replace).not.toHaveBeenCalled();
+        expect(push).not.toHaveBeenCalled();
+
+        expect(router.route.name).toBe(PathRoute.name);
+        expect(window.location.pathname).toBe(path);
+      });
+
+      it('should push state to the history when a navigation is redirected', async () => {
+        expect.assertions(7);
+
+        router = await getRouter({ routes, navigation, listen: 'navigation', syncUpdate: 'replace' });
+
+        const path = '/wildcard/something';
+        window.history.pushState(null, '', path);
+        navigation.dispatchEvent(new CustomEvent('currententrychange'));
+        await wait();
+
+        expect(sync).toHaveBeenCalledTimes(1);
+        expect(resolve).toHaveBeenCalledTimes(2);
+        expect(replace).toHaveBeenCalledTimes(1);
+        expect(replace).toHaveBeenCalledWith({ path });
+        expect(push).not.toHaveBeenCalled();
+
+        expect(router.route.name).toBe(PathRoute.name);
+        expect(window.location.pathname).toBe(PathRoute.path);
+      });
+
+      it('should replace state in the history when a navigation is redirected', async () => {
+        expect.assertions(7);
+
+        router = await getRouter({ routes, navigation, listen: 'navigation', syncUpdate: 'push' });
+
+        const path = '/wildcard/something';
+        window.history.pushState(null, '', path);
+        navigation.dispatchEvent(new CustomEvent('currententrychange'));
+        await wait();
+
+        expect(sync).toHaveBeenCalledTimes(1);
+        expect(resolve).toHaveBeenCalledTimes(2);
+        expect(push).toHaveBeenCalledTimes(1);
+        expect(push).toHaveBeenCalledWith({ path });
+        expect(replace).not.toHaveBeenCalled();
+
+        expect(router.route.name).toBe(PathRoute.name);
+        expect(window.location.pathname).toBe(PathRoute.path);
       });
     });
   });

@@ -19,8 +19,6 @@
   let options: RouterOptions = $state({
     ...defaultOptions,
     listen: 'navigation',
-    replace: 'replace',
-    update: 'replace',
     base: '/svelte-simple-router',
     hash: true,
     ...opts,

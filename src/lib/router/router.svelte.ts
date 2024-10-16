@@ -155,7 +155,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    */
   #navigateListener: (event: PopStateEvent | NavigationCurrentEntryChangeEvent) => void = async () => {
     if (this.#matchState) return;
-    await this.#sync();
+    await this.sync();
     Logger.debug(this.#log, 'Navigate listener', this.snapshot);
   };
 
@@ -300,6 +300,8 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       nameAsTitle: this.#options.nameAsTitle,
       followGuardRedirects: this.#options.followGuardRedirects,
       caseSensitive: this.#options.caseSensitive,
+      syncUpdate: this.#options.syncUpdate,
+      syncDebounce: this.#options.syncDebounce,
       stripHash: this.#options.stripHash,
       stripQuery: this.#options.stripQuery,
       stripTrailingHash: this.#options.stripTrailingHash,
@@ -340,6 +342,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       base: toPathSegment(options.base),
     };
     if (this.#options.routes) this.addRoutes(this.#options.routes);
+    this.sync = debounce(this.#sync.bind(this), this.#options.syncDebounce ?? 0);
     this.#init();
     if (this.#options?.logLevel !== undefined) Logger.setLogLevel(this.#options.logLevel);
     Logger.debug(this.#log, 'Router created', { options: this.#options });
@@ -398,7 +401,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    *
    * @param route - Partial route with name or path
    */
-  hasRoute({ path, name }: Pick<Route<Name>, 'name' | 'path'>): boolean {
+  hasRoute({ path, name }: Pick<Route<Name>, 'name' | 'path'> | { name: Name; path?: string }): boolean {
     if (name && this.hasRouteName(name)) return true;
     return !!(path && this.hasRoutePath(path));
   }
@@ -448,7 +451,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    *
    * @param route - Partial route with name or path
    */
-  removeRoute({ path, name }: Pick<Route<Name>, 'name' | 'path'>): boolean {
+  removeRoute({ path, name }: Pick<Route<Name>, 'name' | 'path'> | { name: Name; path?: string }): boolean {
     //  If no name or path is provided, return false
     if (!name && !path) return false;
 
@@ -749,7 +752,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @defaults {@link type RouterOptions.update} or 'replace'
    * @private
    */
-  async #sync(update: 'push' | 'replace' | false = this.#options.update ?? 'replace'): Promise<ResolvedRouterLocationSnapshot<Name>> {
+  async #sync(update: 'push' | 'replace' | false = this.#options.syncUpdate ?? 'replace'): Promise<ResolvedRouterLocationSnapshot<Name>> {
     let path: string = this.#browser.pathname;
     if (this.#base && !path.startsWith(this.#base)) {
       this.#location = undefined;
@@ -770,7 +773,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * Sync the router with the current location.
    * @debounced
    */
-  sync: () => Promise<ResolvedRouterLocationSnapshot<Name>> = debounce(this.#sync.bind(this), 0);
+  readonly sync: () => Promise<ResolvedRouterLocationSnapshot<Name>>;
 
   /**
    * Internal method to update the history state and navigate to a new URL.

@@ -1,17 +1,17 @@
 import type { Action } from 'svelte/action';
 
-import type { ParsedRoute } from '~/models/route.model.js';
+import type { ParsedRoute, RouteName } from '~/models/route.model.js';
 
 import { Matcher } from '~/models/index.js';
 import { useRouter } from '~/router/use-router.svelte.js';
 import { Logger } from '~/utils/logger.utils.js';
 
-export type ActiveActionOptions = {
+export type ActiveActionOptions<Name extends RouteName = RouteName> = {
   /**
    * Route name to match against.
    * This takes precedence over the path option.
    */
-  name?: string;
+  name?: Name;
   /**
    * Route path to match against.
    * This is ignored if the name option is provided.
@@ -83,7 +83,7 @@ export const active: Action<HTMLElement, ActiveActionOptions | undefined> = (nod
 
   let _options = $state(options);
   let _path: string | null = $state(_options.path || node.getAttribute('data-path') || node.getAttribute('href'));
-  let _name: string | null = $state(_options.name || node.getAttribute('data-name'));
+  let _name: RouteName | null = $state(_options.name || node.getAttribute('data-name'));
 
   if (!_path && !_name) {
     Logger.warn('No path or name found. Make sure you are using the active action with the proper parameters.', { node, options });
@@ -98,7 +98,7 @@ export const active: Action<HTMLElement, ActiveActionOptions | undefined> = (nod
     if (!route?.name) return false;
     const names = _options.exact ? [route.name] : getParentName(route);
     if (caseSensitive) return names.includes(_name);
-    return names.map(n => String(n)?.toLowerCase()).includes(_name?.toLowerCase());
+    return names.map(n => String(n)?.toLowerCase()).includes(String(_name)?.toLowerCase());
   });
 
   const location = $derived(router.location?.path);

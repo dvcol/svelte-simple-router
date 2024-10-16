@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { Route } from '~/models/route.model.js';
+  import type { Route, RouteName } from '~/models/route.model.js';
 
   import { active } from '~/router/active.svelte';
   import { link } from '~/router/link.svelte';
@@ -36,7 +36,7 @@
     await router.addRoute(route).sync();
     console.info('New routes', router.routes);
   };
-  const onRemoveRoute = async (name: string) => {
+  const onRemoveRoute = async (name?: RouteName) => {
     if (!router) return Logger.error('Router not found');
     console.info('onRemoveRoute', route);
     if (!router.removeRoute({ name })) return;
@@ -80,8 +80,8 @@
 </div>
 
 <div class="row">
-  <button onclick={async () => router.back()}>Back</button>
-  <button onclick={() => router.forward()}>Forward</button>
+  <button onclick={async () => router?.back()}>Back</button>
+  <button onclick={() => router?.forward()}>Forward</button>
 </div>
 
 <style lang="scss">

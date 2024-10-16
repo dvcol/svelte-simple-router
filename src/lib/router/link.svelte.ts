@@ -1,5 +1,5 @@
 import type { Action } from 'svelte/action';
-import type { CommonRouteNavigation, RouteNavigation } from '~/models/route.model.js';
+import type { CommonRouteNavigation, RouteName, RouteNavigation } from '~/models/route.model.js';
 import type { RouterNavigationOptions } from '~/models/router.model.js';
 
 import { NavigationCancelledError } from '~/models/index.js';
@@ -58,7 +58,8 @@ const isNotValidAnchorNavigation = (event: MouseEvent | KeyboardEvent) => {
   return !isSameHost(anchor);
 };
 
-export type LinkActionOptions = CommonRouteNavigation & RouterNavigationOptions & { replace?: boolean; name?: string; path?: string };
+export type LinkActionOptions<Name extends RouteName = RouteName> = CommonRouteNavigation &
+  RouterNavigationOptions & { replace?: boolean; name?: Name; path?: string };
 
 /**
  * A svelte action to add to an element to navigate to a new location using the router.
@@ -121,7 +122,7 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
     const name = _options?.name || node.getAttribute('data-name');
     const path = (_options?.path || node.getAttribute('data-path') || node.getAttribute('href')) ?? '';
 
-    const navigation: RouteNavigation = name?.length ? { name } : { path };
+    const navigation: RouteNavigation = name ? { name } : { path };
 
     // CommonRouteNavigation
     addIfFound(navigation, 'query', _options.query ?? parseJsonAttribute(node, 'query'));
