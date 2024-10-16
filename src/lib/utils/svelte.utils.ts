@@ -65,8 +65,7 @@ export const resolveComponent = async <
     onError?: (error: unknown) => void;
   } = {},
 ): Promise<Component<Props, Exports, Bindings> | AnySnippet | undefined> => {
-  if (!component) return component;
-  if (!isSnippet(component) && isLazyComponent(component)) {
+  if (component && !isSnippet(component) && isLazyComponent(component)) {
     onLoading?.();
     try {
       const awaited = await component();
