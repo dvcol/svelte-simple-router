@@ -298,11 +298,11 @@ export type RouteContainerProps<Name extends RouteName = any> = {
    * @see {@link RouteComponents.errors}
    * @see {@link RouteComponent.error}
    */
-  error?: Snippet<[unknown]>;
+  error?: Snippet<[Error | any]>;
 };
 
 export type RouterViewProps<Name extends RouteName = any> = RouterContextProps<Name> & RouteContainerProps<Name>;
-export type RouteViewProps<Name extends RouteName = any> = {
+export type RouteViewProps<Name extends RouteName = any> = Pick<RouterViewProps<Name>, 'loading' | 'error' | 'name'> & {
   /**
    * Route to inject into the router.
    */
@@ -311,7 +311,7 @@ export type RouteViewProps<Name extends RouteName = any> = {
    * Children to render when the router is ready.
    */
   children?: AnySnippet;
-} & Pick<RouterViewProps<Name>, 'loading' | 'error'>;
+} & Partial<Record<Name, Route<Name>['component']>>;
 
 export type RouterScrollPosition = { x: number; y: number };
 export type RouterStateLocation<Name extends RouteName = RouteName> = {

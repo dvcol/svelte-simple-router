@@ -99,7 +99,7 @@ export type RouteComponent = {
   /**
    * Component to display when the URL matches this route.
    */
-  component: ComponentOrLazy | Snippet<unknown[]>;
+  component: ComponentOrLazy | Snippet;
   /**
    * Loading component to display while the component is being loaded.
    */

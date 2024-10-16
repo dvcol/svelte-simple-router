@@ -7,24 +7,44 @@
   import { useRouter, useView } from '~/router/use-router.svelte.js';
   import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 
-  const { children, loading, error, route }: RouteViewProps = $props();
+  const { children, loading, error, route, name, ..._props }: RouteViewProps = $props();
 
   const router = useRouter();
   if (!router) throw new MissingRouterContextError();
 
-  const name = useView();
+  const _name = name ?? useView();
 
-  if (!children && !route.redirect && !route.components?.[name || 'default'] && !route.component) {
-    Logger.warn(`[${LoggerKey} Route - ${router.id}]`, 'Route has no component, redirect or children', route);
+  let component: Route['component'] | undefined;
+  let components: Route['components'] | undefined;
+
+  // Extract snippet/component from props
+  if (Object.keys(_props).length) {
+    components = Object.entries(_props).reduce<NonNullable<Route['components']>>((acc, [key, value]) => {
+      if (typeof value !== 'function') return acc;
+      acc[key] = value;
+      return acc;
+    }, {});
+  }
+
+  if (_name) {
+    components ??= {};
+    if (components[_name]) components.default = children;
+    else components[_name] = children;
+  } else {
+    component = children;
   }
 
   const _route = {
-    component: name ? undefined : children,
-    components: name ? { [name]: children } : undefined,
+    component,
+    components,
     error,
     loading,
     ...route,
   } as Route;
+
+  if (!_route.component && !_route.redirect && !_route.components?.[_name || 'default']) {
+    Logger.warn(`[${LoggerKey} Route - ${router.id}]`, 'Route has no component, redirect or children', _route);
+  }
 
   router.addRoute(_route);
   router.sync();
