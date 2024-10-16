@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.4.0](https://github.com/dvcol/svelte-simple-router/compare/v1.3.0...v1.4.0) (2024-10-16)
+
+
+### Features
+
+* **RouteView:** adds declarative route API for dynamically adding route ([6f9039b](https://github.com/dvcol/svelte-simple-router/commit/6f9039b484536fccb427cdb4f00c2fd94709b636))
+* **RouteView:** adds support to snippet ([428eab8](https://github.com/dvcol/svelte-simple-router/commit/428eab87d47668dac96873e3979f24cb35dc417e))
+
+
+### Bug Fixes
+
+* **hash:** replace base when navigating in hash mode ([a8c00b1](https://github.com/dvcol/svelte-simple-router/commit/a8c00b13601a200294a74e8c226251b3096d9a10))
+* **nested:** clear component when no component found ([e3ad994](https://github.com/dvcol/svelte-simple-router/commit/e3ad9940923c2877f2ed00ccbd5ac0dacd98260a))
+* **options:** adds default routing options to routerinstance ([4f9abad](https://github.com/dvcol/svelte-simple-router/commit/4f9abad8a84d91c2da314aeab86e7a0ba8fc461f))
+* **router:** correct typing & adds UT for sync strategy ([2184ace](https://github.com/dvcol/svelte-simple-router/commit/2184ace3abd70494a47ac2f572dd3ab739e2ab77))
+* **sync:** allow replace of history state when syncing router ([4a2a7b3](https://github.com/dvcol/svelte-simple-router/commit/4a2a7b3dbd8db2c89311ed97b7400ad5b1a3b3d6))
+* **url:** correctly parse path parameter when syncing ([e3e5f4d](https://github.com/dvcol/svelte-simple-router/commit/e3e5f4d952e5409b9a9e56ee639437a90f3a89f5))
+
 ## [1.3.0](https://github.com/dvcol/svelte-simple-router/compare/v1.2.0...v1.3.0) (2024-10-06)
 
 
