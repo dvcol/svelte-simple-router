@@ -24,6 +24,7 @@
       acc[key] = value;
       return acc;
     }, {});
+    if (!Object.keys(components).length) components = undefined;
   }
 
   if (_name) {
@@ -35,14 +36,14 @@
   }
 
   const _route = {
-    component,
-    components,
-    error,
-    loading,
     ...route,
+    component: route.component ?? component,
+    components: route.components ?? components,
+    error: route.error ?? error,
+    loading: route.loading ?? loading,
   } as Route;
 
-  if (!_route.component && !_route.redirect && !_route.components?.[_name || 'default']) {
+  if (!_route.redirect && !_route.component && !_route.components?.[_name || 'default']) {
     Logger.warn(`[${LoggerKey} Route - ${router.id}]`, 'Route has no component, redirect or children', _route);
   }
 

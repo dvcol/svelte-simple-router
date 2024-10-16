@@ -4,7 +4,7 @@ import ErrorComponent from './ErrorComponent.test.svelte';
 import HelloComponent from './HelloComponent.test.svelte';
 import LoadingComponent from './LoadingComponent.test.svelte';
 
-import type { Route } from '~/models/route.model.js';
+import type { PartialRoute, Route } from '~/models/route.model.js';
 
 import { toLazyComponent } from '~/utils/svelte.utils.js';
 
@@ -80,3 +80,29 @@ export const routes: Route[] = [
     },
   },
 ];
+
+export const partialRoute: PartialRoute = {
+  name: 'RouteView',
+  path: '/route-view',
+  component: () => import('./HelloComponent.test.svelte'),
+  error: ErrorComponent,
+  loading: LoadingComponent,
+  props: { title: 'Route View' },
+  meta: { key: 'Route View' },
+};
+
+export const namedPartialRoute: PartialRoute = {
+  name: 'NamedRouteView',
+  path: '/named-route-view',
+  components: {
+    default: HelloComponent,
+    nested: toLazyComponent(() => import('./GoodbyeComponent.test.svelte')),
+  },
+  properties: {
+    default: { title: 'Named Route View Hello' },
+    nested: { title: 'Named Route View Goodbye' },
+  },
+  error: ErrorComponent,
+  loading: LoadingComponent,
+  meta: { key: 'Named Route View' },
+};

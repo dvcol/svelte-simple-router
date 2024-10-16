@@ -10,7 +10,7 @@
 {#snippet loading()}
   <div data-testid="default-loading"><h1>Default Loading</h1></div>
 {/snippet}
-{#snippet error(_error)}
+{#snippet error(_error: Error)}
   <div data-testid="default-error">
     <h1>Default Error</h1>
     {#if _error}
@@ -18,11 +18,11 @@
     {/if}
   </div>
 {/snippet}
-{#snippet routing(_router: IRouter)}
+{#snippet routing(_routing: IRouter['routing'])}
   <div data-testid="default-routing">
     <h1>Default Routing</h1>
-    <span data-testid="routing-from">{_router?.routing?.from?.location?.name}</span>
-    <span data-testid="routing-to">{_router?.routing?.to?.name}</span>
+    <span data-testid="routing-from">{_routing?.from?.location?.name}</span>
+    <span data-testid="routing-to">{_routing?.to?.name}</span>
   </div>
 {/snippet}
 

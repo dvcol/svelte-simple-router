@@ -23,8 +23,6 @@ import type {
 
 import type { LogLevel } from '~/utils/logger.utils.js';
 
-import type { AnySnippet } from '~/utils/svelte.utils.js';
-
 import { NavigationAbortedError, NavigationCancelledError } from '~/models/error.model.js';
 import { isRouteEqual, toBaseRoute } from '~/models/route.model.js';
 
@@ -310,7 +308,7 @@ export type RouteViewProps<Name extends RouteName = any> = Pick<RouterViewProps<
   /**
    * Children to render when the router is ready.
    */
-  children?: AnySnippet;
+  children?: Snippet;
 } & Partial<Record<Name, Route<Name>['component']>>;
 
 export type RouterScrollPosition = { x: number; y: number };
