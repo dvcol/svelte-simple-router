@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/dvcol/svelte-simple-router/compare/v1.4.0...v1.5.0) (2024-10-24)
+
+
+### Features
+
+* **dep:** bump to svelte 5 final release ([bf25d84](https://github.com/dvcol/svelte-simple-router/commit/bf25d84941c0987ae9db9ad7ce562f8b83b5bc61))
+
+
+### Bug Fixes
+
+* **transition:** wrap css in global following svelte compile changes ([61e5a3f](https://github.com/dvcol/svelte-simple-router/commit/61e5a3fa6fb5624798c484ca2e46db667c8e895c))
+
 ## [1.4.0](https://github.com/dvcol/svelte-simple-router/compare/v1.3.0...v1.4.0) (2024-10-16)
 
 
