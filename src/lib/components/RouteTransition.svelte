@@ -37,14 +37,16 @@
 
 <style lang="scss">
   /* stylelint-disable selector-pseudo-class-no-unknown */
-  div[data-transition-id='transition-container']:has(div[data-transition-id='transition-wrapper'][inert]) {
-    position: relative;
+  div[data-transition-id='transition-container'] {
+    &:global(:has(div[data-transition-id='transition-wrapper']:not(:only-child))) {
+      position: relative;
 
-    :not(:first-child) {
-      position: absolute;
+      div[data-transition-id='transition-wrapper']:not(:first-child) {
+        position: absolute;
 
-      &[inert] {
-        display: none;
+        &:not(:last-child) {
+          display: none;
+        }
       }
     }
   }
