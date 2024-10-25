@@ -3,7 +3,7 @@ import type { CommonRouteNavigation, RouteName, RouteNavigation } from '~/models
 import type { RouterNavigationOptions } from '~/models/router.model.js';
 
 import { NavigationCancelledError } from '~/models/index.js';
-import { useRouter } from '~/router/use-router.svelte.js';
+import { getRouter } from '~/router/context.svelte.js';
 import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 
 const isAnchorTarget = (target: EventTarget | null): target is HTMLAnchorElement => {
@@ -102,7 +102,7 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
     node.setAttribute('href', options.path);
   }
 
-  const router = useRouter();
+  const router = getRouter();
   if (!router) {
     Logger.warn('Router not found. Make sure you are using the link action within a Router context.', { node, options });
     node.setAttribute('data-error', 'Router not found.');

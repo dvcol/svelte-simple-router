@@ -12,12 +12,12 @@
 </script>
 
 <script lang="ts">
-  import { getContext, onDestroy } from 'svelte';
+  import { onDestroy } from 'svelte';
 
-  import { RouterContextSymbol } from '~/models/router.model.js';
+  import { getRouter } from '~/router/context.svelte.js';
   import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 
-  const router = getContext<IRouter>(RouterContextSymbol);
+  const router = getRouter();
   Logger.info(`[${LoggerKey} Debugger]`, 'router attached to "window.router"', router);
   window[RouterDebuggerConstant] = { ...window[RouterDebuggerConstant], [router.id]: router };
 

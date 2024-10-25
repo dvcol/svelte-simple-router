@@ -3,7 +3,7 @@
 
   import { active } from '~/router/active.svelte';
   import { link } from '~/router/link.svelte';
-  import { useRouter } from '~/router/use-router.svelte';
+  import { useNavigate, useRouter } from '~/router/use-router.svelte';
   import { Logger } from '~/utils/logger.utils.js';
 
   const { stripQuery, stripHash, stripTrailingHash }: { stripQuery?: boolean; stripHash?: boolean; stripTrailingHash?: boolean } = $props();
@@ -18,11 +18,13 @@
 
   const routes: Route[] = $derived([...(router?.routes ?? [])].sort((a, b) => a.name.localeCompare(b.name)));
 
-  const onRouterButton = async (path: string) => {
+  const { push } = useNavigate();
+
+  const onRouterButton = async (e: MouseEvent, path: string) => {
     console.info('onRouterButton', path);
-    if (!router) return Logger.error('Router not found');
+    e.preventDefault();
     try {
-      const route = await router.push({ path, ...navOptions });
+      const route = await push({ path, ...navOptions });
       console.info('Route', route);
     } catch (err: any) {
       console.error(err, err?.from, err?.to);
@@ -36,9 +38,10 @@
     await router.addRoute(route).sync();
     console.info('New routes', router.routes);
   };
-  const onRemoveRoute = async (name?: RouteName) => {
+  const onRemoveRoute = async (e: MouseEvent, name?: RouteName) => {
     if (!router) return Logger.error('Router not found');
     console.info('onRemoveRoute', route);
+    e.preventDefault();
     if (!router.removeRoute({ name })) return;
     await router.sync();
     console.info('New routes', router.routes);
@@ -63,8 +66,8 @@
           <td>{name}</td>
           <td>{path}</td>
           <td>{redirect?.name ?? redirect?.path ?? meta?.redirect ?? '-'}</td>
-          <td><button onclick={() => onRouterButton(path)}>Go</button></td>
-          <td><button onclick={() => onRemoveRoute(name)}>Remove</button></td>
+          <td><button onclick={e => onRouterButton(e, path)}>Go</button></td>
+          <td><button onclick={e => onRemoveRoute(e, name)}>Remove</button></td>
         </tr>
       {/each}
     </tbody>

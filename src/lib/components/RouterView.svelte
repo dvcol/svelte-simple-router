@@ -1,16 +1,14 @@
 <script lang="ts">
-  import { setContext } from 'svelte';
-
   import RouteContainer from '~/components/RouteContainer.svelte';
   import RouterContext from '~/components/RouterContext.svelte';
-  import { type IRouter, type RouterViewProps, RouterViewSymbol } from '~/models/router.model.js';
+  import { type IRouter, type RouterViewProps } from '~/models/router.model.js';
 
-  import { useRouter } from '~/router/use-router.svelte.js';
+  import { getRouter, setView } from '~/router/context.svelte.js';
 
   const { children: outerChildren, options, router, name, ..._props }: RouterViewProps = $props();
-  const contextRouter = useRouter();
+  const contextRouter = getRouter();
 
-  if (name) setContext(RouterViewSymbol, name);
+  if (name) setView(name);
 </script>
 
 {#snippet view(_router: IRouter)}

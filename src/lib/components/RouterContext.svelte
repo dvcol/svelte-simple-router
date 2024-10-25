@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { onDestroy, setContext } from 'svelte';
+  import { onDestroy } from 'svelte';
 
-  import { type IRouter, type RouterContextProps, RouterContextSymbol } from '~/models/router.model.js';
+  import { type IRouter, type RouterContextProps } from '~/models/router.model.js';
 
+  import { getRouter, setRouter } from '~/router/context.svelte.js';
   import { Router } from '~/router/router.svelte.js';
-  import { useRouter } from '~/router/use-router.svelte.js';
   import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 
   const { children, router, options }: RouterContextProps = $props();
 
-  const outerRouter = useRouter();
+  const outerRouter = getRouter();
 
   if (outerRouter && (router || options)) {
     Logger.warn(`[${LoggerKey} Context]`, 'Router Context is already defined, router prop will be ignored', {
@@ -19,7 +19,7 @@
   }
 
   const createInnerRouter = (_router: IRouter = new Router(options)) => {
-    setContext(RouterContextSymbol, _router);
+    setRouter(_router);
     Logger.debug(`[${LoggerKey} Context]`, 'Router Context set:', _router);
     return _router;
   };

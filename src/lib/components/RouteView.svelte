@@ -3,14 +3,12 @@
 
   import type { Route, RouteViewProps } from '~/models/index.js';
 
-  import { MissingRouterContextError } from '~/models/index.js';
   import { useRouter, useView } from '~/router/use-router.svelte.js';
   import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 
   const { children, loading, error, route, name, ..._props }: RouteViewProps = $props();
 
   const router = useRouter();
-  if (!router) throw new MissingRouterContextError();
 
   const _name = name ?? useView();
 

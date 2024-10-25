@@ -4,7 +4,6 @@
   import type { RouteContainerProps } from '~/models/router.model.js';
 
   import RouteComponent from '~/components/RouteComponent.svelte';
-  import { MissingRouterContextError } from '~/models/error.model.js';
 
   import { useRouter } from '~/router/use-router.svelte.js';
 
@@ -25,9 +24,7 @@
   }: RouteContainerProps = $props();
 
   const router = useRouter();
-  if (!router) throw new MissingRouterContextError();
-
-  const route = $derived(router?.route);
+  const route = $derived(router.route);
 
   // Extract component props from route
   const resolvedProps = $derived.by(() => {
@@ -75,6 +72,7 @@
     component={ResolvedComponent}
     loading={ResolvedLoading}
     error={ResolvedError}
+    {name}
     {route}
     {router}
     {transition}
