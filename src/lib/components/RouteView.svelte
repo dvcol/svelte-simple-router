@@ -1,16 +1,17 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
 
-  import type { Route, RouteViewProps } from '~/models/index.js';
+  import { NavigationCancelledError, type Route, type RouteViewProps } from '~/models/index.js';
 
-  import { useRouter, useView } from '~/router/use-router.svelte.js';
+  import { getView } from '~/router/context.svelte.js';
+  import { useRouter } from '~/router/use-router.svelte.js';
   import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 
   const { children, loading, error, route, name, ..._props }: RouteViewProps = $props();
 
   const router = useRouter();
 
-  const _name = name ?? useView();
+  const _name = name ?? getView()?.name;
 
   let component: Route['component'] | undefined;
   let components: Route['components'] | undefined;
@@ -25,7 +26,7 @@
     if (!Object.keys(components).length) components = undefined;
   }
 
-  if (_name) {
+  if (_name && _name !== 'default') {
     components ??= {};
     if (components[_name]) components.default = children;
     else components[_name] = children;
@@ -41,17 +42,27 @@
     loading: route.loading ?? loading,
   } as Route;
 
+  const log = `[${LoggerKey} Route - ${router.id}]`;
+
   if (!_route.redirect && !_route.component && !_route.components?.[_name || 'default']) {
-    Logger.warn(`[${LoggerKey} Route - ${router.id}]`, 'Route has no component, redirect or children', _route);
+    Logger.warn(log, 'Route has no component, redirect or children', _route);
   }
 
+  const handleError = (err: Error | unknown) => {
+    if (err instanceof NavigationCancelledError) {
+      Logger.warn(log, `Failed to sync, navigation cancelled`, err);
+    } else {
+      Logger.error(log, `Failed to sync`, err);
+    }
+  };
+
   router.addRoute(_route);
-  router.sync();
-  Logger.debug(`[${LoggerKey} Route - ${router.id}]`, 'Route added', { route, children });
+  Logger.debug(log, 'Route added', { route, children });
+  router.sync().catch(handleError);
 
   onDestroy(() => {
     router.removeRoute(_route);
-    router.sync();
-    Logger.debug(`[${LoggerKey} Route - ${router.id}]`, 'Route removed', route);
+    Logger.debug(log, 'Route removed', route);
+    router.sync().catch(handleError);
   });
 </script>

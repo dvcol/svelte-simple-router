@@ -8,12 +8,11 @@
   import { useRouter } from '~/router/use-router.svelte.js';
 
   const {
+    view,
     name,
     transition,
     // hooks
     beforeEach,
-    onLoading,
-    onLoaded,
     onError,
     onStart,
     onEnd,
@@ -72,13 +71,11 @@
     component={ResolvedComponent}
     loading={ResolvedLoading}
     error={ResolvedError}
+    {view}
     {name}
     {route}
     {router}
     {transition}
-    {onLoading}
-    {onLoaded}
-    {onError}
     {errorSnippet}
     {loadingSnippet}
     {routingSnippet}

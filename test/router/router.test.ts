@@ -4,15 +4,20 @@ import { wait } from '@dvcol/common-utils/common/promise';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { NavigationEvent } from '../../src/lib/models/navigation.model';
+
 import type { ParsingRelativePathError } from '@dvcol/common-utils/common/error';
 import type { MockInstance } from 'vitest';
+
 import type { NavigationAbortedError, NavigationNotFoundError } from '~/models/error.model.js';
 
 import type { Route, RouteParams, RouteQuery } from '~/models/route.model.js';
+
 import type { RouterOptions } from '~/models/router.model.js';
 
 import { ErrorTypes } from '~/models/error.model.js';
-import { NavigationEvent, RouterScrollConstant, RouterStateConstant } from '~/models/router.model.js';
+
+import { RouterScrollConstant, RouterStateConstant } from '~/models/router.model.js';
 import { Router } from '~/router/router.svelte.js';
 
 describe('router', () => {

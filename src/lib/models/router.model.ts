@@ -6,6 +6,13 @@ import type { Snippet } from 'svelte';
 import type { TransitionConfig } from 'svelte/transition';
 
 import type {
+  INavigationEvent,
+  LoadingListener,
+  NavigationEndListener,
+  NavigationErrorListener,
+  NavigationListener,
+} from '~/models/navigation.model.js';
+import type {
   BaseRoute,
   HistoryState,
   NavigationGuard,
@@ -21,12 +28,10 @@ import type {
   RouteWildcards,
 } from '~/models/route.model.js';
 
+import type { IView } from '~/models/view.model.js';
 import type { LogLevel } from '~/utils/logger.utils.js';
 
-import { NavigationAbortedError, NavigationCancelledError } from '~/models/error.model.js';
-import { isRouteEqual, toBaseRoute } from '~/models/route.model.js';
-
-import { Logger } from '~/utils/index.js';
+import { isRouteEqual } from '~/models/route.model.js';
 
 export type RouterLocation<Name extends RouteName = RouteName> = {
   origin: string;
@@ -132,138 +137,17 @@ export type TransitionProps<
     container?: Record<string, any>;
     wrapper?: Record<string, any>;
   };
-  /**
-   * If `true`, component will be wrapped in a div with `view-transition-name: <router-id>-<route-name>` to allow view transitions.
-   */
-  viewTransitionApi?: boolean;
 };
 
 export type ResolvedRouteSnapshot<Name extends RouteName = RouteName> = Omit<ResolvedRoute<Name>, 'route'> & {
   route: BaseRoute<Name>;
 };
 
-export type INavigationEventState<Name extends RouteName = RouteName> = {
-  readonly active: boolean;
-  readonly failed: boolean | unknown;
-  readonly cancelled: boolean;
-  readonly completed: boolean;
-  readonly redirected: boolean | RouteNavigation<Name>;
-};
-
-export type INavigationEvent<Name extends RouteName = RouteName> = INavigationEventState<Name> & {
-  readonly to: ResolvedRouteSnapshot<Name>;
-  readonly from: ResolvedRouterLocationSnapshot<Name>;
-  readonly uuid: string;
-  readonly result: Promise<NavigationEventStatus>;
-  readonly status: NavigationEventStatus;
-};
-
-type NavigationEventStatus = keyof INavigationEventState;
-
-export class NavigationEvent<Name extends RouteName = RouteName> implements INavigationEvent<Name> {
-  readonly to: ResolvedRouteSnapshot<Name>;
-  readonly from: ResolvedRouterLocationSnapshot<Name>;
-  readonly uuid: string;
-  readonly result: Promise<NavigationEventStatus>;
-
-  readonly #resolve: (status: NavigationEventStatus) => void;
-  readonly #reject: (error: unknown) => void;
-
-  #status: NavigationEventStatus = 'active';
-  #error?: unknown;
-  #redirect?: RouteNavigation<Name>;
-
-  get status(): NavigationEventStatus {
-    return this.#status;
-  }
-
-  get active(): boolean {
-    return this.#status === 'active';
-  }
-
-  get completed(): boolean {
-    return this.#status === 'completed';
-  }
-
-  get cancelled(): boolean {
-    return this.#status === 'cancelled';
-  }
-
-  get failed(): unknown | boolean {
-    return this.#error ?? this.#status === 'failed';
-  }
-
-  get redirected(): RouteNavigation<Name> | boolean {
-    return this.#redirect ?? this.#status === 'redirected';
-  }
-
-  constructor(to: ResolvedRoute<Name>, from: ResolvedRouterLocationSnapshot<Name>) {
-    this.uuid = crypto.randomUUID();
-    this.to = { ...to, route: toBaseRoute(to.route)! };
-    this.from = from;
-
-    const { promise, resolve, reject } = Promise.withResolvers<NavigationEventStatus>();
-    this.result = promise;
-    this.#resolve = resolve;
-    this.#reject = reject;
-  }
-
-  redirect(to: RouteNavigation<Name>): void {
-    if (!this.active) return Logger.error('Cannot redirect a navigation event that is not active', this);
-    this.#status = 'redirected';
-    this.#redirect = to;
-    this.#resolve(this.#status);
-  }
-
-  complete(): void {
-    if (!this.active) return Logger.error('Cannot complete a navigation event that is not active', this);
-    this.#status = 'completed';
-    this.#resolve(this.#status);
-  }
-
-  /**
-   * Cancel the current navigation event.
-   * @throws {@link NavigationCancelledError}
-   */
-  cancel(error?: unknown): void {
-    if (!this.active) return Logger.error('Cannot cancel a navigation event that is not active', this);
-    this.#status = 'cancelled';
-    this.#error = error;
-    this.#reject(this.#status);
-    if (error instanceof NavigationCancelledError) throw error;
-    throw new NavigationCancelledError(this, { error });
-  }
-
-  /**
-   * Fail the current navigation event.
-   * @param error - Error to throw
-   * @throws {@link NavigationAbortedError}
-   */
-  fail(error?: unknown): void {
-    if (!this.active) return Logger.error('Cannot fail a navigation event that is not active', this);
-    this.#status = 'failed';
-    this.#error = error;
-    this.#reject(this.#status);
-    if (error instanceof NavigationAbortedError) throw error;
-    throw new NavigationAbortedError(this, { error });
-  }
-}
-
-export type NavigationListener<Name extends RouteName = RouteName> = (navigation: INavigationEvent<Name>) => void;
-
-export type NavigationEndListener<Name extends RouteName = RouteName> = (
-  navigation: INavigationEvent<Name>,
-  resolved: ResolvedRouterLocationSnapshot<Name>,
-) => void;
-
-export type NavigationErrorListener<Name extends RouteName = RouteName> = (
-  navigation: Error | unknown,
-  context: Partial<INavigationEvent<Name>> & { route?: BaseRoute<Name> },
-) => void;
-
-export type LoadingListener<Name extends RouteName = RouteName> = (route?: BaseRoute<Name>) => void;
-
 export type RouteContainerProps<Name extends RouteName = any> = {
+  /**
+   * The view instance on which to broadcast loading state.
+   */
+  view: IView<Name>;
   /**
    * Name of the router view to render.
    * If not provided, the default view will be used.
@@ -277,14 +161,6 @@ export type RouteContainerProps<Name extends RouteName = any> = {
    * Navigation guard passed to the router instance.
    */
   beforeEach?: NavigationGuard<Name>;
-  /**
-   * Loading listener to execute when the view starts loading.
-   */
-  onLoading?: LoadingListener<Name>;
-  /**
-   * Loaded listener to execute when the view is loaded.
-   */
-  onLoaded?: LoadingListener<Name>;
   /**
    * Error listener to execute when the view fails to load.
    */
@@ -319,7 +195,18 @@ export type RouteContainerProps<Name extends RouteName = any> = {
   error?: Snippet<[Error | any]>;
 };
 
-export type RouterViewProps<Name extends RouteName = any> = RouterContextProps<Name> & RouteContainerProps<Name>;
+export type RouterViewProps<Name extends RouteName = any> = RouterContextProps<Name> &
+  Omit<RouteContainerProps<Name>, 'view'> & {
+    /**
+     * Loading listener to execute when the view starts loading.
+     */
+    onLoading?: LoadingListener<Name>;
+    /**
+     * Loaded listener to execute when the view is loaded.
+     */
+    onLoaded?: LoadingListener<Name>;
+  };
+
 export type RouteViewProps<Name extends RouteName = any> = Pick<RouterViewProps<Name>, 'loading' | 'error' | 'name'> & {
   /**
    * Route to inject into the router.
