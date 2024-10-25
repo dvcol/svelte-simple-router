@@ -1,6 +1,6 @@
 import { LogLevel, ProxyLogger, toLogLevel } from '@dvcol/common-utils/common/logger';
 
-export const LoggerKey = 'SSR Router' as const;
+export const LoggerKey = 'SR Router' as const;
 
 export class Logger {
   static logger = new ProxyLogger({ logLevel: LogLevel.Warn });

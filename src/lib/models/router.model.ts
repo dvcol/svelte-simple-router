@@ -72,9 +72,6 @@ export const isResolvedLocationEqual = <Name extends RouteName = RouteName>(
   b: ResolvedRouterLocation<Name>,
 ): boolean => isRouteEqual(a?.route, b?.route) && isLocationEqual(a?.location, b?.location);
 
-export const RouterContextSymbol = Symbol('SvelteSimpleRouterContext');
-export const RouterViewSymbol = Symbol('SvelteSimpleRouterView');
-
 export const RouterStateConstant = '__SVELTE_SIMPLE_ROUTER_STATE__' as const;
 export const RouterScrollConstant = '__SVELTE_SIMPLE_ROUTER_SCROLL__' as const;
 export const RouterDebuggerConstant = '__SVELTE_SIMPLE_ROUTER_DEBUGGER__' as const;
@@ -135,6 +132,10 @@ export type TransitionProps<
     container?: Record<string, any>;
     wrapper?: Record<string, any>;
   };
+  /**
+   * If `true`, component will be wrapped in a div with `view-transition-name: <router-id>-<route-name>` to allow view transitions.
+   */
+  viewTransitionApi?: boolean;
 };
 
 export type ResolvedRouteSnapshot<Name extends RouteName = RouteName> = Omit<ResolvedRoute<Name>, 'route'> & {
@@ -153,6 +154,8 @@ export type INavigationEvent<Name extends RouteName = RouteName> = INavigationEv
   readonly to: ResolvedRouteSnapshot<Name>;
   readonly from: ResolvedRouterLocationSnapshot<Name>;
   readonly uuid: string;
+  readonly result: Promise<NavigationEventStatus>;
+  readonly status: NavigationEventStatus;
 };
 
 type NavigationEventStatus = keyof INavigationEventState;
@@ -161,10 +164,18 @@ export class NavigationEvent<Name extends RouteName = RouteName> implements INav
   readonly to: ResolvedRouteSnapshot<Name>;
   readonly from: ResolvedRouterLocationSnapshot<Name>;
   readonly uuid: string;
+  readonly result: Promise<NavigationEventStatus>;
+
+  readonly #resolve: (status: NavigationEventStatus) => void;
+  readonly #reject: (error: unknown) => void;
 
   #status: NavigationEventStatus = 'active';
   #error?: unknown;
   #redirect?: RouteNavigation<Name>;
+
+  get status(): NavigationEventStatus {
+    return this.#status;
+  }
 
   get active(): boolean {
     return this.#status === 'active';
@@ -190,17 +201,24 @@ export class NavigationEvent<Name extends RouteName = RouteName> implements INav
     this.uuid = crypto.randomUUID();
     this.to = { ...to, route: toBaseRoute(to.route)! };
     this.from = from;
+
+    const { promise, resolve, reject } = Promise.withResolvers<NavigationEventStatus>();
+    this.result = promise;
+    this.#resolve = resolve;
+    this.#reject = reject;
   }
 
   redirect(to: RouteNavigation<Name>): void {
     if (!this.active) return Logger.error('Cannot redirect a navigation event that is not active', this);
     this.#status = 'redirected';
     this.#redirect = to;
+    this.#resolve(this.#status);
   }
 
   complete(): void {
     if (!this.active) return Logger.error('Cannot complete a navigation event that is not active', this);
     this.#status = 'completed';
+    this.#resolve(this.#status);
   }
 
   /**
@@ -211,6 +229,7 @@ export class NavigationEvent<Name extends RouteName = RouteName> implements INav
     if (!this.active) return Logger.error('Cannot cancel a navigation event that is not active', this);
     this.#status = 'cancelled';
     this.#error = error;
+    this.#reject(this.#status);
     if (error instanceof NavigationCancelledError) throw error;
     throw new NavigationCancelledError(this, { error });
   }
@@ -224,6 +243,7 @@ export class NavigationEvent<Name extends RouteName = RouteName> implements INav
     if (!this.active) return Logger.error('Cannot fail a navigation event that is not active', this);
     this.#status = 'failed';
     this.#error = error;
+    this.#reject(this.#status);
     if (error instanceof NavigationAbortedError) throw error;
     throw new NavigationAbortedError(this, { error });
   }
