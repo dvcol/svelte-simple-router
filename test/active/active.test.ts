@@ -6,8 +6,8 @@ import Active from './Active.test.svelte';
 import type { Route } from '~/models/route.model.js';
 
 import { active } from '~/router/active.svelte.js';
+import * as GetRouterModule from '~/router/context.svelte.js';
 import { Router } from '~/router/router.svelte.js';
-import * as UseRouterModule from '~/router/use-router.svelte.js';
 import { Logger } from '~/utils/logger.utils.js';
 
 describe('active', () => {
@@ -54,7 +54,7 @@ describe('active', () => {
       style: mockStyle,
     } as unknown as HTMLElement;
 
-    const spyRouter = vi.spyOn(UseRouterModule, 'useRouter').mockReturnValue(router);
+    const spyRouter = vi.spyOn(GetRouterModule, 'getRouter').mockReturnValue(router);
     const spyLoger = vi.spyOn(Logger.logger, 'warn').mockReturnValue(undefined);
 
     it('should exit, warn and add a data-error attribute if the router is not found', () => {

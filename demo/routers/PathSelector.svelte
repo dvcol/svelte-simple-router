@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { Route, RouteName } from '~/models/route.model.js';
 
+  import { NavigationCancelledError } from '~';
   import { active } from '~/router/active.svelte';
   import { link } from '~/router/link.svelte';
   import { useNavigate, useRouter } from '~/router/use-router.svelte';
-  import { Logger } from '~/utils/logger.utils.js';
 
   const { stripQuery, stripHash, stripTrailingHash }: { stripQuery?: boolean; stripHash?: boolean; stripTrailingHash?: boolean } = $props();
 
@@ -32,18 +32,35 @@
   };
 
   const route = $state({ name: 'dynamic', path: '/dynamic', redirect: { name: 'goodbye' } });
+
+  const handleError = (err: Error | unknown) => {
+    if (err instanceof NavigationCancelledError) {
+      console.warn('[PathSelector]', `Failed to sync, navigation cancelled`, err);
+    } else {
+      console.error('[PathSelector]', `Failed to sync`, err);
+    }
+  };
+
   const onAddRoute = async () => {
-    if (!router) return Logger.error('Router not found');
+    if (!router) return console.error('Router not found');
     console.info('onAddRoute', route);
-    await router.addRoute(route).sync();
+    try {
+      await router.addRoute(route).sync();
+    } catch (err) {
+      handleError(err);
+    }
     console.info('New routes', router.routes);
   };
   const onRemoveRoute = async (e: MouseEvent, name?: RouteName) => {
-    if (!router) return Logger.error('Router not found');
+    if (!router) return console.error('Router not found');
     console.info('onRemoveRoute', route);
     e.preventDefault();
     if (!router.removeRoute({ name })) return;
-    await router.sync();
+    try {
+      await router.sync();
+    } catch (err) {
+      handleError(err);
+    }
     console.info('New routes', router.routes);
   };
 </script>

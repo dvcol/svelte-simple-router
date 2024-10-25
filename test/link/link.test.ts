@@ -9,8 +9,8 @@ import Link from './Link.test.svelte';
 import type { Route } from '~/models/route.model.js';
 
 import { active } from '~/router/active.svelte.js';
+import * as GetRouterModule from '~/router/context.svelte.js';
 import { Router } from '~/router/router.svelte.js';
-import * as UseRouterModule from '~/router/use-router.svelte.js';
 import { Logger } from '~/utils/logger.utils.js';
 
 describe('link', () => {
@@ -42,7 +42,7 @@ describe('link', () => {
     } as unknown as HTMLElement;
 
     const spyLoger = vi.spyOn(Logger.logger, 'warn').mockReturnValue(undefined);
-    const spyRouter = vi.spyOn(UseRouterModule, 'useRouter').mockReturnValue(router);
+    const spyRouter = vi.spyOn(GetRouterModule, 'getRouter').mockReturnValue(router);
 
     it('should exit, warn and add a data-error attribute if the router is not found', () => {
       expect.assertions(3);

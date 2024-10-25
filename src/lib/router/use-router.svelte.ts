@@ -1,10 +1,12 @@
-import { getContext, hasContext } from 'svelte';
+import { hasContext } from 'svelte';
 
 import type { RouteName } from '~/models/route.model.js';
 
-import { MissingRouterContextError } from '~/models/index.js';
+import type { IView } from '~/models/view.model.js';
+
+import { MissingRouterContextError, MissingViewContextError } from '~/models/index.js';
 import { type IRouter } from '~/models/router.model.js';
-import { getRouter, RouterContextSymbol, RouterViewSymbol } from '~/router/context.svelte.js';
+import { getRouter, getView, RouterContextSymbol, RouterViewSymbol } from '~/router/context.svelte.js';
 
 export const hasRouter = (): boolean => {
   return hasContext(RouterContextSymbol);
@@ -20,9 +22,9 @@ export const hasView = (): boolean => {
   return hasContext(RouterViewSymbol);
 };
 
-export const useView = (): string | undefined => {
-  if (!hasRouter()) throw new MissingRouterContextError();
-  return getContext<string>(RouterViewSymbol);
+export const useView = <Name extends RouteName = any>(): IView<Name> => {
+  if (!hasView()) throw new MissingViewContextError();
+  return getView<Name>();
 };
 
 export const useRoute = <Name extends RouteName = any>(): Pick<IRouter<Name>, 'route' | 'location' | 'routing'> => {
@@ -46,16 +48,21 @@ export const useNavigate = <Name extends RouteName = any>(): Pick<IRouter<Name>,
   };
 };
 
-export const useNavigation = <Name extends RouteName = any>() => {
+export const useRouterHooks = <Name extends RouteName = any>() => {
   const router = useRouter<Name>();
-  if (!router) throw new MissingRouterContextError();
-
   return {
     beforeEach: router.beforeEach.bind(router),
-    onError: router.onError.bind(router), // merge with view.onError
     onStart: router.onStart.bind(router),
     onEnd: router.onEnd.bind(router),
-    // onLoading TODO: Add onLoading
-    // onLoaded TODO: Add onLoaded
+    onError: router.onError.bind(router),
+  };
+};
+
+export const useViewHooks = <Name extends RouteName = any>() => {
+  const view = useView<Name>();
+  return {
+    onLoading: view.onLoading.bind(view),
+    onLoaded: view.onLoaded.bind(view),
+    onError: view.onError.bind(view),
   };
 };

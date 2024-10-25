@@ -11,6 +11,7 @@
   import RouterView from '~/components/RouterView.svelte';
   import RouteDebugger from '~/components/debug/RouteDebugger.svelte';
   import RouterDebugger from '~/components/debug/RouterDebugger.svelte';
+  import ViewDebugger from '~/components/debug/ViewDebugger.svelte';
   import { defaultOptions } from '~/models/router.model.js';
   import { transition } from '~/utils/transition.utils.js';
 
@@ -114,6 +115,7 @@
       <div class="column debuggers">
         <RouterDebugger />
         <RouteDebugger />
+        <ViewDebugger />
       </div>
     </RouterView>
   </div>

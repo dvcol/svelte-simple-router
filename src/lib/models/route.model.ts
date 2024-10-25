@@ -2,7 +2,7 @@ import { isShallowEqual, shallowClone } from '@dvcol/common-utils/common/object'
 
 import type { Snippet } from 'svelte';
 import type { IMatcher } from '~/models/matcher.model.js';
-import type { INavigationEvent } from '~/models/router.model.js';
+import type { INavigationEvent } from '~/models/navigation.model.js';
 import type { AnyComponent, ComponentOrLazy } from '~/utils/svelte.utils.js';
 
 /**

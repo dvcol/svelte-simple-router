@@ -7,15 +7,12 @@ import { raceUntil } from '@dvcol/common-utils/common/promise';
 import { computeAbsolutePath, toPathSegment } from '@dvcol/common-utils/common/string';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
+import type { INavigationEvent, NavigationEndListener, NavigationErrorListener, NavigationListener } from '~/models/navigation.model.js';
 import type { NavigationGuard, ParsedRoute, ResolvedRoute, Route, RouteName, RouteNavigation } from '~/models/route.model.js';
 
 import type {
   IHistory,
-  INavigationEvent,
   IRouter,
-  NavigationEndListener,
-  NavigationErrorListener,
-  NavigationListener,
   ResolvedRouterLocation,
   ResolvedRouterLocationSnapshot,
   RouterLocation,
@@ -33,23 +30,15 @@ import {
   RouterPathConflictError,
 } from '~/models/error.model.js';
 import { Matcher, replaceTemplateParams } from '~/models/matcher.model.js';
+import { NavigationEvent } from '~/models/navigation.model.js';
 import { cloneRoute, toBaseRoute } from '~/models/route.model.js';
-import {
-  defaultOptions,
-  isResolvedLocationEqual,
-  NavigationEvent,
-  RouterPathPriority,
-  RouterStateConstant,
-  toBasicRouterLocation,
-} from '~/models/router.model.js';
-
+import { defaultOptions, isResolvedLocationEqual, RouterPathPriority, RouterStateConstant, toBasicRouterLocation } from '~/models/router.model.js';
 import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 import { preventNavigation, resolveNewHref, routeToHistoryState } from '~/utils/navigation.utils.js';
 
 export class Router<Name extends RouteName = RouteName> implements IRouter<Name> {
   /**
    * Unique identifier for the router instance.
-   * @private
    */
   readonly id = `r${randomHex(4)}`;
 
@@ -155,8 +144,16 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    */
   #navigateListener: (event: PopStateEvent | NavigationCurrentEntryChangeEvent) => void = async () => {
     if (this.#matchState) return;
-    await this.sync();
     Logger.debug(this.#log, 'Navigate listener', this.snapshot);
+    try {
+      await this.sync();
+    } catch (error) {
+      if (error instanceof NavigationCancelledError) {
+        Logger.warn(this.#log, `Failed to sync, navigation cancelled`, error);
+      } else {
+        Logger.error(this.#log, `Failed to sync`, error);
+      }
+    }
   };
 
   /**
@@ -349,7 +346,15 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   }
 
   async #init() {
-    await this.#sync();
+    try {
+      await this.#sync();
+    } catch (error) {
+      if (error instanceof NavigationCancelledError) {
+        Logger.warn(this.#log, `Failed to sync, navigation cancelled`, error);
+      } else {
+        Logger.error(this.#log, `Failed to sync`, error);
+      }
+    }
 
     if (this.#options.beforeEach) this.#beforeEachGuards.add(this.#options.beforeEach);
     if (this.#options.onStart) this.#onStartListeners.add(this.#options.onStart);

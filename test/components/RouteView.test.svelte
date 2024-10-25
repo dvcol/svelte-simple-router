@@ -1,6 +1,5 @@
 <script lang="ts">
-  import type { PartialRoute } from '~/models/route.model.js';
-  import type { RouterViewProps } from '~/models/router.model.js';
+  import type { RouterViewProps, RouteViewProps } from '~/models/router.model.js';
 
   import RouteView from '~/components/RouteView.svelte';
   import RouterContext from '~/components/RouterContext.svelte';
@@ -13,7 +12,7 @@
     route,
     namedRoute,
     snippets,
-  }: RouterViewProps & { route?: PartialRoute; namedRoute?: PartialRoute; snippets?: boolean } = $props();
+  }: RouterViewProps & { route?: RouteViewProps['route']; namedRoute?: RouteViewProps['route']; snippets?: boolean } = $props();
 </script>
 
 {#snippet loading()}
@@ -39,8 +38,7 @@
 <RouterContext {options} {router}>
   <RouterView {transition}>
     {#if route}
-      <RouteView {route} {loading} {error} nested={snippets ? defaultNested : undefined}
-        >>
+      <RouteView {route} {loading} {error} nested={snippets ? defaultNested : undefined}>
         <div data-testid="default-route-view">
           <h1>Default Route View</h1>
           <span data-testid="route-name">{route.name}</span>

@@ -44,6 +44,10 @@ export const enum ErrorTypes {
    * Could not find a required router context.
    */
   MISSING_ROUTER_CONTEXT = 'MISSING_ROUTER_CONTEXT',
+  /**
+   * Could not find a required view context.
+   */
+  MISSING_VIEW_CONTEXT = 'MISSING_VIEW_CONTEXT',
 }
 
 type NavigationErrors = ErrorTypes.NAVIGATION_CANCELLED | ErrorTypes.NAVIGATION_ABORTED | ErrorTypes.NAVIGATION_NOT_FOUND;
@@ -214,5 +218,13 @@ export class MissingRouterContextError extends Error {
   constructor(message = 'Router context is missing. Make sure you are calling useRoutes inside a RouterContext or RouterView component tree.') {
     super(message);
     this.type = ErrorTypes.MISSING_ROUTER_CONTEXT;
+  }
+}
+
+export class MissingViewContextError extends Error {
+  readonly type: ErrorTypes.MISSING_VIEW_CONTEXT;
+  constructor(message = 'View context is missing. Make sure you are calling useView inside a RouterView component tree.') {
+    super(message);
+    this.type = ErrorTypes.MISSING_VIEW_CONTEXT;
   }
 }
