@@ -1,14 +1,16 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
 
+  import type { RouterViewProps } from '~/models/component.model.js';
+
   import RouteContainer from '~/components/RouteContainer.svelte';
   import RouterContext from '~/components/RouterContext.svelte';
-  import { type IRouter, type RouterViewProps } from '~/models/router.model.js';
+  import { type IRouter } from '~/models/router.model.js';
 
   import { getRouter, setView } from '~/router/context.svelte.js';
   import { View } from '~/router/view.svelte.js';
 
-  const { children: outerChildren, options, router, name, onLoaded, onLoading, onError, ..._props }: RouterViewProps = $props();
+  const { children: outerChildren, options, router, name, onLoaded, onLoading, onChange, onError, ..._props }: RouterViewProps = $props();
   const contextRouter = getRouter();
 
   const view = new View(name);
@@ -16,6 +18,7 @@
 
   const subs: (() => void)[] = [];
 
+  if (onChange) subs.push(view.onChange(onChange));
   if (onLoading) subs.push(view.onLoading(onLoading));
   if (onLoaded) subs.push(view.onLoaded(onLoaded));
   if (onError) subs.push(view.onError(onError));

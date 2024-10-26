@@ -24,6 +24,15 @@ export type IView<Name extends RouteName = RouteName> = {
   error?: Error | unknown;
 
   /**
+   * Add a listener that execute when the route changes and before the view change starts.
+   *
+   * @return Returns a function that removes the registered guard.
+   *
+   * @param listener - listener to add
+   */
+  onChange(listener: LoadingListener<Name>): () => void;
+
+  /**
    * Add a listener that is executed when a view start loading a component.
    *
    * @param listener - listener to add

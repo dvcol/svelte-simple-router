@@ -1,6 +1,6 @@
 import type { BaseRoute, ResolvedRoute, RouteName, RouteNavigation } from '~/models/route.model.js';
 
-import type { ResolvedRouterLocationSnapshot, ResolvedRouteSnapshot } from '~/models/router.model.js';
+import type { ResolvedRouterLocationSnapshot } from '~/models/router.model.js';
 
 import type { IView } from '~/models/view.model.js';
 
@@ -9,12 +9,27 @@ import { toBaseRoute } from '~/models/route.model.js';
 
 import { Logger } from '~/utils/index.js';
 
+export type NavigationGuardReturn<Name extends RouteName = RouteName> = void | undefined | null | boolean | Error | RouteNavigation<Name>;
+
+/**
+ * Guards trigger after url change and before the route component is rendered.
+ * If a guard returns `false`, and object of instance `Error` or `throws`, the navigation will be aborted and the error will be thrown.
+ * If a guard returns an object with a `path` or `name` property, the navigation will be redirected to the provided route, if any is found and `followGuardRedirects` is enabled.
+ */
+export type NavigationGuard<Name extends RouteName = RouteName> = (
+  navigation: INavigationEvent<Name>,
+) => NavigationGuardReturn<Name> | Promise<NavigationGuardReturn<Name>>;
+
 export type INavigationEventState<Name extends RouteName = RouteName> = {
   readonly active: boolean;
   readonly failed: boolean | unknown;
   readonly cancelled: boolean;
   readonly completed: boolean;
   readonly redirected: boolean | RouteNavigation<Name>;
+};
+
+export type ResolvedRouteSnapshot<Name extends RouteName = RouteName> = Omit<ResolvedRoute<Name>, 'route'> & {
+  route: BaseRoute<Name>;
 };
 
 export type INavigationEvent<Name extends RouteName = RouteName> = INavigationEventState<Name> & {
@@ -181,16 +196,19 @@ export class NavigationEvent<Name extends RouteName = RouteName> implements INav
   }
 }
 
-export type NavigationListener<Name extends RouteName = RouteName> = (navigation: INavigationEvent<Name>) => void;
+export type NavigationListener<Name extends RouteName = RouteName> = (navigation: INavigationEvent<Name>) => void | Promise<void>;
 
 export type NavigationEndListener<Name extends RouteName = RouteName> = (
   navigation: INavigationEvent<Name>,
   resolved: ResolvedRouterLocationSnapshot<Name>,
-) => void;
+) => void | Promise<void>;
 
-export type NavigationErrorListener<Name extends RouteName = RouteName> = (error: Error | unknown, event: INavigationEvent<Name>) => void;
+export type NavigationErrorListener<Name extends RouteName = RouteName> = (
+  error: Error | unknown,
+  event: INavigationEvent<Name>,
+) => void | Promise<void>;
 
-export type LoadingEventStatus = 'loading' | 'loaded' | 'error';
+export type LoadingEventStatus = 'pending' | 'loading' | 'loaded' | 'error';
 export type ILoadingEvent<Name extends RouteName = RouteName> = {
   /**
    * Unique identifier of the router instance.
@@ -213,7 +231,11 @@ export type ILoadingEvent<Name extends RouteName = RouteName> = {
    */
   readonly status: LoadingEventStatus;
   /**
-   * Indicates if the loading event is currently active.
+   * Indicates if the loading event status is currently pending or loading.
+   */
+  readonly pending: boolean;
+  /**
+   * Indicates if the loading event is currently loading an async component.
    */
   readonly loading: boolean;
   /**
@@ -239,7 +261,7 @@ export class LoadingEvent<Name extends RouteName = RouteName> implements ILoadin
   #resolve?: (status: LoadingEventStatus) => void;
   #reject?: (error: unknown) => void;
 
-  #status: LoadingEventStatus = 'loading';
+  #status: LoadingEventStatus = 'pending';
   #error?: unknown;
 
   get error(): unknown {
@@ -254,6 +276,10 @@ export class LoadingEvent<Name extends RouteName = RouteName> implements ILoadin
     return this.#status === 'loading';
   }
 
+  get pending(): boolean {
+    return this.loading || this.#status === 'pending';
+  }
+
   get loaded(): boolean {
     return this.#status === 'loaded';
   }
@@ -266,7 +292,7 @@ export class LoadingEvent<Name extends RouteName = RouteName> implements ILoadin
    * Promise that resolves when the navigation event is completed.
    */
   get result(): Promise<LoadingEventStatus> {
-    if (!this.loading) return this.failed ? Promise.reject(this.#status) : Promise.resolve(this.#status);
+    if (!this.pending) return this.failed ? Promise.reject(this.#status) : Promise.resolve(this.#status);
     if (!this.#result) {
       const { promise, resolve, reject } = Promise.withResolvers<LoadingEventStatus>();
       this.#result = promise;
@@ -282,15 +308,21 @@ export class LoadingEvent<Name extends RouteName = RouteName> implements ILoadin
     this.route = route;
   }
 
+  load(): this {
+    if (!this.pending) return Logger.error('Cannot load a loading event that is not pending', this);
+    this.#status = 'loading';
+    return this;
+  }
+
   complete(): this {
-    if (!this.loading) return Logger.error('Cannot complete a loading event that has already been completed', this);
+    if (!this.pending) return Logger.error('Cannot complete a loading event that is not pending', this);
     this.#status = 'loaded';
     this.#resolve?.(this.#status);
     return this;
   }
 
   fail(error?: unknown): this {
-    if (!this.loading) return Logger.error('Cannot fail a loading event that has already completed', this);
+    if (!this.pending) return Logger.error('Cannot fail a loading event that is not pending', this);
     this.#status = 'error';
     this.#error = error;
     this.#reject?.(error);
@@ -298,7 +330,10 @@ export class LoadingEvent<Name extends RouteName = RouteName> implements ILoadin
   }
 }
 
-export type LoadingListener<Name extends RouteName = RouteName> = (event: LoadingEvent<Name>) => void;
-export type LoadingErrorListener<Name extends RouteName = RouteName> = (error: Error | unknown, event: ILoadingEvent<Name>) => void;
+export type LoadingListener<Name extends RouteName = RouteName> = (event: ILoadingEvent<Name>) => void | Promise<void>;
+export type LoadingErrorListener<Name extends RouteName = RouteName> = (error: Error | unknown, event: ILoadingEvent<Name>) => void | Promise<void>;
 
-export type ErrorListener<Name extends RouteName = RouteName> = (error: Error | unknown, event: INavigationEvent<Name> | ILoadingEvent<Name>) => void;
+export type ErrorListener<Name extends RouteName = RouteName> = (
+  error: Error | unknown,
+  event: INavigationEvent<Name> | ILoadingEvent<Name>,
+) => void | Promise<void>;

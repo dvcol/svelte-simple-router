@@ -2,6 +2,8 @@ import { wait } from '@dvcol/common-utils/common/promise';
 
 import { cleanup, render, screen } from '@testing-library/svelte';
 
+import { tick } from 'svelte';
+
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import RouteView from './RouteView.test.svelte';
@@ -15,7 +17,7 @@ import { namedPartialRoute, partialRoute, routes } from './stub/routes.js';
 import type { RenderResult } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 
-import { LoadingEvent } from '~/models/navigation.model.js';
+import { LoadingEvent, NavigationEvent } from '~/models/navigation.model.js';
 import { Router } from '~/router/router.svelte.js';
 
 describe('routerView', () => {
@@ -74,6 +76,7 @@ describe('routerView', () => {
 
         render(component, { router });
         await router.push({ path: '/goodbye' });
+        await tick();
 
         // wait for the component to load
         await wait(100);
@@ -116,6 +119,7 @@ describe('routerView', () => {
 
         render(component, { router });
         await router.push({ path: '/error' });
+        await tick();
 
         const errorComponent = screen.getByTestId('error-component');
         expect(errorComponent).toBeDefined();
@@ -130,6 +134,7 @@ describe('routerView', () => {
 
         render(component, { router });
         await router.push({ path: '/default-error' });
+        await tick();
 
         const errorComponent = screen.getByTestId('default-error');
         expect(errorComponent).toBeDefined();
@@ -145,6 +150,8 @@ describe('routerView', () => {
         await router.push({ path: '/goodbye' });
         render(component, { router });
         const routing$ = router.push({ name: 'routing' });
+
+        // wait for the component to load
         await wait(100);
 
         const routing = screen.getByTestId('default-routing');
@@ -207,17 +214,19 @@ describe('routerView', () => {
 
     let result: RenderResult<typeof RouteView>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       result = render(RouterView, { router, ...hooks });
+      await tick();
       vi.clearAllMocks();
     });
 
     it('should subscribe to router hooks when mounted', async () => {
-      expect.assertions(6);
+      expect.assertions(7);
 
       await router.push({ path: '/hello' });
 
       expect(hooks.beforeEach).toHaveBeenCalledTimes(1);
+      expect(hooks.beforeEach).toHaveBeenCalledWith(expect.any(NavigationEvent));
       expect(hooks.onStart).toHaveBeenCalledTimes(1);
       expect(hooks.onEnd).toHaveBeenCalledTimes(1);
 
@@ -228,12 +237,13 @@ describe('routerView', () => {
     });
 
     it('should trigger onLoading while loading async component', async () => {
-      expect.assertions(6);
+      expect.assertions(7);
 
       await router.push({ path: '/loading' });
       await wait(500);
 
       expect(hooks.beforeEach).toHaveBeenCalledTimes(1);
+      expect(hooks.beforeEach).toHaveBeenCalledWith(expect.any(NavigationEvent));
       expect(hooks.onStart).toHaveBeenCalledTimes(1);
       expect(hooks.onEnd).toHaveBeenCalledTimes(1);
 
@@ -244,11 +254,13 @@ describe('routerView', () => {
     });
 
     it('should trigger onError when loading error component', async () => {
-      expect.assertions(7);
+      expect.assertions(8);
 
       await router.push({ path: '/error' });
+      await tick();
 
       expect(hooks.beforeEach).toHaveBeenCalledTimes(1);
+      expect(hooks.beforeEach).toHaveBeenCalledWith(expect.any(NavigationEvent));
       expect(hooks.onStart).toHaveBeenCalledTimes(1);
       expect(hooks.onEnd).toHaveBeenCalledTimes(1);
 
@@ -260,11 +272,13 @@ describe('routerView', () => {
     });
 
     it('should stop listening to router hooks when unmounted', async () => {
-      expect.assertions(9);
+      expect.assertions(10);
 
       await router.push({ path: '/hello' });
+      await tick();
 
       expect(hooks.beforeEach).toHaveBeenCalledTimes(1);
+      expect(hooks.beforeEach).toHaveBeenCalledWith(expect.any(NavigationEvent));
       expect(hooks.onStart).toHaveBeenCalledTimes(1);
       expect(hooks.onEnd).toHaveBeenCalledTimes(1);
 
@@ -473,6 +487,7 @@ describe('routerView', () => {
 
       render(RouteView, { router, route: { ...partialRoute, component: () => Promise.reject(new Error('Loading error')) } });
       await router.push({ path: partialRoute.path });
+      await tick();
 
       const errorComponent = screen.getByTestId('error-component');
       expect(errorComponent).toBeDefined();
@@ -487,6 +502,7 @@ describe('routerView', () => {
 
       render(RouteView, { router, route: { ...partialRoute, error: undefined, component: () => Promise.reject(new Error('Loading error')) } });
       await router.push({ path: partialRoute.path });
+      await tick();
 
       const errorComponent = screen.getByTestId('default-error');
       expect(errorComponent).toBeDefined();

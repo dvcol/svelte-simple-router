@@ -4,3 +4,4 @@ export * from './route.model.js';
 export * from './router.model.js';
 export * from './view.model.js';
 export * from './navigation.model.js';
+export * from './component.model.js';

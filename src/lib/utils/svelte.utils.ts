@@ -56,23 +56,26 @@ export const resolveComponent = async <
 >(
   component?: ComponentOrLazy<Props, Exports, Bindings> | AnySnippet,
   {
+    onStart,
     onLoading,
     onLoaded,
     onError,
   }: {
-    onLoading?: () => void;
-    onLoaded?: (component?: Component<Props, Exports, Bindings> | AnySnippet) => void;
-    onError?: (error: unknown) => void;
+    onStart?: () => unknown | Promise<unknown>;
+    onLoading?: () => unknown | Promise<unknown>;
+    onLoaded?: (component?: Component<Props, Exports, Bindings> | AnySnippet) => unknown | Promise<unknown>;
+    onError?: (error: unknown) => unknown | Promise<unknown>;
   } = {},
 ): Promise<Component<Props, Exports, Bindings> | AnySnippet | undefined> => {
+  await onStart?.();
   if (component && !isSnippet(component) && isLazyComponent(component)) {
     onLoading?.();
     try {
       const awaited = await component();
-      onLoaded?.(awaited.default);
+      await onLoaded?.(awaited.default);
       return awaited.default;
     } catch (error) {
-      onError?.(error);
+      await onError?.(error);
       return undefined;
     }
   }

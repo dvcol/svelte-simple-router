@@ -1,7 +1,8 @@
 <script lang="ts">
   import { type Component, type Snippet, untrack } from 'svelte';
 
-  import type { IRouter, RouterViewProps } from '~/models/router.model.js';
+  import type { RouterViewProps } from '~/models/component.model.js';
+  import type { IRouter } from '~/models/router.model.js';
 
   import type { View } from '~/router/view.svelte.js';
 
@@ -70,40 +71,36 @@
   // Delay properties update until component is resolved
   let _properties: ComponentProps | undefined = $state();
 
-  const _onLoading = $derived.by(() => {
+  const listeners = $derived.by(() => {
     const _route = toBaseRoute(route);
     const _uuid = routeUUID;
-    return () => {
-      if (routeUUID !== _uuid) return;
-      ResolvedComponent = loading;
-      return untrack(() => view.isLoading(_route));
-    };
-  });
-
-  const _onLoaded = $derived.by(() => {
-    const _route = toBaseRoute(route);
-    const _uuid = routeUUID;
-    return (_component?: AnyComponent | AnySnippet) => {
-      if (routeUUID !== _uuid) return;
-      ResolvedComponent = _component;
-      _properties = properties;
-      return untrack(() => view.hasLoaded(_route));
-    };
-  });
-
-  const _onError = $derived.by(() => {
-    const _route = toBaseRoute(route);
-    const _uuid = routeUUID;
-    return (err: unknown) => {
-      if (routeUUID !== _uuid) return;
-      ResolvedComponent = error;
-      return untrack(() => view.hasError(err, _route));
+    return {
+      onStart: () => {
+        if (routeUUID !== _uuid) return;
+        return untrack(() => view.start(_route));
+      },
+      onLoading: () => {
+        if (routeUUID !== _uuid) return;
+        ResolvedComponent = loading;
+        return untrack(() => view.load());
+      },
+      onLoaded: (_component?: AnyComponent | AnySnippet) => {
+        if (routeUUID !== _uuid) return;
+        ResolvedComponent = _component;
+        _properties = properties;
+        return untrack(() => view.complete());
+      },
+      onError: (err: unknown) => {
+        if (routeUUID !== _uuid) return;
+        ResolvedComponent = error;
+        return untrack(() => view.fail(err));
+      },
     };
   });
 
   // Trigger component resolution on route change
   $effect(() => {
-    resolveComponent(component, { onLoading: _onLoading, onLoaded: _onLoaded, onError: _onError });
+    resolveComponent(component, listeners);
   });
 </script>
 

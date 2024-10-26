@@ -1,6 +1,7 @@
 import { toPathSegment } from '@dvcol/common-utils/common/string';
 
-import type { HistoryState, NavigationGuardReturn, RouteName, RouteNavigation, RouteQuery } from '~/models/route.model.js';
+import type { NavigationGuardReturn } from '~/models/navigation.model.js';
+import type { HistoryState, RouteName, RouteNavigation, RouteQuery } from '~/models/route.model.js';
 import type { ResolvedRouterLocationSnapshot, RouterState } from '~/models/router.model.js';
 
 import { NavigationAbortedError, type NavigationFailureType } from '~/models/error.model.js';

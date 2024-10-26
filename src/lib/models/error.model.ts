@@ -1,5 +1,6 @@
+import type { ResolvedRouteSnapshot } from '~/models/navigation.model.js';
 import type { ResolvedRoute, Route, RouteName, RouteNavigation } from '~/models/route.model.js';
-import type { ResolvedRouterLocationSnapshot, ResolvedRouteSnapshot } from '~/models/router.model.js';
+import type { ResolvedRouterLocationSnapshot } from '~/models/router.model.js';
 
 /**
  * Flags so we can combine them when checking for multiple errors. This is the internal version of

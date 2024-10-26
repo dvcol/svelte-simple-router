@@ -40,6 +40,13 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
   #error = $state<Error | unknown>();
 
   /**
+   * List of navigation guards that should be executed when the route changes and before the view change starts.
+   * @reactive
+   * @private
+   */
+  #onChangeListeners: Set<LoadingListener<Name>> = $state(new SvelteSet());
+
+  /**
    * List of listeners that should be executed when a view start loading a component.
    * @reactive
    * @private
@@ -65,7 +72,7 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
    * @reactive
    */
   get loading() {
-    return !!this.#loading?.loading;
+    return !!this.#loading?.pending;
   }
 
   /**
@@ -79,6 +86,18 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
   constructor(name: string = DefaultView) {
     this.name = name;
     this.#log = `[${LoggerKey} View - ${this.id}${this.name ? ` - ${this.name}` : ''}]`;
+  }
+
+  /**
+   * Add a listener that execute when the route changes and before the view change starts.
+   *
+   * @return Returns a function that removes the registered guard.
+   *
+   * @param listener - listener to add
+   */
+  onChange(listener: LoadingListener<Name>): () => void {
+    this.#onChangeListeners.add(listener);
+    return () => this.#onChangeListeners.delete(listener);
   }
 
   /**
@@ -118,40 +137,51 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
   }
 
   /**
-   * Mark the view as loading.
+   * Start the view loading process.
    * @param route
    */
-  isLoading(route?: BaseRoute<Name>) {
+  start(route?: BaseRoute<Name>) {
     const event = new LoadingEvent<Name>({ view: { id: this.id, name: this.name }, route });
     this.#loading = event;
-    this.#onLoadingListeners.forEach(listener => listener(event));
-    Logger.debug(this.#log, 'Route loading...', event);
+    Logger.debug(this.#log, 'View resolving...', event);
+    return Promise.all([...this.#onChangeListeners].map(listener => listener(event)));
+  }
+
+  /**
+   * Mark the view as loading.
+   */
+  load() {
+    if (!this.#loading) throw new Error('View not started');
+    const event = this.#loading;
+    event.load();
+    Logger.debug(this.#log, 'View loading...', event);
+    return Promise.all([...this.#onLoadingListeners].map(listener => listener(event)));
   }
 
   /**
    * Mark the view as loaded.
-   * @param route
    */
-  hasLoaded(route?: BaseRoute<Name>) {
-    const event = this.#loading ?? new LoadingEvent<Name>({ view: { id: this.id, name: this.name }, route });
-    event.complete();
+  complete() {
+    if (!this.#loading) throw new Error('View not started');
+    const event = this.#loading;
     this.#error = undefined;
     this.#loading = undefined;
-    this.#onLoadedListeners.forEach(listener => listener(event));
-    Logger.debug(this.#log, 'Route loaded', event);
+    event.complete();
+    Logger.info(this.#log, 'View loaded', event);
+    return Promise.all([...this.#onLoadedListeners].map(listener => listener(event)));
   }
 
   /**
    * Mark the view as failed to load.
    * @param error
-   * @param route
    */
-  hasError(error: Error | unknown, route?: BaseRoute<Name>) {
-    const event = this.#loading ?? new LoadingEvent<Name>({ view: { id: this.id, name: this.name }, route });
-    event.fail(error);
+  fail(error: Error | unknown) {
+    if (!this.#loading) throw new Error('View not started');
+    const event = this.#loading;
     this.#error = error;
     this.#loading = undefined;
-    this.#onErrorListeners.forEach(listener => listener(error, event));
-    Logger.error(this.#log, 'Fail to load', { error, route });
+    event.fail(error);
+    Logger.error(this.#log, 'View failed to load', { error, event });
+    return Promise.all([...this.#onErrorListeners].map(listener => listener(error, event)));
   }
 }

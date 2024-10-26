@@ -1,6 +1,6 @@
 import { type EasingFunction, scale, type ScaleParams, type TransitionConfig } from 'svelte/transition';
 
-import type { TransitionProps } from '~/models/router.model.js';
+import type { TransitionProps } from '~/models/component.model.js';
 
 export interface BaseParams {
   delay?: number;
