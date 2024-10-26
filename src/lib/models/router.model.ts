@@ -2,23 +2,17 @@
 
 import { isShallowEqual } from '@dvcol/common-utils/common/object';
 
-import type { Snippet } from 'svelte';
-import type { TransitionConfig } from 'svelte/transition';
-
 import type {
-  ErrorListener,
   INavigationEvent,
-  LoadingListener,
   NavigationEndListener,
   NavigationErrorListener,
+  NavigationGuard,
   NavigationListener,
 } from '~/models/navigation.model.js';
 import type {
   BaseRoute,
   HistoryState,
-  NavigationGuard,
   ParsedRoute,
-  PartialRoute,
   ResolvedRoute,
   Route,
   RouteName,
@@ -29,7 +23,6 @@ import type {
   RouteWildcards,
 } from '~/models/route.model.js';
 
-import type { View } from '~/router/view.svelte.js';
 import type { LogLevel } from '~/utils/logger.utils.js';
 
 import { isRouteEqual } from '~/models/route.model.js';
@@ -81,143 +74,6 @@ export const isResolvedLocationEqual = <Name extends RouteName = RouteName>(
 export const RouterStateConstant = '__SVELTE_SIMPLE_ROUTER_STATE__' as const;
 export const RouterScrollConstant = '__SVELTE_SIMPLE_ROUTER_SCROLL__' as const;
 export const RouterDebuggerConstant = '__SVELTE_SIMPLE_ROUTER_DEBUGGER__' as const;
-
-export type RouterContextProps<Name extends RouteName = any> = {
-  /**
-   * Router instance to use.
-   */
-  router?: IRouter<Name>;
-  /**
-   * Router options to use when creating a new router instance.
-   */
-  options?: RouterOptions<Name>;
-  /**
-   * Children to render when the router is ready.
-   */
-  children?: Snippet<[IRouter<Name>]>;
-};
-
-export type TransitionFunction<T extends Record<string, any> | undefined = Record<string, any> | undefined> = (
-  node: Element,
-  props: T,
-  options: { direction: 'in' | 'out' },
-) => TransitionConfig | (() => TransitionConfig);
-
-export type TransitionProps<
-  T extends { in?: Record<string, any>; out?: Record<string, any> } = { in?: Record<string, any>; out?: Record<string, any> },
-> = {
-  /**
-   * Skip the first enter transition.
-   * This is useful when the first route load is fast and the transition is not needed.
-   * @default true
-   */
-  skipFirst?: boolean;
-  /**
-   * If `true`, the transition will be updated on any route change.
-   * By default, the transition is only triggered when the component changes to avoid unnecessary mounting and unmounting.
-   *
-   * @default false
-   */
-  updateOnRouteChange?: boolean;
-  /**
-   * Transition to use when navigating to a new route.
-   */
-  in?: TransitionFunction<T['in']>;
-  /**
-   * Transition to use when navigating away from the current route.
-   */
-  out?: TransitionFunction<T['out']>;
-  /**
-   * Transition parameters to be passed to the transition functions.
-   */
-  params?: {
-    in?: T['in'];
-    out?: T['out'];
-  };
-  props?: {
-    container?: Record<string, any>;
-    wrapper?: Record<string, any>;
-  };
-};
-
-export type ResolvedRouteSnapshot<Name extends RouteName = RouteName> = Omit<ResolvedRoute<Name>, 'route'> & {
-  route: BaseRoute<Name>;
-};
-
-export type RouteContainerProps<Name extends RouteName = any> = {
-  /**
-   * The view instance on which to broadcast loading state.
-   */
-  view: View<Name>;
-  /**
-   * Name of the router view to render.
-   * If not provided, the default view will be used.
-   */
-  name?: string;
-  /**
-   * Transition to use when navigating between routes.
-   */
-  transition?: TransitionProps;
-  /**
-   * Navigation guard passed to the router instance.
-   */
-  beforeEach?: NavigationGuard<Name>;
-  /**
-   * Error listener to execute when the view fails to load.
-   */
-  onError?: ErrorListener<Name>;
-  /**
-   * Navigation listener passed to the router instance.
-   */
-  onStart?: NavigationListener<Name>;
-  /**
-   * Navigation end listener passed to the router instance.
-   */
-  onEnd?: NavigationEndListener<Name>;
-  /**
-   * Routing snippet to display while the route is being resolved.
-   */
-  routing?: Snippet<[IRouter<Name>['routing']]>;
-  /**
-   * Loading snippet to display while the route is loading.
-   * Route loading component will take precedence over this.
-   *
-   * @see {@link RouteComponents.loadings}
-   * @see {@link RouteComponent.loading}
-   */
-  loading?: Snippet<[IRouter<Name>['route']]>;
-  /**
-   * Error snippet to display if the route fails to load.
-   * Route error component will take precedence over this.
-   *
-   * @see {@link RouteComponents.errors}
-   * @see {@link RouteComponent.error}
-   */
-  error?: Snippet<[Error | any]>;
-};
-
-export type RouterViewProps<Name extends RouteName = any> = RouterContextProps<Name> &
-  Omit<RouteContainerProps<Name>, 'view'> & {
-    /**
-     * Loading listener to execute when the view starts loading.
-     */
-    onLoading?: LoadingListener<Name>;
-    /**
-     * Loaded listener to execute when the view is loaded.
-     */
-    onLoaded?: LoadingListener<Name>;
-  };
-
-export type RouteViewProps<Name extends RouteName = any> = Pick<RouterViewProps<Name>, 'loading' | 'error' | 'name'> & {
-  /**
-   * Route to inject into the router.
-   */
-  route: PartialRoute<Name>;
-  /**
-   * Children to render when the router is ready.
-   */
-  children?: Snippet;
-} & Partial<Record<Name, Route<Name>['component']>>;
 
 export type RouterScrollPosition = { x: number; y: number };
 export type RouterStateLocation<Name extends RouteName = RouteName> = {
@@ -391,10 +247,12 @@ export type RouterOptions<Name extends RouteName = RouteName> = {
   caseSensitive?: boolean;
   /**
    * A route guard that executes before any navigation.
+   * @awaited
    */
   beforeEach?: NavigationGuard<Name>;
   /**
    * A navigation listener that is executed when the navigation is triggered but before the route is resolved.
+   * @awaited
    */
   onStart?: NavigationListener<Name>;
   /**

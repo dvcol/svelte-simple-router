@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { RouterViewProps, RouteViewProps } from '~/models/router.model.js';
+  import type { RouterViewProps, RouteViewProps } from '~/models/component.model';
 
   import RouteView from '~/components/RouteView.svelte';
   import RouterContext from '~/components/RouterContext.svelte';

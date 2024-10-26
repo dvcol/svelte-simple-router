@@ -7,8 +7,15 @@ import { raceUntil } from '@dvcol/common-utils/common/promise';
 import { computeAbsolutePath, toPathSegment } from '@dvcol/common-utils/common/string';
 import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 
-import type { INavigationEvent, NavigationEndListener, NavigationErrorListener, NavigationListener } from '~/models/navigation.model.js';
-import type { NavigationGuard, ParsedRoute, ResolvedRoute, Route, RouteName, RouteNavigation } from '~/models/route.model.js';
+import type {
+  INavigationEvent,
+  NavigationEndListener,
+  NavigationErrorListener,
+  NavigationGuard,
+  NavigationListener,
+} from '~/models/navigation.model.js';
+
+import type { ParsedRoute, ResolvedRoute, Route, RouteName, RouteNavigation } from '~/models/route.model.js';
 
 import type {
   IHistory,
@@ -347,7 +354,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
 
   async #init() {
     try {
-      await this.#sync();
+      await this.sync();
     } catch (error) {
       if (error instanceof NavigationCancelledError) {
         Logger.warn(this.#log, `Failed to sync, navigation cancelled`, error);
@@ -694,11 +701,12 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
 
     // Update the routing state
     const navigation = new NavigationEvent<Name>(to, from);
-    // Set the new navigation as the current routing event
-    this.#routing = navigation;
 
     // Broadcast the navigation start event
-    this.#onStartListeners.forEach(listener => listener(navigation));
+    await Promise.all([...this.#onStartListeners].map(listener => listener(navigation)));
+
+    // Set the new navigation as the current routing event
+    this.#routing = navigation;
 
     try {
       // Execute navigation guards
@@ -735,8 +743,8 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       this.#error = error;
 
       // Broadcast the navigation error event
-      this.#onErrorListeners.forEach(listener => listener(error, navigation));
       Logger.error(this.#log, 'Navigation error', { ...navigation, error });
+      this.#onErrorListeners.forEach(listener => listener(error, navigation));
       navigation.fail(error);
       throw error;
     } finally {
@@ -805,7 +813,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     try {
       this.#history[method](state, title ?? '', routed.location?.href);
       if (title) document.title = title;
-      Logger.debug(this.#log, 'State change', { method, resolved, routed, state, title });
+      Logger.debug(this.#log, 'State changed', { method, resolved, routed, state, title });
       return routed;
     } catch (error) {
       Logger.error(this.#log, 'History error', { method, error, resolved, routed, state, title });

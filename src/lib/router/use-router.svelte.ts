@@ -1,6 +1,6 @@
 import { hasContext } from 'svelte';
 
-import type { NavigationGuard, RouteName } from '~/models/route.model.js';
+import type { RouteName } from '~/models/route.model.js';
 
 import type { IView } from '~/models/view.model.js';
 
@@ -10,7 +10,10 @@ import {
   type LoadingListener,
   MissingRouterContextError,
   MissingViewContextError,
+  type NavigationEndListener,
   type NavigationErrorListener,
+  type NavigationGuard,
+  type NavigationListener,
 } from '~/models/index.js';
 import { type IRouter } from '~/models/router.model.js';
 import { getRouter, getView, RouterContextSymbol, RouterViewSymbol } from '~/router/context.svelte.js';
@@ -105,7 +108,7 @@ export const beforeEach = <Name extends RouteName = any>(callback: NavigationGua
  * @param callback
  * @throws {MissingRouterContextError} when no router is available.
  */
-export const onStart = <Name extends RouteName = any>(callback: NavigationGuard<Name>) => {
+export const onStart = <Name extends RouteName = any>(callback: NavigationListener<Name>) => {
   const router = useRouter<Name>();
   $effect.pre(() => {
     return router.onStart(callback);
@@ -117,22 +120,17 @@ export const onStart = <Name extends RouteName = any>(callback: NavigationGuard<
  * @param callback
  * @throws {MissingRouterContextError} when no router is available.
  */
-export const onEnd = <Name extends RouteName = any>(callback: NavigationGuard<Name>) => {
+export const onEnd = <Name extends RouteName = any>(callback: NavigationEndListener<Name>) => {
   const router = useRouter<Name>();
   $effect.pre(() => {
     return router.onEnd(callback);
   });
 };
 
-/**
- * Add a listener that is executed when a navigation error occurs.
- * @param callback
- * @throws {MissingRouterContextError} when no router is available.
- */
-export const onRouterError = <Name extends RouteName = any>(callback: NavigationErrorListener<Name>) => {
-  const router = useRouter<Name>();
+export const onChange = <Name extends RouteName = any>(callback: LoadingListener<Name>) => {
+  const view = useView<Name>();
   $effect.pre(() => {
-    return router.onError(callback);
+    return view.onChange(callback);
   });
 };
 
@@ -157,6 +155,18 @@ export const onLoading = <Name extends RouteName = any>(callback: LoadingListene
   const view = useView<Name>();
   $effect.pre(() => {
     return view.onLoading(callback);
+  });
+};
+
+/**
+ * Add a listener that is executed when a navigation error occurs.
+ * @param callback
+ * @throws {MissingRouterContextError} when no router is available.
+ */
+export const onRouterError = <Name extends RouteName = any>(callback: NavigationErrorListener<Name>) => {
+  const router = useRouter<Name>();
+  $effect.pre(() => {
+    return router.onError(callback);
   });
 };
 

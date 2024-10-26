@@ -57,6 +57,9 @@ importers:
       '@tsconfig/svelte':
         specifier: ^5.0.4
         version: 5.0.4
+      '@types/dom-view-transitions':
+        specifier: ^1.0.5
+        version: 1.0.5
       '@types/node':
         specifier: ^22.5.1
         version: 22.5.4
@@ -853,6 +856,9 @@ packages:
 
   '@types/cookie@0.6.0':
     resolution: {integrity: sha512-4Kh9a6B2bQciAhf7FSuMRRkUWecJgJu9nPnx3yzpsfXX/c50REIqpHY4C82bXP90qrLtXtkDxTZosYO3UpOwlA==}
+
+  '@types/dom-view-transitions@1.0.5':
+    resolution: {integrity: sha512-N2sILR7fxSMnaFaAPwGj4DtHCXjIyQTHt+xJyf9jATpzUsTkMNM0DWtqZB6W7f501B/Y0tq3uqat/VlbjuTpMA==}
 
   '@types/estree@1.0.5':
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
@@ -5464,6 +5470,8 @@ snapshots:
       '@types/node': 22.5.4
 
   '@types/cookie@0.6.0': {}
+
+  '@types/dom-view-transitions@1.0.5': {}
 
   '@types/estree@1.0.5': {}
 

@@ -1,5 +1,6 @@
 <script lang="ts">
-  import type { IRouter, RouterViewProps } from '~/models/router.model.js';
+  import type { RouterViewProps } from '~/models/component.model';
+  import type { IRouter } from '~/models/router.model.js';
 
   import RouterView from '~/components/RouterView.svelte';
 

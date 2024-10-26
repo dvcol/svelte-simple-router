@@ -14,11 +14,11 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
 
-  import { getRouter } from '~/router/context.svelte.js';
+  import { useRouter } from '~/router/index.js';
   import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 
-  const router = getRouter();
-  Logger.info(`[${LoggerKey} Debugger]`, 'router attached to "window.router"', router);
+  const router = useRouter();
+  Logger.info(`[${LoggerKey} Debugger - ${router.id}]`, 'router attached to "window.router"', router);
   window[RouterDebuggerConstant] = { ...window[RouterDebuggerConstant], [router.id]: router };
 
   const options = $derived(router.options);
@@ -26,7 +26,7 @@
   const location = $derived(router.location);
 
   onDestroy(() => {
-    Logger.info(`[${LoggerKey} Debugger]`, 'router detached from "window.router"', router);
+    Logger.info(`[${LoggerKey} Debugger - ${router.id}]`, 'router detached from "window.router"', router);
     delete window[RouterDebuggerConstant]?.[router.id];
   });
 </script>

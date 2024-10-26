@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import type { TransitionFunction, TransitionProps } from '~/models/router.model.js';
+  import type { TransitionFunction, TransitionProps } from '~/models/component.model.js';
 
   const { children, key, id, transition }: { children: Snippet; id: string; key: any | any[]; transition: TransitionProps } = $props();
 
@@ -27,7 +27,12 @@
   const _containerProps = $derived(transition?.props?.container);
   const _wrapperProps = $derived(transition?.props?.wrapper);
 
-  const _style = $derived([`--router-id: sr-container-${id}`, _containerProps?.style].filter(Boolean).join('; '));
+  const _style = $derived.by(() => {
+    if (!transition?.viewTransitionName) return _containerProps?.style;
+    let _name = transition?.viewTransitionName;
+    if (typeof _name === 'boolean') _name = `sr-container-${id}`;
+    return [`--container-transition-name: ${_name}`, _containerProps?.style].filter(Boolean).join('; ');
+  });
 </script>
 
 <div data-transition-id="transition-container" {..._containerProps} style={_style}>
@@ -45,7 +50,7 @@
 <style lang="scss">
   /* stylelint-disable selector-pseudo-class-no-unknown */
   div[data-transition-id='transition-container'] {
-    view-transition-name: var(--router-id);
+    view-transition-name: var(--container-transition-name);
 
     &:global(:has(div[data-transition-id='transition-wrapper']:not(:only-child))) {
       position: relative;
