@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { type Component, type Snippet } from 'svelte';
+  import { type Component, type Snippet, untrack } from 'svelte';
 
   import type { IRouter, RouterViewProps } from '~/models/router.model.js';
 
@@ -76,7 +76,7 @@
     return () => {
       if (routeUUID !== _uuid) return;
       ResolvedComponent = loading;
-      return view.isLoading(_route);
+      return untrack(() => view.isLoading(_route));
     };
   });
 
@@ -87,7 +87,7 @@
       if (routeUUID !== _uuid) return;
       ResolvedComponent = _component;
       _properties = properties;
-      return view.hasLoaded(_route);
+      return untrack(() => view.hasLoaded(_route));
     };
   });
 
@@ -97,7 +97,7 @@
     return (err: unknown) => {
       if (routeUUID !== _uuid) return;
       ResolvedComponent = error;
-      return view.hasError(err, _route);
+      return untrack(() => view.hasError(err, _route));
     };
   });
 

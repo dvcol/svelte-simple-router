@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
 
-  import { NavigationCancelledError, type Route, type RouteViewProps } from '~/models/index.js';
+  import { DefaultView, NavigationCancelledError, type Route, type RouteViewProps } from '~/models/index.js';
 
   import { getView } from '~/router/context.svelte.js';
   import { useRouter } from '~/router/use-router.svelte.js';
@@ -26,7 +26,7 @@
     if (!Object.keys(components).length) components = undefined;
   }
 
-  if (_name && _name !== 'default') {
+  if (_name && _name !== DefaultView) {
     components ??= {};
     if (components[_name]) components.default = children;
     else components[_name] = children;
@@ -44,7 +44,7 @@
 
   const log = `[${LoggerKey} Route - ${router.id}]`;
 
-  if (!_route.redirect && !_route.component && !_route.components?.[_name || 'default']) {
+  if (!_route.redirect && !_route.component && !_route.components?.[_name || DefaultView]) {
     Logger.warn(log, 'Route has no component, redirect or children', _route);
   }
 

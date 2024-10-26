@@ -3,6 +3,7 @@ import { isShallowEqual, shallowClone } from '@dvcol/common-utils/common/object'
 import type { Snippet } from 'svelte';
 import type { IMatcher } from '~/models/matcher.model.js';
 import type { INavigationEvent } from '~/models/navigation.model.js';
+import type { IDefaultView } from '~/models/view.model.js';
 import type { AnyComponent, ComponentOrLazy } from '~/utils/svelte.utils.js';
 
 /**
@@ -138,19 +139,19 @@ export type RouteComponents<Name extends RouteName = RouteName> = {
   /**
    * Components to display when the URL matches this route.
    */
-  components: Partial<Record<Name | 'default', ComponentOrLazy | Snippet>>;
+  components: Partial<Record<Name | IDefaultView, ComponentOrLazy | Snippet>>;
   /**
    * Loading components to display while the components are being loaded.
    */
-  loadings?: Partial<Record<Name | 'default', AnyComponent | Snippet>>;
+  loadings?: Partial<Record<Name | IDefaultView, AnyComponent | Snippet>>;
   /**
    * Error components to display if the components fail to load.
    */
-  errors?: Partial<Record<Name | 'default', AnyComponent | Snippet>>;
+  errors?: Partial<Record<Name | IDefaultView, AnyComponent | Snippet>>;
   /**
    * Allow passing down params as props to the component rendered by `router`.
    */
-  properties?: Partial<Record<Name | 'default', ComponentProps>>;
+  properties?: Partial<Record<Name | IDefaultView, ComponentProps>>;
   /**
    * Redirect is forbidden in this case.
    */

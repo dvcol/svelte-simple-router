@@ -5,6 +5,7 @@ import { cleanup, render, screen } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import RouteView from './RouteView.test.svelte';
+
 import RouterContext from './RouterContext.test.svelte';
 import RouterView from './RouterView.test.svelte';
 import RouterViewNested from './RouterViewNested.test.svelte';
@@ -14,6 +15,7 @@ import { namedPartialRoute, partialRoute, routes } from './stub/routes.js';
 import type { RenderResult } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 
+import { LoadingEvent } from '~/models/navigation.model.js';
 import { Router } from '~/router/router.svelte.js';
 
 describe('routerView', () => {
@@ -254,7 +256,7 @@ describe('routerView', () => {
       expect(hooks.onLoading).toHaveBeenCalledTimes(1);
 
       expect(hooks.onError).toHaveBeenCalledTimes(1);
-      expect(hooks.onError).toHaveBeenCalledWith(new Error('Loading error'), { route: expect.any(Object) });
+      expect(hooks.onError).toHaveBeenCalledWith(new Error('Loading error'), expect.any(LoadingEvent));
     });
 
     it('should stop listening to router hooks when unmounted', async () => {

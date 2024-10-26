@@ -32,6 +32,8 @@
   {@render container(contextRouter)}
 {:else}
   <RouterContext {options} {router}>
-    {@render container(_router)}
+    {#snippet children(_router)}
+      {@render container(_router)}
+    {/snippet}
   </RouterContext>
 {/if}
