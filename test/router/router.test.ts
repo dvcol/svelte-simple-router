@@ -4,21 +4,21 @@ import { wait } from '@dvcol/common-utils/common/promise';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { NavigationEvent } from '../../src/lib/models/navigation.model';
-
 import type { ParsingRelativePathError } from '@dvcol/common-utils/common/error';
 import type { MockInstance } from 'vitest';
 
-import type { NavigationAbortedError, NavigationNotFoundError } from '~/models/error.model.js';
+import type { NavigationNotFoundError } from '~/models/error.model.js';
 
 import type { Route, RouteParams, RouteQuery } from '~/models/route.model.js';
 
 import type { RouterOptions } from '~/models/router.model.js';
 
-import { ErrorTypes } from '~/models/error.model.js';
-
+import { ErrorTypes, NavigationAbortedError, NavigationCancelledError } from '~/models/error.model.js';
+import { NavigationEvent } from '~/models/navigation.model';
 import { RouterScrollConstant, RouterStateConstant } from '~/models/router.model.js';
+
 import { Router } from '~/router/router.svelte.js';
+import { Logger } from '~/utils/index.js';
 
 describe('router', () => {
   const HomeRoute: Route = {
@@ -1532,6 +1532,172 @@ describe('router', () => {
 
         expect(router.route.name).toBe(PathRoute.name);
         expect(window.location.pathname).toBe(PathRoute.path);
+      });
+    });
+  });
+
+  describe('navigationEvent', () => {
+    const log = vi.spyOn(Logger.logger, 'error').mockReturnValue(undefined);
+    it('should instantiate a NavigationEvent with the to and from routes', () => {
+      expect.assertions(10);
+      const event = new NavigationEvent(PathRoute, HomeRoute);
+
+      expect(event.to).toStrictEqual({ path: PathRoute.path, name: PathRoute.name, route: undefined });
+      expect(event.from).toStrictEqual(HomeRoute);
+      expect(event.uuid).toBeDefined();
+      expect(event.status).toBe('active');
+      expect(event.error).toBeUndefined();
+      expect(event.active).toBeTruthy();
+      expect(event.completed).toBeFalsy();
+      expect(event.cancelled).toBeFalsy();
+      expect(event.failed).toBeFalsy();
+      expect(event.redirected).toBeFalsy();
+    });
+
+    describe('redirect', () => {
+      it('should mark the event as redirected and event.redirected should be true', () => {
+        expect.assertions(4);
+
+        const event = new NavigationEvent(PathRoute, HomeRoute);
+        event.redirect(OtherRoute);
+
+        expect(event.active).toBeFalsy();
+        expect(event.redirected).toBeTruthy();
+        expect(event.error).toBeUndefined();
+        expect(event.failed).toBeFalsy();
+      });
+
+      it('should log an error if the event is not active', () => {
+        expect.assertions(3);
+
+        const event = new NavigationEvent(PathRoute, HomeRoute);
+        event.redirect(OtherRoute);
+        expect(log).not.toHaveBeenCalled();
+
+        event.redirect(OtherRoute);
+        expect(log).toHaveBeenCalledTimes(1);
+        expect(log).toHaveBeenCalledWith('Cannot redirect a navigation event that is not active', event);
+      });
+    });
+
+    describe('complete', () => {
+      it('should mark the event as completed and event.completed should be true', () => {
+        expect.assertions(4);
+
+        const event = new NavigationEvent(PathRoute, HomeRoute);
+        event.complete();
+        expect(event.active).toBeFalsy();
+        expect(event.completed).toBeTruthy();
+        expect(event.error).toBeUndefined();
+        expect(event.failed).toBeFalsy();
+      });
+
+      it('should log an error if the event is not active', () => {
+        expect.assertions(3);
+
+        const event = new NavigationEvent(PathRoute, HomeRoute);
+        event.complete();
+        expect(log).not.toHaveBeenCalled();
+
+        event.complete();
+        expect(log).toHaveBeenCalledTimes(1);
+        expect(log).toHaveBeenCalledWith('Cannot complete a navigation event that is not active', event);
+      });
+    });
+
+    describe('cancel', () => {
+      it('should mark the event as cancelled, event.error should be defined, event.cancelled should be true and should throw a cancellation error', () => {
+        expect.assertions(5);
+
+        const event = new NavigationEvent(PathRoute, HomeRoute);
+        expect(() => event.cancel()).toThrow(expect.any(NavigationCancelledError));
+
+        expect(event.active).toBeFalsy();
+        expect(event.cancelled).toBeTruthy();
+        expect(event.error).toBeDefined();
+        expect(event.failed).toBeTruthy();
+      });
+
+      it('should log an error if the event is not active', () => {
+        expect.assertions(4);
+
+        const event = new NavigationEvent(PathRoute, HomeRoute);
+        expect(() => event.cancel()).toThrow(expect.any(NavigationCancelledError));
+        expect(log).not.toHaveBeenCalled();
+
+        event.cancel();
+        expect(log).toHaveBeenCalledTimes(1);
+        expect(log).toHaveBeenCalledWith('Cannot cancel a navigation event that is not active', event);
+      });
+    });
+
+    describe('fail', () => {
+      it('should mark the event as failed, event.error should be defined, event.failed should be true and should throw a navigation aborted error', () => {
+        expect.assertions(5);
+
+        const event = new NavigationEvent(PathRoute, HomeRoute);
+        expect(() => event.fail()).toThrow(expect.any(NavigationAbortedError));
+
+        expect(event.active).toBeFalsy();
+        expect(event.failed).toBeTruthy();
+        expect(event.error).toBeDefined();
+        expect(event.cancelled).toBeFalsy();
+      });
+      it('should log an error if the event is not active', () => {
+        expect.assertions(4);
+
+        const event = new NavigationEvent(PathRoute, HomeRoute);
+        expect(() => event.fail()).toThrow(expect.any(NavigationAbortedError));
+        expect(log).not.toHaveBeenCalled();
+
+        event.fail();
+        expect(log).toHaveBeenCalledTimes(1);
+        expect(log).toHaveBeenCalledWith('Cannot fail a navigation event that is not active', event);
+      });
+    });
+
+    describe('result', () => {
+      const resolverSpy = vi.spyOn(Promise, 'withResolvers');
+      const resolveSpy = vi.spyOn(Promise, 'resolve');
+      const rejectSpy = vi.spyOn(Promise, 'reject');
+
+      it('should return the result of the view event if the event is already completer or redirected', async () => {
+        expect.assertions(4);
+
+        const event = new NavigationEvent(PathRoute, HomeRoute);
+        event.complete();
+
+        await expect(event.result).resolves.toBe('completed');
+
+        expect(resolverSpy).not.toHaveBeenCalled();
+        expect(rejectSpy).not.toHaveBeenCalled();
+        expect(resolveSpy).toHaveBeenCalledWith('completed');
+      });
+
+      it('should return a rejected promise if the event is failed', async () => {
+        expect.assertions(4);
+
+        const event = new NavigationEvent(PathRoute, HomeRoute);
+        expect(() => event.fail()).toThrow(expect.any(NavigationAbortedError));
+        await expect(event.result).rejects.toThrow('failed');
+
+        expect(resolverSpy).not.toHaveBeenCalled();
+        expect(rejectSpy).toHaveBeenCalledWith('failed');
+      });
+
+      it('should return a pending promise if the event is pending', async () => {
+        expect.assertions(3);
+
+        const event = new NavigationEvent(PathRoute, HomeRoute);
+
+        const promise = event.result;
+
+        expect(promise).toBeInstanceOf(Promise);
+        event.complete();
+
+        await expect(promise).resolves.toBe('completed');
+
+        expect(resolverSpy).toHaveBeenCalledTimes(1);
       });
     });
   });

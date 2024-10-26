@@ -239,6 +239,8 @@
     {
       name: RouteName.SlowRouteSlowLoading,
       path: '/slow-route-loading',
+      loading: Loading,
+      error: ErrorComponent,
       component: () =>
         new Promise(resolve => {
           setTimeout(() => resolve({ default: HelloComponent }), 3000);
