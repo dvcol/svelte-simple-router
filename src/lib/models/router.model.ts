@@ -6,6 +6,7 @@ import type { Snippet } from 'svelte';
 import type { TransitionConfig } from 'svelte/transition';
 
 import type {
+  ErrorListener,
   INavigationEvent,
   LoadingListener,
   NavigationEndListener,
@@ -28,7 +29,7 @@ import type {
   RouteWildcards,
 } from '~/models/route.model.js';
 
-import type { IView } from '~/models/view.model.js';
+import type { View } from '~/router/view.svelte.js';
 import type { LogLevel } from '~/utils/logger.utils.js';
 
 import { isRouteEqual } from '~/models/route.model.js';
@@ -147,7 +148,7 @@ export type RouteContainerProps<Name extends RouteName = any> = {
   /**
    * The view instance on which to broadcast loading state.
    */
-  view: IView<Name>;
+  view: View<Name>;
   /**
    * Name of the router view to render.
    * If not provided, the default view will be used.
@@ -164,7 +165,7 @@ export type RouteContainerProps<Name extends RouteName = any> = {
   /**
    * Error listener to execute when the view fails to load.
    */
-  onError?: NavigationErrorListener<Name>;
+  onError?: ErrorListener<Name>;
   /**
    * Navigation listener passed to the router instance.
    */

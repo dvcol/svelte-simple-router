@@ -1,10 +1,10 @@
 import { randomHex } from '@dvcol/common-utils';
 import { SvelteSet } from 'svelte/reactivity';
 
-import type { LoadingListener, NavigationErrorListener } from '~/models/navigation.model.js';
-import type { IView } from '~/models/view.model.js';
+import { type LoadingErrorListener, LoadingEvent, type LoadingListener } from '~/models/navigation.model.js';
 
 import { type BaseRoute, type RouteName } from '~/models/route.model.js';
+import { DefaultView, type IView } from '~/models/view.model.js';
 
 import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 
@@ -23,14 +23,14 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
    * Logger prefix for the router instance.
    * @private
    */
-  readonly #log = `[${LoggerKey} View - ${this.id}${this.name ? ` ${this.name}` : ''}]`;
+  readonly #log: string;
 
   /**
    * Indicates if the view is currently loading a component.
    * @private
    * @reactive
    */
-  #loading = $state(false);
+  #loading = $state<LoadingEvent<Name>>();
 
   /**
    * Indicates if an error occurred during the last component loading.
@@ -58,14 +58,14 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
    * @reactive
    * @private
    */
-  #onErrorListeners: Set<NavigationErrorListener<Name>> = $state(new SvelteSet());
+  #onErrorListeners: Set<LoadingErrorListener<Name>> = $state(new SvelteSet());
 
   /**
    * Indicates if the view is currently loading a component.
    * @reactive
    */
   get loading() {
-    return this.#loading;
+    return !!this.#loading?.loading;
   }
 
   /**
@@ -76,8 +76,9 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
     return this.#error;
   }
 
-  constructor(name: string = 'default') {
+  constructor(name: string = DefaultView) {
     this.name = name;
+    this.#log = `[${LoggerKey} View - ${this.id}${this.name ? ` - ${this.name}` : ''}]`;
   }
 
   /**
@@ -111,7 +112,7 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
    *
    * @returns a function that removes the registered listener
    */
-  onError(listener: NavigationErrorListener<Name>): () => void {
+  onError(listener: LoadingErrorListener<Name>): () => void {
     this.#onErrorListeners.add(listener);
     return () => this.#onErrorListeners.delete(listener);
   }
@@ -121,9 +122,10 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
    * @param route
    */
   isLoading(route?: BaseRoute<Name>) {
-    this.#loading = true;
-    this.#onLoadingListeners.forEach(listener => listener(route));
-    Logger.debug(this.#log, 'Route loading...', route);
+    const event = new LoadingEvent<Name>({ view: { id: this.id, name: this.name }, route });
+    this.#loading = event;
+    this.#onLoadingListeners.forEach(listener => listener(event));
+    Logger.debug(this.#log, 'Route loading...', event);
   }
 
   /**
@@ -131,10 +133,12 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
    * @param route
    */
   hasLoaded(route?: BaseRoute<Name>) {
+    const event = this.#loading ?? new LoadingEvent<Name>({ view: { id: this.id, name: this.name }, route });
+    event.complete();
     this.#error = undefined;
-    this.#loading = false;
-    this.#onLoadedListeners.forEach(listener => listener(route));
-    Logger.debug(this.#log, 'Route loaded', route);
+    this.#loading = undefined;
+    this.#onLoadedListeners.forEach(listener => listener(event));
+    Logger.debug(this.#log, 'Route loaded', event);
   }
 
   /**
@@ -143,9 +147,11 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
    * @param route
    */
   hasError(error: Error | unknown, route?: BaseRoute<Name>) {
+    const event = this.#loading ?? new LoadingEvent<Name>({ view: { id: this.id, name: this.name }, route });
+    event.fail(error);
     this.#error = error;
-    this.#loading = false;
-    this.#onErrorListeners.forEach(listener => listener(error, { route }));
+    this.#loading = undefined;
+    this.#onErrorListeners.forEach(listener => listener(error, event));
     Logger.error(this.#log, 'Fail to load', { error, route });
   }
 }

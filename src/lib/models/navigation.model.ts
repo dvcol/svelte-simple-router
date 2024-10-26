@@ -1,8 +1,12 @@
 import type { BaseRoute, ResolvedRoute, RouteName, RouteNavigation } from '~/models/route.model.js';
+
 import type { ResolvedRouterLocationSnapshot, ResolvedRouteSnapshot } from '~/models/router.model.js';
+
+import type { IView } from '~/models/view.model.js';
 
 import { NavigationAbortedError, NavigationCancelledError } from '~/models/error.model.js';
 import { toBaseRoute } from '~/models/route.model.js';
+
 import { Logger } from '~/utils/index.js';
 
 export type INavigationEventState<Name extends RouteName = RouteName> = {
@@ -14,19 +18,38 @@ export type INavigationEventState<Name extends RouteName = RouteName> = {
 };
 
 export type INavigationEvent<Name extends RouteName = RouteName> = INavigationEventState<Name> & {
-  readonly to: ResolvedRouteSnapshot<Name>;
-  readonly from: ResolvedRouterLocationSnapshot<Name>;
+  /**
+   * Unique identifier of the router instance.
+   */
   readonly uuid: string;
+  /**
+   * Source of the navigation event.
+   */
+  readonly to: ResolvedRouteSnapshot<Name>;
+  /**
+   * Destination of the navigation event.
+   */
+  readonly from: ResolvedRouterLocationSnapshot<Name>;
+  /**
+   * The error that caused the navigation to fail if any.
+   */
+  readonly error?: unknown;
+  /**
+   * Promise that resolves when the navigation event is completed.
+   */
   readonly result: Promise<NavigationEventStatus>;
+  /**
+   * The current status of the navigation event.
+   */
   readonly status: NavigationEventStatus;
 };
 
 type NavigationEventStatus = keyof INavigationEventState;
 
 export class NavigationEvent<Name extends RouteName = RouteName> implements INavigationEvent<Name> {
+  readonly uuid: string;
   readonly to: ResolvedRouteSnapshot<Name>;
   readonly from: ResolvedRouterLocationSnapshot<Name>;
-  readonly uuid: string;
 
   #result?: Promise<NavigationEventStatus>;
   #resolve?: (status: NavigationEventStatus) => void;
@@ -36,6 +59,16 @@ export class NavigationEvent<Name extends RouteName = RouteName> implements INav
   #error?: unknown;
   #redirect?: RouteNavigation<Name>;
 
+  /**
+   * The error that caused the navigation to fail if any.
+   */
+  get error(): unknown {
+    return this.#error;
+  }
+
+  /**
+   * The current status of the navigation event.
+   */
   get status(): NavigationEventStatus {
     return this.#status;
   }
@@ -155,9 +188,117 @@ export type NavigationEndListener<Name extends RouteName = RouteName> = (
   resolved: ResolvedRouterLocationSnapshot<Name>,
 ) => void;
 
-export type NavigationErrorListener<Name extends RouteName = RouteName> = (
-  navigation: Error | unknown,
-  context: Partial<INavigationEvent<Name>> & { route?: BaseRoute<Name> },
-) => void;
+export type NavigationErrorListener<Name extends RouteName = RouteName> = (error: Error | unknown, event: INavigationEvent<Name>) => void;
 
-export type LoadingListener<Name extends RouteName = RouteName> = (route?: BaseRoute<Name>) => void;
+export type LoadingEventStatus = 'loading' | 'loaded' | 'error';
+export type ILoadingEvent<Name extends RouteName = RouteName> = {
+  /**
+   * Unique identifier of the router instance.
+   */
+  readonly uuid: string;
+  /**
+   * View that is currently loading.
+   */
+  readonly view: Pick<IView<Name>, 'id' | 'name'>;
+  /**
+   * Route that is currently loading.
+   */
+  readonly route?: BaseRoute<Name>;
+  /**
+   * The error that caused the loading to fail if any.
+   */
+  readonly error?: unknown;
+  /**
+   * The current status of the loading event.
+   */
+  readonly status: LoadingEventStatus;
+  /**
+   * Indicates if the loading event is currently active.
+   */
+  readonly loading: boolean;
+  /**
+   * Indicates if the loading event has been completed.
+   */
+  readonly loaded: boolean;
+  /**
+   * Indicates if the loading event has failed.
+   */
+  readonly failed: boolean;
+  /**
+   * Promise that resolves when the loading event is completed.
+   */
+  readonly result: Promise<LoadingEventStatus>;
+};
+
+export class LoadingEvent<Name extends RouteName = RouteName> implements ILoadingEvent<Name> {
+  readonly uuid: string;
+  readonly view: Pick<IView<Name>, 'id' | 'name'>;
+  readonly route?: BaseRoute<Name>;
+
+  #result?: Promise<LoadingEventStatus>;
+  #resolve?: (status: LoadingEventStatus) => void;
+  #reject?: (error: unknown) => void;
+
+  #status: LoadingEventStatus = 'loading';
+  #error?: unknown;
+
+  get error(): unknown {
+    return this.#error;
+  }
+
+  get status(): LoadingEventStatus {
+    return this.#status;
+  }
+
+  get loading(): boolean {
+    return this.#status === 'loading';
+  }
+
+  get loaded(): boolean {
+    return this.#status === 'loaded';
+  }
+
+  get failed(): boolean {
+    return this.#status === 'error';
+  }
+
+  /**
+   * Promise that resolves when the navigation event is completed.
+   */
+  get result(): Promise<LoadingEventStatus> {
+    if (!this.loading) return this.failed ? Promise.reject(this.#status) : Promise.resolve(this.#status);
+    if (!this.#result) {
+      const { promise, resolve, reject } = Promise.withResolvers<LoadingEventStatus>();
+      this.#result = promise;
+      this.#resolve = resolve;
+      this.#reject = reject;
+    }
+    return this.#result;
+  }
+
+  constructor({ view, route }: Pick<ILoadingEvent<Name>, 'view' | 'route'>) {
+    this.uuid = crypto.randomUUID();
+    this.view = view;
+    this.route = route;
+  }
+
+  complete(): this {
+    if (!this.loading) return Logger.error('Cannot complete a loading event that has already been completed', this);
+    this.#status = 'loaded';
+    this.#resolve?.(this.#status);
+    return this;
+  }
+
+  fail(error?: unknown): this {
+    if (!this.loading) return Logger.error('Cannot fail a loading event that has already completed', this);
+    this.#status = 'error';
+    this.#error = error;
+    this.#reject?.(error);
+    return this;
+  }
+}
+
+export type LoadingListener<Name extends RouteName = RouteName> = (event: LoadingEvent<Name>) => void;
+export type LoadingErrorListener<Name extends RouteName = RouteName> = (error: Error | unknown, event: ILoadingEvent<Name>) => void;
+
+export type ErrorListener<Name extends RouteName = RouteName> = (error: Error | unknown, event: INavigationEvent<Name> | ILoadingEvent<Name>) => void;

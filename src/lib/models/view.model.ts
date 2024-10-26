@@ -1,4 +1,4 @@
-import type { LoadingListener, NavigationErrorListener } from '~/models/navigation.model.js';
+import type { LoadingErrorListener, LoadingListener } from '~/models/navigation.model.js';
 import type { RouteName } from '~/models/route.model.js';
 
 export type IView<Name extends RouteName = RouteName> = {
@@ -48,5 +48,8 @@ export type IView<Name extends RouteName = RouteName> = {
    *
    * @returns a function that removes the registered listener
    */
-  onError(listener: NavigationErrorListener<Name>): () => void;
+  onError(listener: LoadingErrorListener<Name>): () => void;
 };
+
+export const DefaultView = 'default';
+export type IDefaultView = typeof DefaultView;
