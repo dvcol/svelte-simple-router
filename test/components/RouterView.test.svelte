@@ -3,10 +3,10 @@
 
   import RouterView from '~/components/RouterView.svelte';
 
-  const { options, router, onError, onEnd, onStart, beforeEach, onLoading, onLoaded, transition }: RouterViewProps = $props();
+  const { options, router, onError, onEnd, onStart, beforeEach, onChange, onLoading, onLoaded, transition }: RouterViewProps = $props();
 </script>
 
-<RouterView {options} {router} {onError} {onEnd} {onStart} {beforeEach} {onLoading} {onLoaded} {transition}>
+<RouterView {options} {router} {onError} {onEnd} {onStart} {beforeEach} {onChange} {onLoading} {onLoaded} {transition}>
   {#snippet loading()}
     <div data-testid="default-loading"><h1>Default Loading</h1></div>
   {/snippet}

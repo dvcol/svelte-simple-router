@@ -4,14 +4,14 @@
   const view = useView();
   const name = $derived(view.name);
   const loading = $derived(view.loading);
-  const error = $derived(view.error);
+  const error = $derived<Error | any>(view.error);
 </script>
 
 <div class="debug">
   <h3>View - {view?.id}</h3>
   <br />
   <div>Name - {name}</div>
-  <div>Loading - {loading}</div>
+  <div>Loading - <span class:loading>{loading}</span></div>
   <br />
   {#if error}
     <div>
@@ -39,5 +39,10 @@
 
   .error {
     color: red;
+  }
+
+  .loading {
+    color: orangered;
+    font-weight: bold;
   }
 </style>

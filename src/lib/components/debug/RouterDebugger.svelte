@@ -36,6 +36,7 @@
   <pre>{JSON.stringify(options, null, 2)}</pre>
 
   <h3>Routing</h3>
+  <div>Pending - <span class:route={routing?.active}>{!!routing?.active}</span></div>
   {#if routing}
     <p>
       From <span class="route">{routing.from?.location?.name ?? routing?.from?.location?.path ?? '-'}</span> to
