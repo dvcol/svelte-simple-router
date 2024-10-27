@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { useRouter } from '~/router/use-router.svelte.js';
+  import { useRouter } from '~/router/hooks.svelte.js';
 
   const router = useRouter();
   const route = $derived(router?.route);

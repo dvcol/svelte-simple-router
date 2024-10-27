@@ -3,6 +3,7 @@ import type { TransitionConfig } from 'svelte/transition';
 import type { ErrorListener, NavigationEndListener, NavigationGuard, NavigationListener, ViewChangeListener } from '~/models/navigation.model.js';
 import type { PartialRoute, Route, RouteName } from '~/models/route.model.js';
 import type { IRouter, RouterOptions } from '~/models/router.model.js';
+import type { IDefaultView } from '~/models/view.model.js';
 
 export type RouterContextProps<Name extends RouteName = any> = {
   /**
@@ -80,7 +81,7 @@ export type RouteContainerProps<Name extends RouteName = any> = {
    * Name of the router view to render.
    * If not provided, the default view will be used.
    */
-  name?: string;
+  name?: Name | IDefaultView;
   /**
    * Transition to use when navigating between routes.
    */

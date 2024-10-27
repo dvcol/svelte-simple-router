@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { useRouter } from '~/router/use-router.svelte.ts';
+  import { useRouter } from '~/router/hooks.svelte.js';
 
   const { title }: { title: string } = $props();
 

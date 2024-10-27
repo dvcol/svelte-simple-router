@@ -238,6 +238,10 @@ describe('view', () => {
     const log = vi.spyOn(Logger.logger, 'error').mockReturnValue(undefined);
     const view = new View(routerId);
 
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
     it('should create a new ViewChangeEvent instance with provided view and route and view.pending should be true', () => {
       expect.assertions(9);
 

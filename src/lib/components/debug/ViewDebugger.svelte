@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { useView } from '~/router/use-router.svelte';
+  import { useView } from '~/router/hooks.svelte.js';
 
   const view = useView();
   const name = $derived(view.name);
