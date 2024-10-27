@@ -1,4 +1,4 @@
-import type { LoadingErrorListener, LoadingListener } from '~/models/navigation.model.js';
+import type { LoadingErrorListener, ViewChangeListener } from '~/models/navigation.model.js';
 import type { RouteName } from '~/models/route.model.js';
 
 export type IView<Name extends RouteName = RouteName> = {
@@ -8,9 +8,14 @@ export type IView<Name extends RouteName = RouteName> = {
   readonly id: string;
 
   /**
+   * Unique identifier of the router instance.
+   */
+  readonly routerId?: string;
+
+  /**
    * Name of the router view instance this is attached to.
    */
-  name?: string;
+  readonly name: IDefaultView | Name;
 
   /**
    * Indicates if the view is currently loading a component.
@@ -30,7 +35,7 @@ export type IView<Name extends RouteName = RouteName> = {
    *
    * @param listener - listener to add
    */
-  onChange(listener: LoadingListener<Name>): () => void;
+  onChange(listener: ViewChangeListener<Name>): () => void;
 
   /**
    * Add a listener that is executed when a view start loading a component.
@@ -39,7 +44,7 @@ export type IView<Name extends RouteName = RouteName> = {
    *
    * @returns a function that removes the registered listener
    */
-  onLoading(listener: LoadingListener<Name>): () => void;
+  onLoading(listener: ViewChangeListener<Name>): () => void;
 
   /**
    * Add a listener that is executed when a view start loading a component.
@@ -48,7 +53,7 @@ export type IView<Name extends RouteName = RouteName> = {
    *
    * @returns a function that removes the registered listener
    */
-  onLoaded(listener: LoadingListener<Name>): () => void;
+  onLoaded(listener: ViewChangeListener<Name>): () => void;
 
   /**
    * Add a listener that is executed when an error occurs during view loading.

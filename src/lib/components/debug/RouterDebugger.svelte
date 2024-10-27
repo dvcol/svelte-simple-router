@@ -14,7 +14,7 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
 
-  import { useRouter } from '~/router/index.js';
+  import { useRouter } from '~/router/use-router.svelte.js';
   import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 
   const router = useRouter();

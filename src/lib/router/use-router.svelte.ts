@@ -7,13 +7,13 @@ import type { IView } from '~/models/view.model.js';
 import {
   type ErrorListener,
   type LoadingErrorListener,
-  type LoadingListener,
   MissingRouterContextError,
   MissingViewContextError,
   type NavigationEndListener,
   type NavigationErrorListener,
   type NavigationGuard,
   type NavigationListener,
+  type ViewChangeListener,
 } from '~/models/index.js';
 import { type IRouter } from '~/models/router.model.js';
 import { getRouter, getView, RouterContextSymbol, RouterViewSymbol } from '~/router/context.svelte.js';
@@ -127,7 +127,12 @@ export const onEnd = <Name extends RouteName = any>(callback: NavigationEndListe
   });
 };
 
-export const onChange = <Name extends RouteName = any>(callback: LoadingListener<Name>) => {
+/**
+ * Add a listener that is executed when a view changes.
+ * @param callback
+ * @throws {MissingViewContextError} when no view is available.
+ */
+export const onChange = <Name extends RouteName = any>(callback: ViewChangeListener<Name>) => {
   const view = useView<Name>();
   $effect.pre(() => {
     return view.onChange(callback);
@@ -139,7 +144,7 @@ export const onChange = <Name extends RouteName = any>(callback: LoadingListener
  * @param callback
  * @throws {MissingViewContextError} when no view is available.
  */
-export const onLoaded = <Name extends RouteName = any>(callback: LoadingListener<Name>) => {
+export const onLoaded = <Name extends RouteName = any>(callback: ViewChangeListener<Name>) => {
   const view = useView<Name>();
   $effect.pre(() => {
     return view.onLoaded(callback);
@@ -151,7 +156,7 @@ export const onLoaded = <Name extends RouteName = any>(callback: LoadingListener
  * @param callback
  * @throws {MissingViewContextError} when no view is available.
  */
-export const onLoading = <Name extends RouteName = any>(callback: LoadingListener<Name>) => {
+export const onLoading = <Name extends RouteName = any>(callback: ViewChangeListener<Name>) => {
   const view = useView<Name>();
   $effect.pre(() => {
     return view.onLoading(callback);

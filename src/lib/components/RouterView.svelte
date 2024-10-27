@@ -1,42 +1,23 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
-
   import type { RouterViewProps } from '~/models/component.model.js';
 
   import RouteContainer from '~/components/RouteContainer.svelte';
   import RouterContext from '~/components/RouterContext.svelte';
   import { type IRouter } from '~/models/router.model.js';
 
-  import { getRouter, setView } from '~/router/context.svelte.js';
-  import { View } from '~/router/view.svelte.js';
+  import { getRouter } from '~/router/context.svelte.js';
 
-  const { children: outerChildren, options, router, name, onLoaded, onLoading, onChange, onError, ..._props }: RouterViewProps = $props();
+  const { options, router, ..._props }: RouterViewProps = $props();
+
   const contextRouter = getRouter();
-
-  const view = new View(name);
-  setView(view);
-
-  const subs: (() => void)[] = [];
-
-  if (onChange) subs.push(view.onChange(onChange));
-  if (onLoading) subs.push(view.onLoading(onLoading));
-  if (onLoaded) subs.push(view.onLoaded(onLoaded));
-  if (onError) subs.push(view.onError(onError));
-
-  onDestroy(() => subs.forEach(sub => sub()));
 </script>
 
 {#snippet container(_router: IRouter)}
-  {@render outerChildren?.(_router)}
-  <RouteContainer {name} {view} {onError} {..._props} />
+  <RouteContainer {..._props} />
 {/snippet}
 
 {#if contextRouter}
   {@render container(contextRouter)}
 {:else}
-  <RouterContext {options} {router}>
-    {#snippet children(_router)}
-      {@render container(_router)}
-    {/snippet}
-  </RouterContext>
+  <RouterContext {options} {router} children={container} />
 {/if}

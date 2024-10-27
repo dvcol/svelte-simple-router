@@ -1,8 +1,12 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
 
-  import { DefaultView, NavigationCancelledError, type Route, type RouteViewProps } from '~/models/index.js';
+  import type { RouteViewProps } from '~/models/component.model.js';
+  import type { Route } from '~/models/route.model.js';
 
+  import { NavigationCancelledError } from '~/models/error.model.js';
+
+  import { DefaultView } from '~/models/view.model.js';
   import { getView } from '~/router/context.svelte.js';
   import { useRouter } from '~/router/use-router.svelte.js';
   import { Logger, LoggerKey } from '~/utils/logger.utils.js';

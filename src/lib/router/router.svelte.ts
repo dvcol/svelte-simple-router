@@ -37,10 +37,11 @@ import {
   RouterPathConflictError,
 } from '~/models/error.model.js';
 import { Matcher, replaceTemplateParams } from '~/models/matcher.model.js';
-import { NavigationEvent } from '~/models/navigation.model.js';
 import { cloneRoute, toBaseRoute } from '~/models/route.model.js';
 import { defaultOptions, isResolvedLocationEqual, RouterPathPriority, RouterStateConstant, toBasicRouterLocation } from '~/models/router.model.js';
-import { Logger, LoggerKey } from '~/utils/logger.utils.js';
+
+import { NavigationEvent } from '~/router/event.svelte.js';
+import { Logger, LoggerColor, LoggerKey } from '~/utils/logger.utils.js';
 import { preventNavigation, resolveNewHref, routeToHistoryState } from '~/utils/navigation.utils.js';
 
 export class Router<Name extends RouteName = RouteName> implements IRouter<Name> {
@@ -369,7 +370,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     if (this.#options.onError) this.#onErrorListeners.add(this.#options.onError);
     if (this.#options.listen) this.listen();
 
-    Logger.info(this.#log, 'Router initialized', { options: this.options });
+    Logger.info(...Logger.colorize(LoggerColor.Success, this.#log, 'Router initialized'), { options: this.options });
   }
 
   listen() {
@@ -387,7 +388,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     window.removeEventListener('popstate', this.#navigateListener);
     this.#navigation?.removeEventListener('currententrychange', this.#navigateListener);
     this.#listening = false;
-    Logger.info(this.#log, 'Router destroyed', { listening: this.#listening });
+    Logger.info(this.#log, ...Logger.colorize(LoggerColor.Warn, 'Router destroyed'), { listening: this.#listening });
   }
 
   /**
@@ -619,7 +620,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       query: { ...route?.query, ...query },
       current: this.#browser.href,
     });
-    Logger.debug(this.#log, 'Route resolved', { to, from, route, path: _path, href, search, wildcards, params: _params });
+    Logger.debug(this.#log, 'Route resolved', route?.name, { to, from, route, path: _path, href, search, wildcards, params: _params });
 
     //  return resolved route
     return {
@@ -716,14 +717,14 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
 
       // If a guard returns a redirect, navigate to the new location and replace state
       if (typeof blockOrRedirect === 'object' && _options.followGuardRedirects) {
-        Logger.info(this.#log, 'Guard redirect', { ...navigation, redirect: blockOrRedirect });
+        Logger.info(...Logger.colorize(LoggerColor.Info, this.#log, 'Guard redirect'), { ...navigation, redirect: blockOrRedirect });
         navigation.redirect(blockOrRedirect);
         return this.#redirect(blockOrRedirect, { ..._options, followGuardRedirects: false });
       }
 
       // If the route is a redirect, navigate to the new location and replace state
       if (route?.redirect) {
-        Logger.info(this.#log, 'Route redirect', { ...navigation, redirect: route.redirect });
+        Logger.info(...Logger.colorize(LoggerColor.Info, this.#log, 'Route redirect'), { ...navigation, redirect: route.redirect });
         navigation.redirect(route.redirect);
         return this.#redirect(route.redirect, _options);
       }
@@ -732,7 +733,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       this.#route = route;
       this.#location = _location;
 
-      Logger.info(this.#log, 'Navigated to', to?.name || to?.path, navigation);
+      Logger.info(...Logger.colorize(LoggerColor.Success, this.#log, 'Navigated to', to?.name || to?.path), navigation);
       navigation.complete();
       return this.snapshot;
     } catch (error) {
@@ -750,8 +751,6 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     } finally {
       // Only clear the routing state if the navigation is still active
       if (Object.is(this.#routing, navigation)) {
-        this.#routing = undefined;
-
         // Broadcast the navigation end event
         this.#onEndListeners.forEach(listener => listener(navigation, this.snapshot));
       }

@@ -5,10 +5,11 @@
 
   import RouteComponent from '~/components/RouteComponent.svelte';
 
+  import { setView } from '~/router/context.svelte.js';
   import { useRouter } from '~/router/use-router.svelte.js';
+  import { View } from '~/router/view.svelte.js';
 
   const {
-    view,
     name,
     transition,
     // hooks
@@ -16,14 +17,24 @@
     onError,
     onStart,
     onEnd,
+    onChange,
+    onLoading,
+    onLoaded,
     // snippets
     routing: routingSnippet,
     loading: loadingSnippet,
     error: errorSnippet,
+    // children
+    children,
   }: RouteContainerProps = $props();
 
+  // Extract router from context
   const router = useRouter();
   const route = $derived(router.route);
+
+  // Instantiate view and set it in context
+  const view = new View(router.id, name);
+  setView(view);
 
   // Extract component props from route
   const resolvedProps = $derived.by(() => {
@@ -62,19 +73,24 @@
   if (onEnd) subs.push(router.onEnd(onEnd));
   if (onError) subs.push(router.onError(onError));
 
+  if (onChange) subs.push(view.onChange(onChange));
+  if (onLoading) subs.push(view.onLoading(onLoading));
+  if (onLoaded) subs.push(view.onLoaded(onLoaded));
+  if (onError) subs.push(view.onError(onError));
+
   onDestroy(() => subs.forEach(sub => sub()));
 </script>
 
 {#if router}
+  {@render children?.(router)}
   <RouteComponent
     properties={resolvedProps}
     component={ResolvedComponent}
     loading={ResolvedLoading}
     error={ResolvedError}
-    {view}
-    {name}
-    {route}
     {router}
+    {view}
+    {route}
     {transition}
     {errorSnippet}
     {loadingSnippet}

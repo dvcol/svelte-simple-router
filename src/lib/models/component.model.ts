@@ -1,9 +1,8 @@
 import type { Snippet } from 'svelte';
 import type { TransitionConfig } from 'svelte/transition';
-import type { ErrorListener, LoadingListener, NavigationEndListener, NavigationGuard, NavigationListener } from '~/models/navigation.model.js';
+import type { ErrorListener, NavigationEndListener, NavigationGuard, NavigationListener, ViewChangeListener } from '~/models/navigation.model.js';
 import type { PartialRoute, Route, RouteName } from '~/models/route.model.js';
 import type { IRouter, RouterOptions } from '~/models/router.model.js';
-import type { View } from '~/router/view.svelte.js';
 
 export type RouterContextProps<Name extends RouteName = any> = {
   /**
@@ -15,7 +14,7 @@ export type RouterContextProps<Name extends RouteName = any> = {
    */
   options?: RouterOptions<Name>;
   /**
-   * Children to render when the router is ready.
+   * Children to render within the view container.
    */
   children?: Snippet<[IRouter<Name>]>;
 };
@@ -42,6 +41,11 @@ export type TransitionProps<
    * @default false
    */
   updateOnRouteChange?: boolean;
+  /**
+   * If `true`, the transition will be updated on any props change.
+   * By default, the transition is only triggered when the component changes to avoid unnecessary mounting and unmounting.
+   */
+  updateOnPropsChange?: boolean;
   /**
    * Transition to use when navigating to a new route.
    */
@@ -73,10 +77,6 @@ export type TransitionProps<
 
 export type RouteContainerProps<Name extends RouteName = any> = {
   /**
-   * The view instance on which to broadcast loading state.
-   */
-  view: View<Name>;
-  /**
    * Name of the router view to render.
    * If not provided, the default view will be used.
    */
@@ -104,6 +104,21 @@ export type RouteContainerProps<Name extends RouteName = any> = {
    */
   onEnd?: NavigationEndListener<Name>;
   /**
+   * Route change listener to execute when the route changes and before the view change starts.
+   * @awaited
+   */
+  onChange?: ViewChangeListener<Name>;
+  /**
+   * Loading listener to execute when the view starts loading.
+   * @awaited
+   */
+  onLoading?: ViewChangeListener<Name>;
+  /**
+   * Loaded listener to execute when the view is loaded.
+   * @awaited
+   */
+  onLoaded?: ViewChangeListener<Name>;
+  /**
    * Routing snippet to display while the route is being resolved.
    */
   routing?: Snippet<[IRouter<Name>['routing']]>;
@@ -123,26 +138,13 @@ export type RouteContainerProps<Name extends RouteName = any> = {
    * @see {@link RouteComponent.error}
    */
   error?: Snippet<[Error | any]>;
+  /**
+   * Children to render when the router is ready.
+   */
+  children?: Snippet<[IRouter<Name>]>;
 };
 
-export type RouterViewProps<Name extends RouteName = any> = RouterContextProps<Name> &
-  Omit<RouteContainerProps<Name>, 'view'> & {
-    /**
-     * Route change listener to execute when the route changes and before the view change starts.
-     * @awaited
-     */
-    onChange?: LoadingListener<Name>;
-    /**
-     * Loading listener to execute when the view starts loading.
-     * @awaited
-     */
-    onLoading?: LoadingListener<Name>;
-    /**
-     * Loaded listener to execute when the view is loaded.
-     * @awaited
-     */
-    onLoaded?: LoadingListener<Name>;
-  };
+export type RouterViewProps<Name extends RouteName = any> = RouterContextProps<Name> & RouteContainerProps<Name>;
 export type RouteViewProps<Name extends RouteName = any> = Pick<RouterViewProps<Name>, 'loading' | 'error' | 'name'> & {
   /**
    * Route to inject into the router.
