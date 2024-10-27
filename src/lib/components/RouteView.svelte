@@ -8,7 +8,7 @@
 
   import { DefaultView } from '~/models/view.model.js';
   import { getView } from '~/router/context.svelte.js';
-  import { useRouter } from '~/router/use-router.svelte.js';
+  import { useRouter } from '~/router/hooks.svelte.js';
   import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 
   const { children, loading, error, route, name, ..._props }: RouteViewProps = $props();

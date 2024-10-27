@@ -6,7 +6,7 @@
   import RouteComponent from '~/components/RouteComponent.svelte';
 
   import { setView } from '~/router/context.svelte.js';
-  import { useRouter } from '~/router/use-router.svelte.js';
+  import { useRouter } from '~/router/hooks.svelte.js';
   import { View } from '~/router/view.svelte.js';
 
   const {

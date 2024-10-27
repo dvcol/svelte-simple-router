@@ -47,8 +47,9 @@ export const hasView = (): boolean => {
  * @throws {MissingViewContextError} when no view is available.
  */
 export const useView = <Name extends RouteName = any>(): IView<Name> => {
-  if (!hasView()) throw new MissingViewContextError();
-  return getView<Name>();
+  const view = getView<Name>();
+  if (!view) throw new MissingViewContextError();
+  return view;
 };
 
 /**

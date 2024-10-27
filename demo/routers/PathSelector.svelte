@@ -1,10 +1,10 @@
 <script lang="ts">
   import type { Route, RouteName } from '~/models/route.model.js';
 
-  import { NavigationCancelledError } from '~';
-  import { active } from '~/router/active.svelte';
-  import { link } from '~/router/link.svelte';
-  import { useNavigate, useRouter } from '~/router/use-router.svelte';
+  import { NavigationCancelledError } from '~/models/error.model.js';
+  import { active } from '~/router/active.svelte.js';
+  import { useNavigate, useRouter } from '~/router/hooks.svelte.js';
+  import { link } from '~/router/link.svelte.js';
 
   const { stripQuery, stripHash, stripTrailingHash }: { stripQuery?: boolean; stripHash?: boolean; stripTrailingHash?: boolean } = $props();
 
