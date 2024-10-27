@@ -1,6 +1,8 @@
 import type { LoadingErrorListener, ViewChangeListener } from '~/models/navigation.model.js';
 import type { RouteName } from '~/models/route.model.js';
 
+export const ViewDebuggerConstant = '__SVELTE_SIMPLE_VIEW_DEBUGGER__' as const;
+
 export type IView<Name extends RouteName = RouteName> = {
   /**
    * Unique identifier of the router instance.

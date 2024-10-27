@@ -6,7 +6,6 @@
   declare global {
     interface Window {
       [RouterDebuggerConstant]?: Record<string, IRouter>;
-      symbols?: Record<string, symbol>;
     }
   }
 </script>
@@ -18,7 +17,7 @@
   import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 
   const router = useRouter();
-  Logger.info(`[${LoggerKey} Debugger - ${router.id}]`, 'router attached to "window.router"', router);
+  Logger.info(`[${LoggerKey} Debugger - ${router.id}]`, `router attached to "window.${RouterDebuggerConstant}"`, router);
   window[RouterDebuggerConstant] = { ...window[RouterDebuggerConstant], [router.id]: router };
 
   const options = $derived(router.options);
@@ -26,7 +25,7 @@
   const location = $derived(router.location);
 
   onDestroy(() => {
-    Logger.info(`[${LoggerKey} Debugger - ${router.id}]`, 'router detached from "window.router"', router);
+    Logger.info(`[${LoggerKey} Debugger - ${router.id}]`, `router detached from "window.${RouterDebuggerConstant}"`, router);
     delete window[RouterDebuggerConstant]?.[router.id];
   });
 </script>

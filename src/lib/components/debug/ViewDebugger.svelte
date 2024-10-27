@@ -1,10 +1,31 @@
+<script lang="ts" module>
+  import { type IView, ViewDebuggerConstant } from '~/models/index.js';
+
+  declare global {
+    interface Window {
+      [ViewDebuggerConstant]?: Record<string, IView>;
+    }
+  }
+</script>
+
 <script lang="ts">
+  import { onDestroy } from 'svelte';
+
   import { useView } from '~/router/hooks.svelte.js';
+  import { Logger, LoggerKey } from '~/utils/index.js';
 
   const view = useView();
+  Logger.info(`[${LoggerKey} Debugger - ${view.id}]`, `view attached to "window.${ViewDebuggerConstant}"`, view);
+  window[ViewDebuggerConstant] = { ...window[ViewDebuggerConstant], [view.id]: view };
+
   const name = $derived(view.name);
   const loading = $derived(view.loading);
   const error = $derived<Error | any>(view.error);
+
+  onDestroy(() => {
+    Logger.info(`[${LoggerKey} Debugger - ${view.id}]`, `router detached from "window.${ViewDebuggerConstant}"`, view);
+    delete window[ViewDebuggerConstant]?.[view.id];
+  });
 </script>
 
 <div class="debug">
