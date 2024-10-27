@@ -1,7 +1,11 @@
 <script lang="ts">
   import { tick } from 'svelte';
 
+  import RouteView from '../../src/lib/components/RouteView.svelte';
   import DynamicRouteView from '../components/DynamicRouteView.svelte';
+
+  import GoodByeComponent from '../components/Goodbye.svelte';
+  import HelloComponent from '../components/Hello.svelte';
 
   import OptionSelector from './OptionSelector.svelte';
   import PathSelector from './PathSelector.svelte';
@@ -72,6 +76,8 @@
           <p>Nested Snippet from default view</p>
         {/snippet}
       </DynamicRouteView>
+
+      <RouteView route={{ path: '/inline-dynamic' }} children={HelloComponent} Nested={GoodByeComponent} />
 
       <div class="content">
         <RouterView

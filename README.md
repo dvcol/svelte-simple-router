@@ -237,9 +237,9 @@ Note: By default the first enter transition is ignored, you can change this beha
 
 If you want to use the [view-transition API](https://developer.mozilla.org/en-US/docs/Web/API/View_Transitions_API) instead, you can pass a `viewTransitionName` key in the `transition` prop of the `RouterView` component.
 
-If 'transition' is a string, it will be used as the `viewTransitionName`, otherwise a unique id will be generated `sr-container-<router-id>-<view-id>`.
+If `viewTransitionName` is a string, it will be used as the `viewTransitionName`, otherwise a unique id will be generated `sr-container-<router-id>-<view-id>`.
 
-Then, you can use the `beforeEach` hook to trigger the transition.
+Then, you can use one or a combination of lifecycle hooks like `onChange` or `onStart` to trigger transitions.
 
 ```svelte
 <script lang="ts">
@@ -631,6 +631,9 @@ It is recommended to use the router instance directly if you need to frequently 
         <!-- Will render the children in this 'nested' RouterView, and nothing in the default when  on '/parent/child' -->
         <ChildComponent />
     </RouteView>
+    
+    <!-- Inline example -->
+    <RouteView route={{ path: '/other' }} children={ParentComponent} nested={ChildComponent} />
   </RouterView>
 </RouterContext>
 ```

@@ -16,7 +16,7 @@
 
   const router = useRouter();
 
-  const routes: Route[] = $derived([...(router?.routes ?? [])].sort((a, b) => a.name.localeCompare(b.name)));
+  const routes: Route[] = $derived([...(router?.routes ?? [])].sort((a, b) => a.name?.localeCompare(b.name)));
 
   const { push } = useNavigate();
 
@@ -79,7 +79,7 @@
     </thead>
     <tbody>
       {#each routes as { name, path, redirect, meta }}
-        <tr use:link={{ name, ...navOptions }} use:active={{ name, class: 'active', exact: true }}>
+        <tr use:link={{ name, path, ...navOptions }} use:active={{ name, path, class: 'active', exact: true }}>
           <td>{name}</td>
           <td>{path}</td>
           <td>{redirect?.name ?? redirect?.path ?? meta?.redirect ?? '-'}</td>
