@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.6.0](https://github.com/dvcol/svelte-simple-router/compare/v1.5.0...v1.6.0) (2024-10-27)
+
+
+### Features
+
+* **hooks:** adds listener hooks ([e72e45d](https://github.com/dvcol/svelte-simple-router/commit/e72e45de2729c04c29d9da52d35927eb34135949))
+* **hooks:** rework context logic to create utility hooks ([d0dee9a](https://github.com/dvcol/svelte-simple-router/commit/d0dee9a8a97fc400d69ae84e8f37d9c42774ce2e))
+* **loading:** adds loading event to subscribe in listeners ([5e90ad9](https://github.com/dvcol/svelte-simple-router/commit/5e90ad952864c6a9677bbda98fd84d418c16c7ae))
+* **view:** adds beforeEach & parametrize viewTransitionName ([001efea](https://github.com/dvcol/svelte-simple-router/commit/001efea99b013e064511e95d37c25cb6f2a835f6))
+
+
+### Bug Fixes
+
+* **components:** refactor and simplify component tree ([ee9be72](https://github.com/dvcol/svelte-simple-router/commit/ee9be72c5a96fbaad6a14face0478bcc83af7f33))
+
 ## [1.5.0](https://github.com/dvcol/svelte-simple-router/compare/v1.4.0...v1.5.0) (2024-10-24)
 
 
