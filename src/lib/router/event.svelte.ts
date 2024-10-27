@@ -206,20 +206,20 @@ export class ViewChangeEvent<Name extends RouteName = RouteName> implements IVie
   }
 
   load(): this {
-    if (!this.pending) return Logger.error('Cannot load a loading event that is not pending', this);
+    if (!this.pending) return Logger.error('Cannot load a change event that is not pending', this);
     this.#status = 'loading';
     return this;
   }
 
   complete(): this {
-    if (!this.pending) return Logger.error('Cannot complete a loading event that is not pending', this);
+    if (!this.pending) return Logger.error('Cannot complete a change event that is not pending', this);
     this.#status = 'loaded';
     this.#resolve?.(this.#status);
     return this;
   }
 
   fail(error?: unknown): this {
-    if (!this.pending) return Logger.error('Cannot fail a loading event that is not pending', this);
+    if (!this.pending) return Logger.error('Cannot fail a change event that is not pending', this);
     this.#status = 'error';
     this.#error = error;
     this.#reject?.(error);
