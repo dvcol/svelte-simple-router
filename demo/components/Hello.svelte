@@ -1,17 +1,19 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
 
+  import { Logger } from '~/utils/logger.utils.js';
+
   const { title, subtitle, onMoutHook }: { title?: string; subtitle?: string; onMoutHook?: () => void } = $props();
 
   const uuid = crypto.randomUUID();
 
   onMount(() => {
-    if (onMoutHook) onMoutHook();
-    console.info('Hello mounted !', uuid);
+    onMoutHook?.();
+    console.info(...Logger.colorize('green', 'Hello mounted !'), uuid);
   });
 
   onDestroy(() => {
-    console.info('Hello destroyed !', uuid);
+    console.info(...Logger.colorize('orange', 'Hello destroyed !'), uuid);
   });
 </script>
 

@@ -1,15 +1,17 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
 
+  import { Logger } from '~/utils/logger.utils.js';
+
   const { error }: { error: Error | any } = $props();
 
   const uuid = crypto.randomUUID();
   onMount(() => {
-    console.info('Error mounted !', uuid);
+    console.info(...Logger.colorize('green', 'Error mounted !'), uuid);
   });
 
   onDestroy(() => {
-    console.info('Error destroyed !', uuid);
+    console.info(...Logger.colorize('orange', 'Error destroyed !'), uuid);
   });
 </script>
 
