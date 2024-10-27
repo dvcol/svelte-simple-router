@@ -95,12 +95,19 @@ You can find a complete example in the [demo app](https://github.com/dvcol/svelt
 - [Debuggers](#debuggers)
 - [Nested routes](#nested-routes)
 - [Router transition](#router-transition)
+  - [Svelte transition](#svelte-transition)
+  - [View Transition API](#view-transition-api)
 - [Dom actions](#dom-actions)
   - [Link action](#link-action)
   - [Active action](#active-action)
 - [Programmatic navigation](#programmatic-navigation)
+  - [Hooks](#hooks)
+  - [Router instance](#router-instance)
+  - [Outside component tree](#outside-component-tree)
 - [Dynamic routes](#dynamic-routes)
 - [Guards and listeners](#guards-and-listeners)
+  - [Navigation listeners](#navigation-listeners)
+  - [Loading Listeners](#loading-listeners)
 - [Lazy routing](#lazy-routing)
 - [Routes](#routes)
 - [Router](#router)
@@ -205,6 +212,8 @@ Note: Sibling `RouterView` or `RouterContext` components will instantiate a new 
 
 ### Router transition
 
+#### Svelte transition
+
 The `RouterView` component can take a `transition` [prop](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L97-L122) to animate the route transition.
 
 It wraps the route component in a div with optionals `in` and `out` transitions.
@@ -222,6 +231,42 @@ Note: By default the first enter transition is ignored, you can change this beha
 </script>
 
 <RouterView {transition} {options} />
+```
+
+#### View Transition API
+
+If you want to use the [view-transition API](https://developer.mozilla.org/en-US/docs/Web/API/View_Transitions_API) instead, you can pass a `viewTransitionName` key in the `transition` prop of the `RouterView` component.
+
+If 'transition' is a string, it will be used as the `viewTransitionName`, otherwise a unique id will be generated `sr-container-<router-id>-<view-id>`.
+
+Then, you can use the `beforeEach` hook to trigger the transition.
+
+```svelte
+<script lang="ts">
+  import { onChange, onError, onLoaded } from '@dvcol/svelte-simple-router/router';
+  
+  let resolve: () => void;
+
+  const starTransition = () => {
+    const { promise: transition, resolve: end } = Promise.withResolvers<void>();
+    resolve = end;
+
+    const { promise: wait, resolve: start } = Promise.withResolvers<void>();
+    document.startViewTransition(async () => {
+      start();
+      await transition;
+    });
+    return wait;
+  };
+
+  onChange(async () => {
+    if (resolve) resolve();
+    return starTransition();
+  });
+
+  onError(() => resolve?.());
+  onLoaded(() => resolve?.());
+</script>
 ```
 
 ### Dom actions
@@ -285,7 +330,183 @@ Note: The action requires the router context to be present in the component tree
 
 ### Programmatic navigation
 
-To navigate without a dom link, you can grab the router instance from the context and call the `push` or `replace` methods.
+#### Hooks
+
+* hasRouter & useRouter - Returns the router instance
+
+Must be used within a `RouterView` or `RouterContext`.
+
+```svelte
+<script lang="ts">
+  import { useRouter } from '@dvcol/svelte-simple-router/router';
+  
+  const router = useRouter()
+</script>
+```
+* hasView & useView - Returns the view instance
+
+Must be used within a `RouterView`.
+
+```svelte
+<script lang="ts">
+  import { useView } from '@dvcol/svelte-simple-router/router';
+  
+  const view = useView()
+</script>
+```
+* useRoute - Returns the current `route`, `location` and the `routing`state
+
+Must be used within a `RouterView` or `RouterContext`.
+
+```svelte
+<script lang="ts">
+  import { useRoute } from '@dvcol/svelte-simple-router/router';
+  
+  const { route, location, routing } = useRoute()
+  
+  const reactiveRoute = $derived(route)
+  const reactiveLocation = $derived(location)
+  const reactiveRoutingState = $derived(routing)
+</script>
+```
+* useNavigate - Returns utility function to start navigation logic.
+
+Must be used within a `RouterView` or `RouterContext`.
+
+```svelte
+<script lang="ts">
+  import { useNavigate } from '@dvcol/svelte-simple-router/router';
+  
+  const { resolve, push, replace, back, forward, go } = useNavigate()
+</script>
+```
+* beforeEach - Returns a onMount hook that register (and auto-clean) a listener that triggers before each navigation event
+
+Must be used within a `RouterView` or `RouterContext`.
+
+```svelte
+<script lang="ts">
+  import { beforeEach } from '@dvcol/svelte-simple-router/router';
+  
+  beforeEach((event) => {
+    console.info('before navigation', event);
+  })
+</script>
+```
+* onStart - Returns a onMount hook that register (and auto-clean) a listener that triggers at the start of each navigation event
+
+Must be used within a `RouterView` or `RouterContext`.
+
+```svelte
+<script lang="ts">
+  import { onStart } from '@dvcol/svelte-simple-router/router';
+  
+  onStart((event) => {
+    console.info('start of navigation', event);
+  })
+</script>
+```
+* onEnd - Returns a onMount hook that register (and auto-clean) a listener that triggers at the end of each navigation event
+
+Must be used within a `RouterView` or `RouterContext`.
+
+```svelte
+<script lang="ts">
+  import { onEnd } from '@dvcol/svelte-simple-router/router';
+  
+  onEnd((event) => {
+    console.info('end of navigation', event);
+  })
+</script>
+```
+* onChange - Returns a onMount hook that register (and auto-clean) a listener that triggers at the start of a view change.
+
+Must be used within a `RouterView`.
+
+```svelte
+<script lang="ts">
+  import { onChange } from '@dvcol/svelte-simple-router/router';
+  
+  onChange((event) => {
+    console.info('start of view change', event);
+  })
+</script>
+```
+* onLoading - Returns a onMount hook that register (and auto-clean) a listener that triggers when a view start loading an async component.
+
+Must be used within a `RouterView`.
+
+```svelte
+<script lang="ts">
+  import { onLoading } from '@dvcol/svelte-simple-router/router';
+  
+  onLoading((event) => {
+    console.info('loading view', event);
+  })
+</script>
+```
+* onLoaded - Returns a onMount hook that register (and auto-clean) a listener that triggers when a view finish loading a component.
+
+Must be used within a `RouterView`.
+
+```svelte
+<script lang="ts">
+  import { onLoaded } from '@dvcol/svelte-simple-router/router';
+  
+  onLoaded((event) => {
+    console.info('view loaded', event);
+  })
+</script>
+```
+* onError - Returns a onMount hook that register (and auto-clean) a listener that triggers when an error occurs during navigation or view change.
+
+Must be used within a `RouterView`.
+
+```svelte
+<script lang="ts">
+  import { onError, NavigationEvent, ViewChangeEvent } from '@dvcol/svelte-simple-router/router';
+  
+  onError((err, event) => {
+    if (event instanceof NavigationEvent) {
+      console.error('Navigation Error', { err, event });
+    } else if (event instanceof ViewChangeEvent) {
+      console.error('View change error', { err, event });
+    } else {
+      console.error('Unknown Error', { err, event });
+    }
+  });
+</script>
+```
+* onViewError - Returns a onMount hook that register (and auto-clean) a listener that triggers when an error occurs during view change.
+
+Must be used within a `RouterView`.
+
+```svelte
+<script lang="ts">
+  import { onViewError } from '@dvcol/svelte-simple-router/router';
+  
+  onViewError((err, event) => {
+    console.error('View change error', { err, event });
+  });
+</script>
+```
+* onRouterError - Returns a onMount hook that register (and auto-clean) a listener that triggers when an error occurs during navigation.
+
+Must be used within a `RouterView` or `RouterContext`.
+
+```svelte
+<script lang="ts">
+  import { onRouterError } from '@dvcol/svelte-simple-router/router';
+  
+  onRouterError((err, event) => {
+    console.error('Navigation error', { err, event });
+  });
+</script>
+```
+
+#### Router instance
+
+For more complexe usage, you can grab the router instance from the context and call the `push` or `replace` methods.
 
 See the [router model](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L482-L501) for more information.
 
@@ -307,6 +528,8 @@ See the [router model](https://github.com/dvcol/svelte-simple-router/blob/1ca370
   };
 </script>
 ```
+
+#### Outside component tree
 
 If you need to access the router instance outside of a component, you can instantiate a router instance and pass it to the `RouterContext` or `RouterView` component.
 ```ts
@@ -414,7 +637,9 @@ It is recommended to use the router instance directly if you need to frequently 
 
 ### Guards and listeners
 
-The `route and `router` supports several navigation guards and listeners:
+#### Navigation listeners
+
+The `route` and `router` supports several navigation guards and listeners:
 
 - [beforeEnter](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/route.model.ts#L269) to run before a route is resolved.
 - [beforeLeave](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/route.model.ts#L273) to run before a route is removed.
@@ -430,6 +655,19 @@ The `router` ([dynamically](https://github.com/dvcol/svelte-simple-router/blob/1
 - onStart - executed when the navigation is triggered but before the route is resolved (fires on start and redirects).
 - onEnd - executed when the navigation is triggered and the route is resolved (fires on successful and failed navigation, but not on cancelled/redirected).
 - onError - executed when the navigation is triggered but an error occurs.
+
+Note: The `onError` listeners passed to a `RouterView` will listen to both the router and view events. If you want to listen to only the router events, you can pass the listeners to the `router` options or instance directly.
+
+#### Loading Listeners
+
+The `RouterView` supports several view change listeners that triggers once the navigation concludes and the view starts changing.
+
+- onChange - executed when a view starts to change.
+- onLoading - executed when a view starts loading an async component.
+- onLoaded - executed when a view finish loading a component.
+- onError - executed when an error occurs during view change.
+
+Note: The `onError` listeners passed to a `RouterView` will listen to both the router and view events. If you want to listen to only the view events, you can pass the listeners to the `view` instance directly.
 
 ### Lazy routing
 
