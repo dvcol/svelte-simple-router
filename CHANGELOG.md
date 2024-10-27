@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.6.1](https://github.com/dvcol/svelte-simple-router/compare/v1.6.0...v1.6.1) (2024-10-27)
+
+
+### Bug Fixes
+
+* **debugger:** attach view to window for debugging ([4c06096](https://github.com/dvcol/svelte-simple-router/commit/4c0609648d8c425e42038d4ddbfd874dc04a8d05))
+* **utils:** export toLazyComponent wrapper function ([3fb5e6a](https://github.com/dvcol/svelte-simple-router/commit/3fb5e6ae9c84c1a4e5e401bd85522ee27a4da803))
+
 ## [1.6.0](https://github.com/dvcol/svelte-simple-router/compare/v1.5.0...v1.6.0) (2024-10-27)
 
 
