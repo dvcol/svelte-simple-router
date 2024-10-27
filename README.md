@@ -332,7 +332,7 @@ Note: The action requires the router context to be present in the component tree
 
 #### Hooks
 
-* hasRouter & useRouter - Returns the router instance
+* `hasRouter` & `useRouter` - Returns the router instance
 
 Must be used within a `RouterView` or `RouterContext`.
 
@@ -343,7 +343,7 @@ Must be used within a `RouterView` or `RouterContext`.
   const router = useRouter()
 </script>
 ```
-* hasView & useView - Returns the view instance
+* `hasView` & `useView` - Returns the view instance
 
 Must be used within a `RouterView`.
 
@@ -354,7 +354,7 @@ Must be used within a `RouterView`.
   const view = useView()
 </script>
 ```
-* useRoute - Returns the current `route`, `location` and the `routing`state
+* `useRoute` - Returns the current `route`, `location` and the `routing`state
 
 Must be used within a `RouterView` or `RouterContext`.
 
@@ -369,7 +369,7 @@ Must be used within a `RouterView` or `RouterContext`.
   const reactiveRoutingState = $derived(routing)
 </script>
 ```
-* useNavigate - Returns utility function to start navigation logic.
+* `useNavigate` - Returns utility function to start navigation logic.
 
 Must be used within a `RouterView` or `RouterContext`.
 
@@ -380,7 +380,7 @@ Must be used within a `RouterView` or `RouterContext`.
   const { resolve, push, replace, back, forward, go } = useNavigate()
 </script>
 ```
-* beforeEach - Returns a onMount hook that register (and auto-clean) a listener that triggers before each navigation event
+* `beforeEach` - Returns a onMount hook that register (and auto-clean) a listener that triggers before each navigation event
 
 Must be used within a `RouterView` or `RouterContext`.
 
@@ -393,7 +393,7 @@ Must be used within a `RouterView` or `RouterContext`.
   })
 </script>
 ```
-* onStart - Returns a onMount hook that register (and auto-clean) a listener that triggers at the start of each navigation event
+* `onStart` - Returns a onMount hook that register (and auto-clean) a listener that triggers at the start of each navigation event
 
 Must be used within a `RouterView` or `RouterContext`.
 
@@ -406,7 +406,7 @@ Must be used within a `RouterView` or `RouterContext`.
   })
 </script>
 ```
-* onEnd - Returns a onMount hook that register (and auto-clean) a listener that triggers at the end of each navigation event
+* `onEnd` - Returns a onMount hook that register (and auto-clean) a listener that triggers at the end of each navigation event
 
 Must be used within a `RouterView` or `RouterContext`.
 
@@ -419,7 +419,7 @@ Must be used within a `RouterView` or `RouterContext`.
   })
 </script>
 ```
-* onChange - Returns a onMount hook that register (and auto-clean) a listener that triggers at the start of a view change.
+* `onChange` - Returns a onMount hook that register (and auto-clean) a listener that triggers at the start of a view change.
 
 Must be used within a `RouterView`.
 
@@ -432,7 +432,7 @@ Must be used within a `RouterView`.
   })
 </script>
 ```
-* onLoading - Returns a onMount hook that register (and auto-clean) a listener that triggers when a view start loading an async component.
+* `onLoading` - Returns a onMount hook that register (and auto-clean) a listener that triggers when a view start loading an async component.
 
 Must be used within a `RouterView`.
 
@@ -445,7 +445,7 @@ Must be used within a `RouterView`.
   })
 </script>
 ```
-* onLoaded - Returns a onMount hook that register (and auto-clean) a listener that triggers when a view finish loading a component.
+* `onLoaded` - Returns a onMount hook that register (and auto-clean) a listener that triggers when a view finish loading a component.
 
 Must be used within a `RouterView`.
 
@@ -458,7 +458,7 @@ Must be used within a `RouterView`.
   })
 </script>
 ```
-* onError - Returns a onMount hook that register (and auto-clean) a listener that triggers when an error occurs during navigation or view change.
+* `onError` - Returns a onMount hook that register (and auto-clean) a listener that triggers when an error occurs during navigation or view change.
 
 Must be used within a `RouterView`.
 
@@ -477,7 +477,7 @@ Must be used within a `RouterView`.
   });
 </script>
 ```
-* onViewError - Returns a onMount hook that register (and auto-clean) a listener that triggers when an error occurs during view change.
+* `onViewError` - Returns a onMount hook that register (and auto-clean) a listener that triggers when an error occurs during view change.
 
 Must be used within a `RouterView`.
 
@@ -490,7 +490,7 @@ Must be used within a `RouterView`.
   });
 </script>
 ```
-* onRouterError - Returns a onMount hook that register (and auto-clean) a listener that triggers when an error occurs during navigation.
+* `onRouterError` - Returns a onMount hook that register (and auto-clean) a listener that triggers when an error occurs during navigation.
 
 Must be used within a `RouterView` or `RouterContext`.
 
@@ -595,11 +595,14 @@ It is recommended to use the router instance directly if you need to frequently 
 ```svelte  
 <script lang="ts">
   import { RouterView, RouterContext, RouteView} from '@dvcol/svelte-simple-router/components';
+  import { toLazyComponent } from '@dvcol/svelte-simple-router/utils';
 
   import type { PartialRoute } from '@dvcol/svelte-simple-router/models';
   
   import ParentComponent from '~/components/hello/ParentComponent.svelte';
   import ChildComponent from '~/components/goodbye/ChildComponent.svelte';
+  
+  const LazyComponent = toLazyComponent(() => import('./LazyComponent.svelte'));
 
   const parent: PartialRoute = {
     name: 'parent',
@@ -633,7 +636,7 @@ It is recommended to use the router instance directly if you need to frequently 
     </RouteView>
     
     <!-- Inline example -->
-    <RouteView route={{ path: '/other' }} children={ParentComponent} nested={ChildComponent} />
+    <RouteView route={{ path: '/other' }} children={ParentComponent} nested={LazyComponent} />
   </RouterView>
 </RouterContext>
 ```
@@ -655,9 +658,9 @@ If a guard returns `false`, and object of instance `Error` or `throws`, the navi
 If a guard returns an object with a `path` or `name` property, the navigation will be redirected to the provided route, if any is found and `followGuardRedirects` is enabled.
 
 The `router` ([dynamically](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L422-L447) or through [options](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L307-L317)) and `RouterView` also support several event listeners:
-- onStart - executed when the navigation is triggered but before the route is resolved (fires on start and redirects).
-- onEnd - executed when the navigation is triggered and the route is resolved (fires on successful and failed navigation, but not on cancelled/redirected).
-- onError - executed when the navigation is triggered but an error occurs.
+- `onStart` - executed when the navigation is triggered but before the route is resolved (fires on start and redirects).
+- `onEnd` - executed when the navigation is triggered and the route is resolved (fires on successful and failed navigation, but not on cancelled/redirected).
+- `onError` - executed when the navigation is triggered but an error occurs.
 
 Note: The `onError` listeners passed to a `RouterView` will listen to both the router and view events. If you want to listen to only the router events, you can pass the listeners to the `router` options or instance directly.
 
@@ -665,10 +668,10 @@ Note: The `onError` listeners passed to a `RouterView` will listen to both the r
 
 The `RouterView` supports several view change listeners that triggers once the navigation concludes and the view starts changing.
 
-- onChange - executed when a view starts to change.
-- onLoading - executed when a view starts loading an async component.
-- onLoaded - executed when a view finish loading a component.
-- onError - executed when an error occurs during view change.
+- `onChange` - executed when a view starts to change.
+- `onLoading` - executed when a view starts loading an async component.
+- `onLoaded` - executed when a view finish loading a component.
+- `onError` - executed when an error occurs during view change.
 
 Note: The `onError` listeners passed to a `RouterView` will listen to both the router and view events. If you want to listen to only the view events, you can pass the listeners to the `view` instance directly.
 

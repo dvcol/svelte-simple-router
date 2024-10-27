@@ -5,7 +5,6 @@
   import DynamicRouteView from '../components/DynamicRouteView.svelte';
 
   import GoodByeComponent from '../components/Goodbye.svelte';
-  import HelloComponent from '../components/Hello.svelte';
 
   import OptionSelector from './OptionSelector.svelte';
   import PathSelector from './PathSelector.svelte';
@@ -17,6 +16,9 @@
   import RouteDebugger from '~/components/debug/RouteDebugger.svelte';
   import RouterDebugger from '~/components/debug/RouterDebugger.svelte';
   import { defaultOptions } from '~/models/router.model.js';
+  import { toLazyComponent } from '~/utils/svelte.utils.js';
+
+  const LazyHelloComponent = toLazyComponent(() => import('../components/Hello.svelte'));
 
   const opts: Partial<RouterOptions> = $props();
 
@@ -77,7 +79,7 @@
         {/snippet}
       </DynamicRouteView>
 
-      <RouteView route={{ path: '/inline-dynamic' }} children={HelloComponent} Nested={GoodByeComponent} />
+      <RouteView route={{ path: '/inline-dynamic' }} children={LazyHelloComponent} Nested={GoodByeComponent} />
 
       <div class="content">
         <RouterView
