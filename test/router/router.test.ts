@@ -14,8 +14,8 @@ import type { Route, RouteParams, RouteQuery } from '~/models/route.model.js';
 import type { RouterOptions } from '~/models/router.model.js';
 
 import { ErrorTypes, NavigationAbortedError, NavigationCancelledError } from '~/models/error.model.js';
-import { NavigationEvent } from '~/models/navigation.model';
 import { RouterScrollConstant, RouterStateConstant } from '~/models/router.model.js';
+import { NavigationEvent } from '~/router/event.svelte.js';
 
 import { Router } from '~/router/router.svelte.js';
 import { Logger } from '~/utils/index.js';
