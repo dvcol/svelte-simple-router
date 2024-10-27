@@ -37,4 +37,4 @@ export class Logger {
   }
 }
 
-export { LogLevel } from '@dvcol/common-utils/common/logger';
+export { LogLevel, LoggerColor } from '@dvcol/common-utils/common/logger';

@@ -1,23 +1,31 @@
 import { randomHex } from '@dvcol/common-utils';
 import { SvelteSet } from 'svelte/reactivity';
 
-import { type LoadingErrorListener, LoadingEvent, type LoadingListener } from '~/models/navigation.model.js';
+import type { LoadingErrorListener, ViewChangeListener } from '~/models/navigation.model.js';
+import type { ViewChangeEvent } from '~/router/event.svelte.js';
 
-import { type BaseRoute, type RouteName } from '~/models/route.model.js';
-import { DefaultView, type IView } from '~/models/view.model.js';
+import { ViewChangeStatusError } from '~/models/error.model.js';
 
-import { Logger, LoggerKey } from '~/utils/logger.utils.js';
+import { type RouteName } from '~/models/route.model.js';
+import { DefaultView, type IDefaultView, type IView } from '~/models/view.model.js';
+
+import { Logger, LoggerColor, LoggerKey } from '~/utils/logger.utils.js';
 
 export class View<Name extends RouteName = RouteName> implements IView<Name> {
   /**
+   * Unique identifier for the view instance.
+   */
+  readonly uuid = `v${randomHex(4)}`;
+
+  /**
    * Unique identifier for the router instance.
    */
-  readonly id = `v${randomHex(4)}`;
+  readonly routerId: string;
 
   /**
    * Name of the router view instance this is attached to.
    */
-  readonly name?: string;
+  readonly name: IDefaultView | Name;
 
   /**
    * Logger prefix for the router instance.
@@ -30,7 +38,7 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
    * @private
    * @reactive
    */
-  #loading = $state<LoadingEvent<Name>>();
+  #loading = $state<ViewChangeEvent<Name>>();
 
   /**
    * Indicates if an error occurred during the last component loading.
@@ -44,21 +52,21 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
    * @reactive
    * @private
    */
-  #onChangeListeners: Set<LoadingListener<Name>> = $state(new SvelteSet());
+  #onChangeListeners: Set<ViewChangeListener<Name>> = $state(new SvelteSet());
 
   /**
    * List of listeners that should be executed when a view start loading a component.
    * @reactive
    * @private
    */
-  #onLoadingListeners: Set<LoadingListener<Name>> = $state(new SvelteSet());
+  #onViewChangeListeners: Set<ViewChangeListener<Name>> = $state(new SvelteSet());
 
   /**
    * List of listeners that should be executed when a view load a component.
    * @reactive
    * @private
    */
-  #onLoadedListeners: Set<LoadingListener<Name>> = $state(new SvelteSet());
+  #onLoadedListeners: Set<ViewChangeListener<Name>> = $state(new SvelteSet());
 
   /**
    * List of listeners that should be executed when an error occurs during view loading.
@@ -66,6 +74,13 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
    * @private
    */
   #onErrorListeners: Set<LoadingErrorListener<Name>> = $state(new SvelteSet());
+
+  /**
+   * Unique identifier of the view instance.
+   */
+  get id() {
+    return `${this.routerId}-${this.uuid}-${String(this.name)}`;
+  }
 
   /**
    * Indicates if the view is currently loading a component.
@@ -83,9 +98,10 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
     return this.#error;
   }
 
-  constructor(name: string = DefaultView) {
+  constructor(routerId: string, name: IDefaultView | Name = DefaultView) {
+    this.routerId = routerId;
     this.name = name;
-    this.#log = `[${LoggerKey} View - ${this.id}${this.name ? ` - ${this.name}` : ''}]`;
+    this.#log = `[${LoggerKey} View - ${[this.routerId, this.uuid, this.name].join(' - ')}]`;
   }
 
   /**
@@ -95,7 +111,7 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
    *
    * @param listener - listener to add
    */
-  onChange(listener: LoadingListener<Name>): () => void {
+  onChange(listener: ViewChangeListener<Name>): () => void {
     this.#onChangeListeners.add(listener);
     return () => this.#onChangeListeners.delete(listener);
   }
@@ -107,9 +123,9 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
    *
    * @returns a function that removes the registered listener
    */
-  onLoading(listener: LoadingListener<Name>): () => void {
-    this.#onLoadingListeners.add(listener);
-    return () => this.#onLoadingListeners.delete(listener);
+  onLoading(listener: ViewChangeListener<Name>): () => void {
+    this.#onViewChangeListeners.add(listener);
+    return () => this.#onViewChangeListeners.delete(listener);
   }
 
   /**
@@ -119,7 +135,7 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
    *
    * @returns a function that removes the registered listener
    */
-  onLoaded(listener: LoadingListener<Name>): () => void {
+  onLoaded(listener: ViewChangeListener<Name>): () => void {
     this.#onLoadedListeners.add(listener);
     return () => this.#onLoadedListeners.delete(listener);
   }
@@ -138,10 +154,9 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
 
   /**
    * Start the view loading process.
-   * @param route
+   * @param event
    */
-  start(route?: BaseRoute<Name>) {
-    const event = new LoadingEvent<Name>({ view: { id: this.id, name: this.name }, route });
+  start(event: ViewChangeEvent<Name>) {
     this.#loading = event;
     Logger.debug(this.#log, 'View resolving...', event);
     return Promise.all([...this.#onChangeListeners].map(listener => listener(event)));
@@ -149,35 +164,35 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
 
   /**
    * Mark the view as loading.
+   * @param event
    */
-  load() {
-    if (!this.#loading) throw new Error('View not started');
-    const event = this.#loading;
+  load(event = this.#loading) {
+    if (!event) throw new ViewChangeStatusError();
     event.load();
     Logger.debug(this.#log, 'View loading...', event);
-    return Promise.all([...this.#onLoadingListeners].map(listener => listener(event)));
+    return Promise.all([...this.#onViewChangeListeners].map(listener => listener(event)));
   }
 
   /**
    * Mark the view as loaded.
+   * @param event
    */
-  complete() {
-    if (!this.#loading) throw new Error('View not started');
-    const event = this.#loading;
+  complete(event = this.#loading) {
+    if (!event) throw new ViewChangeStatusError();
     this.#error = undefined;
     this.#loading = undefined;
     event.complete();
-    Logger.info(this.#log, 'View loaded', event);
+    Logger.info(...Logger.colorize(LoggerColor.Success, this.#log, 'View loaded'), event);
     return Promise.all([...this.#onLoadedListeners].map(listener => listener(event)));
   }
 
   /**
    * Mark the view as failed to load.
    * @param error
+   * @param event
    */
-  fail(error: Error | unknown) {
-    if (!this.#loading) throw new Error('View not started');
-    const event = this.#loading;
+  fail(error: Error | unknown, event = this.#loading) {
+    if (!event) throw new ViewChangeStatusError();
     this.#error = error;
     this.#loading = undefined;
     event.fail(error);

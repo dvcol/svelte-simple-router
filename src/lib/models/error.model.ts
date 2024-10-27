@@ -49,6 +49,10 @@ export const enum ErrorTypes {
    * Could not find a required view context.
    */
   MISSING_VIEW_CONTEXT = 'MISSING_VIEW_CONTEXT',
+  /**
+   * No active event could be found when starting a view change.
+   */
+  VIEW_CHANGE_STATUS_ERROR = 'VIEW_CHANGE_STATUS_ERROR',
 }
 
 type NavigationErrors = ErrorTypes.NAVIGATION_CANCELLED | ErrorTypes.NAVIGATION_ABORTED | ErrorTypes.NAVIGATION_NOT_FOUND;
@@ -227,5 +231,13 @@ export class MissingViewContextError extends Error {
   constructor(message = 'View context is missing. Make sure you are calling useView inside a RouterView component tree.') {
     super(message);
     this.type = ErrorTypes.MISSING_VIEW_CONTEXT;
+  }
+}
+
+export class ViewChangeStatusError extends Error {
+  readonly type: ErrorTypes.VIEW_CHANGE_STATUS_ERROR;
+  constructor(message = 'No active event could be found.') {
+    super(message);
+    this.type = ErrorTypes.VIEW_CHANGE_STATUS_ERROR;
   }
 }
