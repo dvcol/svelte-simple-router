@@ -4,7 +4,7 @@ import { cleanup, render, screen } from '@testing-library/svelte';
 
 import { tick } from 'svelte';
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, assert, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import RouteView from './RouteView.test.svelte';
 
@@ -12,13 +12,16 @@ import RouterContext from './RouterContext.test.svelte';
 import RouterView from './RouterView.test.svelte';
 import RouterViewNested from './RouterViewNested.test.svelte';
 
+import LoadingComponent from './stub/LoadingComponent.test.svelte';
 import { namedPartialRoute, partialRoute, routes } from './stub/routes.js';
 
 import type { RenderResult } from '@testing-library/svelte';
 import type { MockInstance } from 'vitest';
 
-import { LoadingEvent, NavigationEvent } from '~/models/navigation.model.js';
+import RouteTransition from '~/components/RouteTransition.svelte';
+import { NavigationEvent, ViewChangeEvent } from '~/router/event.svelte.js';
 import { Router } from '~/router/router.svelte.js';
+import { transition } from '~/utils/transition.utils.js';
 
 describe('routerView', () => {
   let router: Router;
@@ -208,6 +211,7 @@ describe('routerView', () => {
       onStart: vi.fn(),
       onEnd: vi.fn(),
       onError: vi.fn(),
+      onChange: vi.fn(),
       onLoading: vi.fn(),
       onLoaded: vi.fn(),
     };
@@ -221,7 +225,7 @@ describe('routerView', () => {
     });
 
     it('should subscribe to router hooks when mounted', async () => {
-      expect.assertions(7);
+      expect.assertions(8);
 
       await router.push({ path: '/hello' });
 
@@ -231,13 +235,14 @@ describe('routerView', () => {
       expect(hooks.onEnd).toHaveBeenCalledTimes(1);
 
       expect(hooks.onLoading).not.toHaveBeenCalled();
+      expect(hooks.onChange).toHaveBeenCalledTimes(1);
       expect(hooks.onLoaded).toHaveBeenCalledTimes(1);
 
       expect(hooks.onError).not.toHaveBeenCalled();
     });
 
     it('should trigger onLoading while loading async component', async () => {
-      expect.assertions(7);
+      expect.assertions(8);
 
       await router.push({ path: '/loading' });
       await wait(500);
@@ -247,6 +252,7 @@ describe('routerView', () => {
       expect(hooks.onStart).toHaveBeenCalledTimes(1);
       expect(hooks.onEnd).toHaveBeenCalledTimes(1);
 
+      expect(hooks.onChange).toHaveBeenCalledTimes(1);
       expect(hooks.onLoading).toHaveBeenCalledTimes(1);
       expect(hooks.onLoaded).toHaveBeenCalledTimes(1);
 
@@ -254,7 +260,7 @@ describe('routerView', () => {
     });
 
     it('should trigger onError when loading error component', async () => {
-      expect.assertions(8);
+      expect.assertions(9);
 
       await router.push({ path: '/error' });
       await tick();
@@ -265,10 +271,11 @@ describe('routerView', () => {
       expect(hooks.onEnd).toHaveBeenCalledTimes(1);
 
       expect(hooks.onLoaded).not.toHaveBeenCalled();
+      expect(hooks.onChange).toHaveBeenCalledTimes(1);
       expect(hooks.onLoading).toHaveBeenCalledTimes(1);
 
       expect(hooks.onError).toHaveBeenCalledTimes(1);
-      expect(hooks.onError).toHaveBeenCalledWith(new Error('Loading error'), expect.any(LoadingEvent));
+      expect(hooks.onError).toHaveBeenCalledWith(new Error('Loading error'), expect.any(ViewChangeEvent));
     });
 
     it('should stop listening to router hooks when unmounted', async () => {
@@ -559,6 +566,103 @@ describe('routerView', () => {
 
       const hello = screen.getByTestId('hello-component');
       expect(hello).toBeDefined();
+    });
+  });
+
+  describe('routeTransition', () => {
+    const assertsWrapper = () => {
+      const container = document.querySelector<HTMLDivElement>('[data-transition-id="container"]');
+
+      expect(container).not.toBeNull();
+      assert(container !== null);
+      expect(container.children).toHaveLength(1);
+
+      const wrapper = container.querySelector<HTMLDivElement>('[data-transition-id="wrapper"]');
+
+      expect(wrapper).not.toBeNull();
+      assert(wrapper !== null);
+      expect(wrapper.children).toHaveLength(1);
+
+      expect(getComputedStyle(wrapper).getPropertyValue('--container-transition-name')).toBe('');
+
+      expect(screen.getByTestId('loading-component')).toBeDefined();
+    };
+
+    it('should wrap component in transition container & wrapper if `in` transition is provided', () => {
+      expect.assertions(6);
+
+      render(RouteTransition, {
+        transition: { in: transition.in },
+        children: LoadingComponent,
+      });
+
+      assertsWrapper();
+    });
+
+    it('should wrap component in transition container & wrapper if `out` transition is provided', () => {
+      expect.assertions(6);
+
+      render(RouteTransition, {
+        transition: { out: transition.out },
+        children: LoadingComponent,
+      });
+
+      assertsWrapper();
+    });
+
+    it('should wrap component in transition container and wrapper if `in` and `out` transitions are provided', () => {
+      expect.assertions(6);
+
+      render(RouteTransition, {
+        transition,
+        children: LoadingComponent,
+      });
+
+      assertsWrapper();
+    });
+
+    const assertNoWrapper = () => {
+      const container = document.querySelector<HTMLDivElement>('[data-transition-id="container"]');
+
+      expect(container).toBeDefined();
+      assert(container !== null);
+      expect(container?.children).toHaveLength(1);
+
+      const wrapper = container.querySelector<HTMLDivElement>('[data-transition-id="wrapper"]');
+
+      expect(wrapper).toBeNull();
+      assert(wrapper === null);
+
+      return container;
+    };
+
+    it('should wrap component in transition container and add view-transition-name if `viewTransitionName` is true', () => {
+      expect.assertions(4);
+
+      const id = 'my-view-transition-id';
+      render(RouteTransition, {
+        id,
+        transition: { viewTransitionName: true },
+        children: LoadingComponent,
+      });
+
+      const container = assertNoWrapper();
+      expect(getComputedStyle(container).getPropertyValue('--container-transition-name')).toBe(`sr-container-${id}`);
+    });
+
+    it('should wrap component in transition container and add view-transition-name if `viewTransitionName` is a string', () => {
+      expect.assertions(4);
+
+      const id = 'my-view-transition-id';
+      const name = 'my-view-transition-name';
+      render(RouteTransition, {
+        id,
+        transition: { viewTransitionName: name },
+        children: LoadingComponent,
+      });
+
+      const container = assertNoWrapper();
+      expect(getComputedStyle(container).getPropertyValue('--container-transition-name')).toBe(name);
     });
   });
 });

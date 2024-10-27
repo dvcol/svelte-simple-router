@@ -35,10 +35,10 @@
   });
 </script>
 
-<div data-transition-id="transition-container" {..._containerProps} style={_style}>
+<div data-transition-id="container" {..._containerProps} style={_style}>
   {#if transition?.in || transition?.out}
     {#key key}
-      <div data-transition-id="transition-wrapper" in:_in={_inParams} out:_out={_outParams} {..._wrapperProps}>
+      <div data-transition-id="wrapper" in:_in={_inParams} out:_out={_outParams} {..._wrapperProps}>
         {@render children?.()}
       </div>
     {/key}
@@ -49,13 +49,13 @@
 
 <style lang="scss">
   /* stylelint-disable selector-pseudo-class-no-unknown */
-  div[data-transition-id='transition-container'] {
+  div[data-transition-id='container'] {
     view-transition-name: var(--container-transition-name);
 
-    &:global(:has(div[data-transition-id='transition-wrapper']:not(:only-child))) {
+    &:global(:has(div[data-transition-id='wrapper']:not(:only-child))) {
       position: relative;
 
-      div[data-transition-id='transition-wrapper']:not(:first-child) {
+      div[data-transition-id='wrapper']:not(:first-child) {
         position: absolute;
 
         &:not(:last-child) {
