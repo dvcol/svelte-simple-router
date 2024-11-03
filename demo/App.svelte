@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { toLazyComponent } from '@dvcol/svelte-utils/component';
+
   import ErrorComponent from './components/Error.svelte';
   import GoodbyeComponent from './components/Goodbye.svelte';
   import HelloComponent from './components/Hello.svelte';
@@ -11,7 +13,6 @@
   import type { RouterOptions } from '~/models/router.model.js';
 
   import { LogLevel } from '~/utils/logger.utils.js';
-  import { toLazyComponent } from '~/utils/svelte.utils.js';
 
   const RouteName = {
     Hello: 'Hello',

@@ -1,12 +1,12 @@
 import { wait } from '@dvcol/common-utils/common/promise';
 
+import { toLazyComponent } from '@dvcol/svelte-utils/component';
+
 import ErrorComponent from './ErrorComponent.test.svelte';
 import HelloComponent from './HelloComponent.test.svelte';
 import LoadingComponent from './LoadingComponent.test.svelte';
 
 import type { PartialRoute, Route } from '~/models/route.model.js';
-
-import { toLazyComponent } from '~/utils/svelte.utils.js';
 
 export const routes: Route[] = [
   { name: 'hello', path: '/hello', component: HelloComponent, props: { title: 'Hello' }, meta: { key: 'Hello' } },

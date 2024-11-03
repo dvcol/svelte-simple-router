@@ -1,10 +1,10 @@
 import { isShallowEqual, shallowClone } from '@dvcol/common-utils/common/object';
 
+import type { AnyComponent, ComponentOrLazy } from '@dvcol/svelte-utils/component';
 import type { Snippet } from 'svelte';
 import type { IMatcher } from '~/models/matcher.model.js';
 import type { NavigationGuard } from '~/models/navigation.model.js';
 import type { IDefaultView } from '~/models/view.model.js';
-import type { AnyComponent, ComponentOrLazy } from '~/utils/svelte.utils.js';
 
 /**
  * Allowed variables in HTML5 history state. Note that pushState clones the state

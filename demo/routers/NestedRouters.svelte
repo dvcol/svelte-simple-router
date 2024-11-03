@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { toLazyComponent } from '@dvcol/svelte-utils/component';
   import { tick } from 'svelte';
 
   import RouteView from '../../src/lib/components/RouteView.svelte';
@@ -16,7 +17,6 @@
   import RouteDebugger from '~/components/debug/RouteDebugger.svelte';
   import RouterDebugger from '~/components/debug/RouterDebugger.svelte';
   import { defaultOptions } from '~/models/router.model.js';
-  import { toLazyComponent } from '~/utils/svelte.utils.js';
 
   const LazyHelloComponent = toLazyComponent(() => import('../components/Hello.svelte'));
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { type AnyComponent, type AnySnippet, isSnippet, resolveComponent } from '@dvcol/svelte-utils/component';
   import { type Component, type Snippet, untrack } from 'svelte';
 
   import type { RouterViewProps } from '~/models/component.model.js';
@@ -9,7 +10,6 @@
   import RouteTransition from '~/components/RouteTransition.svelte';
   import { type ComponentProps, type Route } from '~/models/route.model.js';
   import { ViewChangeEvent } from '~/router/event.svelte.js';
-  import { type AnyComponent, type AnySnippet, isSnippet, resolveComponent } from '~/utils/svelte.utils.js';
 
   const {
     // context
