@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.7.0](https://github.com/dvcol/svelte-simple-router/compare/v1.6.1...v1.7.0) (2024-11-06)
+
+
+### Features
+
+* **hooks:** allow overriding router/view instance in hooks ([a351085](https://github.com/dvcol/svelte-simple-router/commit/a35108565bc4de14ec053a38cdfdf9ff2f3e5d9a))
+
 ### [1.6.1](https://github.com/dvcol/svelte-simple-router/compare/v1.6.0...v1.6.1) (2024-10-27)
 
 
