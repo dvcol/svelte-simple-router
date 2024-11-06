@@ -1,6 +1,8 @@
 <script lang="ts">
   import type {
     ErrorListener,
+    IRouter,
+    IView,
     LoadingErrorListener,
     NavigationEndListener,
     NavigationErrorListener,
@@ -14,6 +16,8 @@
   const {
     name,
     callback,
+    view,
+    router,
   }: {
     name: 'beforeEach' | 'onStart' | 'onEnd' | 'onChange' | 'onLoading' | 'onLoaded' | 'onError' | 'onRouterError' | 'onViewError';
     callback:
@@ -24,35 +28,37 @@
       | NavigationGuard
       | NavigationListener
       | ViewChangeListener;
+    view?: IView;
+    router?: IRouter;
   } = $props();
 
   switch (name) {
     case 'beforeEach':
-      beforeEach(callback);
+      beforeEach(callback, router);
       break;
     case 'onStart':
-      onStart(callback);
+      onStart(callback, router);
       break;
     case 'onEnd':
-      onEnd(callback);
+      onEnd(callback, router);
       break;
     case 'onChange':
-      onChange(callback);
+      onChange(callback, view);
       break;
     case 'onLoading':
-      onLoading(callback);
+      onLoading(callback, view);
       break;
     case 'onLoaded':
-      onLoaded(callback);
+      onLoaded(callback, view);
       break;
     case 'onError':
-      onError(callback);
+      onError(callback, { view, router });
       break;
     case 'onRouterError':
-      onRouterError(callback);
+      onRouterError(callback, router);
       break;
     case 'onViewError':
-      onViewError(callback);
+      onViewError(callback, view);
       break;
     default:
       break;

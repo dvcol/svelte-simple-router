@@ -191,6 +191,13 @@ describe('hooks', () => {
 
         expect(() => render(HooksComponent, { name, callback })).toThrow(MissingRouterContextError);
       });
+
+      it('should not throw an error when no router context is available but a router is passed to the hook', () => {
+        expect.assertions(1);
+        spyGetRouter.mockReturnValueOnce(null);
+
+        expect(() => render(HooksComponent, { name, callback, router })).not.toThrow(MissingViewContextError);
+      });
     });
 
     describe.each<[string, keyof typeof viewSpy]>([
@@ -214,6 +221,13 @@ describe('hooks', () => {
 
         expect(() => render(HooksComponent, { name, callback })).toThrow(MissingViewContextError);
       });
+
+      it('should not throw an error when no view context is available but a view is passed to the hook', () => {
+        expect.assertions(1);
+        spyGetView.mockReturnValueOnce(null);
+
+        expect(() => render(HooksComponent, { name, callback, view })).not.toThrow(MissingViewContextError);
+      });
     });
 
     describe('onError', () => {
@@ -235,11 +249,25 @@ describe('hooks', () => {
         expect(() => render(HooksComponent, { name: 'onError', callback })).toThrow(MissingViewContextError);
       });
 
+      it('should not throw an error when no view context is available but a view is passed to the hook', () => {
+        expect.assertions(1);
+        spyGetView.mockReturnValueOnce(null);
+
+        expect(() => render(HooksComponent, { name: 'onError', callback, view })).not.toThrow(MissingViewContextError);
+      });
+
       it('should throw an error when no router context is available', () => {
         expect.assertions(1);
         spyGetRouter.mockReturnValueOnce(null);
 
         expect(() => render(HooksComponent, { name: 'onError', callback })).toThrow(MissingRouterContextError);
+      });
+
+      it('should not throw an error when no router context is available but a router is passed to the hook', () => {
+        expect.assertions(1);
+        spyGetRouter.mockReturnValueOnce(null);
+
+        expect(() => render(HooksComponent, { name: 'onError', callback, router })).not.toThrow(MissingViewContextError);
       });
     });
   });

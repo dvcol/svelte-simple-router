@@ -95,10 +95,10 @@ export const useNavigate = <Name extends RouteName = any>(): Pick<IRouter<Name>,
 /**
  * Add a listener that is executed before each navigation.
  * @param callback
+ * @param router - optional router instance to use.
  * @throws {MissingRouterContextError} when no router is available.
  */
-export const beforeEach = <Name extends RouteName = any>(callback: NavigationGuard<Name>) => {
-  const router = useRouter<Name>();
+export const beforeEach = <Name extends RouteName = any>(callback: NavigationGuard<Name>, router: IRouter<Name> = useRouter<Name>()) => {
   $effect.pre(() => {
     return router.beforeEach(callback);
   });
@@ -107,10 +107,10 @@ export const beforeEach = <Name extends RouteName = any>(callback: NavigationGua
 /**
  * Add a listener that is executed when a navigation starts.
  * @param callback
+ * @param router - optional router instance to use.
  * @throws {MissingRouterContextError} when no router is available.
  */
-export const onStart = <Name extends RouteName = any>(callback: NavigationListener<Name>) => {
-  const router = useRouter<Name>();
+export const onStart = <Name extends RouteName = any>(callback: NavigationListener<Name>, router: IRouter<Name> = useRouter<Name>()) => {
   $effect.pre(() => {
     return router.onStart(callback);
   });
@@ -119,10 +119,10 @@ export const onStart = <Name extends RouteName = any>(callback: NavigationListen
 /**
  * Add a listener that is executed when a navigation ends.
  * @param callback
+ * @param router - optional router instance to use.
  * @throws {MissingRouterContextError} when no router is available.
  */
-export const onEnd = <Name extends RouteName = any>(callback: NavigationEndListener<Name>) => {
-  const router = useRouter<Name>();
+export const onEnd = <Name extends RouteName = any>(callback: NavigationEndListener<Name>, router: IRouter<Name> = useRouter<Name>()) => {
   $effect.pre(() => {
     return router.onEnd(callback);
   });
@@ -131,10 +131,10 @@ export const onEnd = <Name extends RouteName = any>(callback: NavigationEndListe
 /**
  * Add a listener that is executed when a view changes.
  * @param callback
+ * @param view - optional view instance to use.
  * @throws {MissingViewContextError} when no view is available.
  */
-export const onChange = <Name extends RouteName = any>(callback: ViewChangeListener<Name>) => {
-  const view = useView<Name>();
+export const onChange = <Name extends RouteName = any>(callback: ViewChangeListener<Name>, view: IView<Name> = useView<Name>()) => {
   $effect.pre(() => {
     return view.onChange(callback);
   });
@@ -143,10 +143,10 @@ export const onChange = <Name extends RouteName = any>(callback: ViewChangeListe
 /**
  * Add a listener that is executed when a view finish loading a component.
  * @param callback
+ * @param view - optional view instance to use.
  * @throws {MissingViewContextError} when no view is available.
  */
-export const onLoaded = <Name extends RouteName = any>(callback: ViewChangeListener<Name>) => {
-  const view = useView<Name>();
+export const onLoaded = <Name extends RouteName = any>(callback: ViewChangeListener<Name>, view: IView<Name> = useView<Name>()) => {
   $effect.pre(() => {
     return view.onLoaded(callback);
   });
@@ -155,10 +155,10 @@ export const onLoaded = <Name extends RouteName = any>(callback: ViewChangeListe
 /**
  * Add a listener that is executed when a view start loading a component.
  * @param callback
+ * @param view - optional view instance to use.
  * @throws {MissingViewContextError} when no view is available.
  */
-export const onLoading = <Name extends RouteName = any>(callback: ViewChangeListener<Name>) => {
-  const view = useView<Name>();
+export const onLoading = <Name extends RouteName = any>(callback: ViewChangeListener<Name>, view: IView<Name> = useView<Name>()) => {
   $effect.pre(() => {
     return view.onLoading(callback);
   });
@@ -167,10 +167,10 @@ export const onLoading = <Name extends RouteName = any>(callback: ViewChangeList
 /**
  * Add a listener that is executed when a navigation error occurs.
  * @param callback
+ * @param router - optional router instance to use.
  * @throws {MissingRouterContextError} when no router is available.
  */
-export const onRouterError = <Name extends RouteName = any>(callback: NavigationErrorListener<Name>) => {
-  const router = useRouter<Name>();
+export const onRouterError = <Name extends RouteName = any>(callback: NavigationErrorListener<Name>, router: IRouter<Name> = useRouter<Name>()) => {
   $effect.pre(() => {
     return router.onError(callback);
   });
@@ -179,10 +179,10 @@ export const onRouterError = <Name extends RouteName = any>(callback: Navigation
 /**
  * Add a listener that is executed when an error occurs during view loading.
  * @param callback
+ * @param view - optional view instance to use.
  * @throws {MissingViewContextError} when no view is available.
  */
-export const onViewError = <Name extends RouteName = any>(callback: LoadingErrorListener<Name>) => {
-  const view = useView<Name>();
+export const onViewError = <Name extends RouteName = any>(callback: LoadingErrorListener<Name>, view: IView<Name> = useView<Name>()) => {
   $effect.pre(() => {
     return view.onError(callback);
   });
@@ -191,12 +191,15 @@ export const onViewError = <Name extends RouteName = any>(callback: LoadingError
 /**
  * Add a listener that is executed when an error occurs during view loading or router navigation.
  * @param callback
+ * @param router - optional router instance to use.
+ * @param view - optional view instance to use.
  * @throws {MissingRouterContextError} when no router is available.
  * @throws {MissingViewContextError} when no view is available.
  */
-export const onError = <Name extends RouteName = any>(callback: ErrorListener<Name>) => {
-  const router = useRouter<Name>();
-  const view = useView<Name>();
+export const onError = <Name extends RouteName = any>(
+  callback: ErrorListener<Name>,
+  { router = useRouter<Name>(), view = useView<Name>() }: { router?: IRouter<Name>; view?: IView<Name> } = {},
+) => {
   $effect.pre(() => {
     const unsubscribeRouter = router.onError(callback);
     const unsubscribeView = view.onError(callback);

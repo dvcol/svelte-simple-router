@@ -279,7 +279,6 @@
     border-radius: 0.5rem;
   }
 
-  // stylelint-disable-next-line selector-pseudo-class-no-unknown
   :global(.content) {
     display: flex;
     flex: 1 1 20rem;
