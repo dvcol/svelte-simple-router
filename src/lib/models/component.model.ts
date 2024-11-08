@@ -1,5 +1,5 @@
+import type { TransitionFunction } from '@dvcol/svelte-utils/transition';
 import type { Snippet } from 'svelte';
-import type { TransitionConfig } from 'svelte/transition';
 import type { ErrorListener, NavigationEndListener, NavigationGuard, NavigationListener, ViewChangeListener } from '~/models/navigation.model.js';
 import type { PartialRoute, Route, RouteName } from '~/models/route.model.js';
 import type { IRouter, RouterOptions } from '~/models/router.model.js';
@@ -19,12 +19,6 @@ export type RouterContextProps<Name extends RouteName = any> = {
    */
   children?: Snippet<[IRouter<Name>]>;
 };
-
-export type TransitionFunction<T extends Record<string, any> | undefined = Record<string, any> | undefined> = (
-  node: Element,
-  props: T,
-  options: { direction: 'in' | 'out' },
-) => TransitionConfig | (() => TransitionConfig);
 
 export type TransitionProps<
   T extends { in?: Record<string, any>; out?: Record<string, any> } = { in?: Record<string, any>; out?: Record<string, any> },
