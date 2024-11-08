@@ -1,6 +1,7 @@
 <script lang="ts">
+  import type { TransitionFunction } from '@dvcol/svelte-utils/transition';
   import type { Snippet } from 'svelte';
-  import type { TransitionFunction, TransitionProps } from '~/models/component.model.js';
+  import type { TransitionProps } from '~/models/component.model.js';
 
   const { children, key, id, transition }: { children: Snippet; id: string; key: any | any[]; transition: TransitionProps } = $props();
 
@@ -59,7 +60,8 @@
         position: absolute;
 
         &:not(:last-child) {
-          display: none;
+          visibility: hidden;
+          pointer-events: none;
         }
       }
     }
