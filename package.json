@@ -109,7 +109,7 @@
     "svelte": ">=5"
   },
   "dependencies": {
-    "@dvcol/common-utils": "^1.18.1",
+    "@dvcol/common-utils": "^1.18.2",
     "@dvcol/svelte-utils": "^1.3.0",
     "svelte": "^5.1.0",
     "vite": "^5.4.3"
