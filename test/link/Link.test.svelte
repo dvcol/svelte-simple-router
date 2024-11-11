@@ -19,6 +19,12 @@
   <div data-testid="param-path" data-path="/other" use:link={{ path: '/home' }}></div>
   <div data-testid="param-name" data-name="other" use:link={{ name: 'home' }}></div>
 
+  <div data-testid="disabled" disabled data-name="other" use:link={{ name: 'home' }}></div>
+  <div data-testid="disabled-true" disabled="true" data-name="other" use:link={{ name: 'home' }}></div>
+  <div data-testid="disabled-option" data-name="other" use:link={{ name: 'home', disabled: true }}></div>
+  <div data-testid="disabled-false" disabled="false" data-name="other" use:link={{ name: 'home' }}></div>
+  <div data-testid="disabled-any" disabled="any" data-name="other" use:link={{ name: 'home' }}></div>
+
   <span
     data-testid="span-query-params"
     use:link={{ path: '/home/:id/user/:name', query: { search: 'value', filter: 42 }, params: { id: 12, name: 'john' } }}

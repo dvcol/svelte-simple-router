@@ -25,8 +25,8 @@ const isSameHost = (anchor: HTMLAnchorElement, host = window.location.host) => {
   return anchor.host === host || anchor.href.startsWith(`https://${host}`) || anchor.href.indexOf(`http://${host}`) === 0;
 };
 
-const parseJsonAttribute = <T = Record<string, any>>(element: HTMLElement, name: string): T | undefined => {
-  const value = element.getAttribute(`data-${name}`);
+const parseJsonAttribute = <T = Record<string, any>>(element: HTMLElement, name: string, prefix = 'data'): T | undefined => {
+  const value = element.getAttribute([prefix, name].join('-'));
   if (value === undefined || value === null) return;
   try {
     return JSON.parse(value) as T;
@@ -36,8 +36,8 @@ const parseJsonAttribute = <T = Record<string, any>>(element: HTMLElement, name:
   }
 };
 
-const parseBooleanAttribute = (element: HTMLElement, name: string): boolean | undefined => {
-  const value = element.getAttribute(`data-${name}`);
+const parseBooleanAttribute = (element: HTMLElement, name: string, prefix = 'data'): boolean | undefined => {
+  const value = element.getAttribute([prefix, name].join('-'));
   if (value === undefined || value === null) return;
   return value !== 'false';
 };
@@ -59,7 +59,7 @@ const isNotValidAnchorNavigation = (event: MouseEvent | KeyboardEvent) => {
 };
 
 export type LinkActionOptions<Name extends RouteName = RouteName> = CommonRouteNavigation &
-  RouterNavigationOptions & { replace?: boolean; name?: Name; path?: string };
+  RouterNavigationOptions & { replace?: boolean; name?: Name; path?: string; disabled?: boolean };
 
 /**
  * A svelte action to add to an element to navigate to a new location using the router.
@@ -112,6 +112,11 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
   let _options = options;
 
   const navigate = async (event: MouseEvent | KeyboardEvent) => {
+    // if the element is disabled, we return
+    if (_options?.disabled) return;
+    if ('disabled' in node && node.disabled) return;
+    const disabled = node.getAttribute('disabled');
+    if (disabled === '' || disabled === 'true') return;
     // if the target is an anchor element and the event is not a valid navigation event, we return
     if (isNotValidAnchorNavigation(event)) return;
 
