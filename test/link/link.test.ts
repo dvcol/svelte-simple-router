@@ -277,4 +277,71 @@ describe('link', () => {
       error: expect.any(Error),
     });
   });
+
+  describe('disabled', () => {
+    it('should ignore the click event if the element has a disabled attribute', async () => {
+      expect.assertions(2);
+
+      const user = userEvent.setup();
+      render(Link, { router });
+
+      const target = screen.getByTestId('disabled');
+      await user.click(target);
+
+      expect(spyPush).not.toHaveBeenCalled();
+      expect(spyReplace).not.toHaveBeenCalled();
+    });
+
+    it('should ignore the click event if the element has a disabled="true" attribute', async () => {
+      expect.assertions(2);
+
+      const user = userEvent.setup();
+      render(Link, { router });
+
+      const target = screen.getByTestId('disabled-true');
+      await user.click(target);
+
+      expect(spyPush).not.toHaveBeenCalled();
+      expect(spyReplace).not.toHaveBeenCalled();
+    });
+
+    it('should ignore the click event if the element has a disabled option', async () => {
+      expect.assertions(2);
+
+      const user = userEvent.setup();
+      render(Link, { router });
+
+      const target = screen.getByTestId('disabled-option');
+      await user.click(target);
+
+      expect(spyPush).not.toHaveBeenCalled();
+      expect(spyReplace).not.toHaveBeenCalled();
+    });
+
+    it('should not ignore the click event if the element has a disabled="false" attribute', async () => {
+      expect.assertions(2);
+
+      const user = userEvent.setup();
+      render(Link, { router });
+
+      const target = screen.getByTestId('disabled-false');
+      await user.click(target);
+
+      expect(spyPush).toHaveBeenCalledTimes(1);
+      expect(spyReplace).not.toHaveBeenCalled();
+    });
+
+    it('should not ignore the click event if the element has a disabled="any" attribute', async () => {
+      expect.assertions(2);
+
+      const user = userEvent.setup();
+      render(Link, { router });
+
+      const target = screen.getByTestId('disabled-any');
+      await user.click(target);
+
+      expect(spyPush).toHaveBeenCalledTimes(1);
+      expect(spyReplace).not.toHaveBeenCalled();
+    });
+  });
 });
