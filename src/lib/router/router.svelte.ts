@@ -185,7 +185,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @private
    */
   get #matchState(): boolean {
-    return !!(this.#state?.href?.toString() && this.#location?.href?.toString());
+    return !!this.#state && this.#state?.href?.toString() === this.#location?.href?.toString();
   }
 
   /**
