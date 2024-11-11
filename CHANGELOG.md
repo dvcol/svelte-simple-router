@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.7.3](https://github.com/dvcol/svelte-simple-router/compare/v1.7.2...v1.7.3) (2024-11-11)
+
+
+### Bug Fixes
+
+* **listen:** fix check error that skipped all sync events ([81ffd94](https://github.com/dvcol/svelte-simple-router/commit/81ffd9446a4b92eac2b804e65a2799263e928f89))
+
 ### [1.7.2](https://github.com/dvcol/svelte-simple-router/compare/v1.7.1...v1.7.2) (2024-11-11)
 
 
