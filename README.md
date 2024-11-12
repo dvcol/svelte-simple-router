@@ -1,5 +1,7 @@
 
 <h1 align="center">Welcome to <i>Svelte Simple Router</i></h1>
+<h3 align="center">A simple and flexible SPA router for svelte 5</h3>
+
 <p>
   <img src="https://img.shields.io/badge/pnpm-%3E%3D7.0.0-blue.svg" />
   <img src="https://img.shields.io/badge/node-%3E%3D17.0.0-blue.svg" />
@@ -18,6 +20,8 @@
 </p>
 
 ## Prerequisites
+
+Note: Svelte Simple Router is a svelte 5 native library, and will not work with prior versions of svelte.
 
 - svelte >= 5.0.0
 
