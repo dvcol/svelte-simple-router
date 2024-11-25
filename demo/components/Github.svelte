@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24">
+<svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" preserveAspectRatio="xMidYMid meet" viewBox="0 0 24 24" {...$$props}>
   <mask id="eyes" x="0" y="0" width="24" height="24">
     <g fill="white">
       <ellipse cx="9.5" cy="9" rx="1.5" ry="1" />

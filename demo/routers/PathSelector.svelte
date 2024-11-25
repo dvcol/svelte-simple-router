@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { NeoButton, NeoCard, NeoInput } from '@dvcol/neo-svelte';
+
   import type { Route, RouteName } from '~/models/route.model.js';
 
   import { NavigationCancelledError } from '~/models/error.model.js';
@@ -66,48 +68,55 @@
   };
 </script>
 
-<div id="route-selector" class="container">
-  <h3>Routes</h3>
-  <table class="routes" use:links>
-    <thead>
-      <tr>
-        <th>Name</th>
-        <th>Path</th>
-        <th>Redirect</th>
-        <th>Go</th>
-        <th>Remove</th>
-      </tr>
-    </thead>
-    <tbody>
-      {#each routes as { name, path, redirect, meta }}
-        <tr use:link={{ name, path, ...navOptions }} use:active={{ name, path, class: 'active', exact: true }}>
-          <td>{name}</td>
-          <td>{path}</td>
-          <td>{redirect?.name ?? redirect?.path ?? meta?.redirect ?? '-'}</td>
-          <td><button onclick={e => onRouterButton(e, path)}>Go</button></td>
-          <td><button onclick={e => onRemoveRoute(e, name)}>Remove</button></td>
+<NeoCard rounded>
+  <div id="route-selector" class="container">
+    <h3>Routes</h3>
+    <table class="routes" use:links>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Path</th>
+          <th>Redirect</th>
+          <th>Go</th>
+          <th>Remove</th>
         </tr>
-      {/each}
-    </tbody>
-  </table>
-</div>
+      </thead>
+      <tbody>
+        {#each routes as { name, path, redirect, meta }}
+          <tr use:link={{ name, path, ...navOptions }} use:active={{ name, path, class: 'active', exact: true }}>
+            <td>{name}</td>
+            <td>{path}</td>
+            <td>{redirect?.name ?? redirect?.path ?? meta?.redirect ?? '-'}</td>
+            <td><NeoButton shallow borderless onclick={e => onRouterButton(e, path)}>Go</NeoButton></td>
+            <td><NeoButton shallow borderless onclick={e => onRemoveRoute(e, name)}>Remove</NeoButton></td>
+          </tr>
+        {/each}
+      </tbody>
+    </table>
+  </div>
 
-<div class="row add">
-  <label for="route">Add Route</label>
-  <input id="route" type="text" bind:value={route.name} />
-  <input id="route.path" type="text" bind:value={route.path} />
-  <input id="route.redirect.name" type="text" bind:value={route.redirect.name} />
-  <button onclick={() => onAddRoute()}>Add</button>
-</div>
+  {#snippet footer()}
+    <div class="row add">
+      <label for="route">Add Route</label>
+      <NeoInput elevation={-2} rounded id="route" bind:value={route.name} />
+      <NeoInput elevation={-2} rounded id="route.path" bind:value={route.path} />
+      <NeoInput elevation={-2} rounded id="route.redirect.name" bind:value={route.redirect.name} />
+      <NeoButton onclick={() => onAddRoute()}>Add</NeoButton>
+    </div>
+  {/snippet}
 
-<div class="row">
-  <button onclick={async () => router?.back()}>Back</button>
-  <button onclick={() => router?.forward()}>Forward</button>
-</div>
+  {#snippet action()}
+    <div class="row">
+      <NeoButton borderless onclick={async () => router?.back()}>Back</NeoButton>
+      <NeoButton borderless onclick={() => router?.forward()}>Forward</NeoButton>
+    </div>
+  {/snippet}
+</NeoCard>
 
 <style lang="scss">
   .row {
     display: flex;
+    flex: 1 1 auto;
     flex-direction: row;
     gap: 1rem;
     align-items: baseline;
@@ -124,13 +133,11 @@
 
   .routes {
     padding: 1rem;
-    background-color: color-mix(in srgb, transparent, black 20%);
     border-radius: 0.5rem;
   }
 
   tbody tr {
     cursor: pointer;
-    transition: background-color 300ms ease;
 
     td {
       padding: 0.5rem 0.75rem;
@@ -144,11 +151,6 @@
         border-top-right-radius: 0.5rem;
         border-bottom-right-radius: 0.5rem;
       }
-    }
-
-    &:active,
-    &:hover {
-      background-color: color-mix(in srgb, transparent, black 40%);
     }
   }
 </style>

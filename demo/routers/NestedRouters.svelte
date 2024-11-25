@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { NeoButton } from '@dvcol/neo-svelte';
   import { toLazyComponent } from '@dvcol/svelte-utils/component';
   import { tick } from 'svelte';
 
@@ -60,7 +61,7 @@
     <RouterContext {options}>
       <div class="column">
         <OptionSelector bind:options bind:stripQuery bind:stripHash bind:stripTrailingHash />
-        <button onclick={refresh}>Refresh router</button>
+        <NeoButton onclick={refresh}>Refresh router</NeoButton>
       </div>
 
       <div class="column selector">
@@ -81,7 +82,7 @@
 
       <RouteView route={{ path: '/inline-dynamic' }} children={LazyHelloComponent} Nested={GoodByeComponent} />
 
-      <div class="content">
+      <div class="router-content">
         <RouterView
           {options}
           onLoading={_route => console.warn('View loading', _route)}
@@ -121,7 +122,6 @@
 <style lang="scss">
   .container {
     padding: 0 1rem 1rem;
-    background-color: rgba(0 0 0 / 20%);
     border-radius: 0.5rem;
   }
 
