@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { NeoThemeProvider } from '@dvcol/neo-svelte';
   import { toLazyComponent } from '@dvcol/svelte-utils/component';
 
   import ErrorComponent from './components/Error.svelte';
@@ -261,13 +262,24 @@
   ];
 </script>
 
-<div class="column">
-  <DefaultRouter {routes} logLevel={import.meta.env.DEV ? LogLevel.Debug : LogLevel.Info} />
-  <NestedRouters {routes} />
-  <Links />
-</div>
+<NeoThemeProvider>
+  <div class="row">
+    <Links />
+  </div>
+  <div class="column">
+    <DefaultRouter {routes} logLevel={import.meta.env.DEV ? LogLevel.Debug : LogLevel.Info} />
+    <NestedRouters {routes} />
+  </div>
+</NeoThemeProvider>
 
 <style lang="scss">
+  .row {
+    display: flex;
+    flex: 1 1 auto;
+    justify-content: center;
+    margin: 1rem;
+  }
+
   .column {
     display: flex;
     flex: 1 1 auto;
@@ -279,7 +291,7 @@
     border-radius: 0.5rem;
   }
 
-  :global(.content) {
+  :global(.router-content) {
     display: flex;
     flex: 1 1 20rem;
     flex-direction: column;
