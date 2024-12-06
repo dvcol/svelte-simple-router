@@ -5,6 +5,7 @@
   import { active } from '~/router/active.svelte.js';
   import { useNavigate, useRouter } from '~/router/hooks.svelte.js';
   import { link } from '~/router/link.svelte.js';
+  import { links } from '~/router/links.svelte.js';
 
   const { stripQuery, stripHash, stripTrailingHash }: { stripQuery?: boolean; stripHash?: boolean; stripTrailingHash?: boolean } = $props();
 
@@ -67,7 +68,7 @@
 
 <div id="route-selector" class="container">
   <h3>Routes</h3>
-  <table class="routes">
+  <table class="routes" use:links>
     <thead>
       <tr>
         <th>Name</th>
