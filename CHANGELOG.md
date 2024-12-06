@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.8.0](https://github.com/dvcol/svelte-simple-router/compare/v1.7.3...v1.8.0) (2024-12-06)
+
+
+### Features
+
+* **action:** adds links wrapper. [#11](https://github.com/dvcol/svelte-simple-router/issues/11) ([7ad7baf](https://github.com/dvcol/svelte-simple-router/commit/7ad7baf781c638f4b48798db2a6c303944a2f64f))
+
 ### [1.7.3](https://github.com/dvcol/svelte-simple-router/compare/v1.7.2...v1.7.3) (2024-11-11)
 
 
