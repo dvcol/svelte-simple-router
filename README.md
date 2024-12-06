@@ -371,6 +371,9 @@ Must be used within a `RouterView` or `RouterContext`.
   const reactiveRoute = $derived(route)
   const reactiveLocation = $derived(location)
   const reactiveRoutingState = $derived(routing)
+  
+  const pathParams = $derived(location.params);
+  const queryParams = $derived(location.query);
 </script>
 ```
 * `useNavigate` - Returns utility function to start navigation logic.
@@ -689,7 +692,7 @@ While the component is being resolved, the `loading` component will be rendered 
 
 Similarly, if an error occurs during the component resolution, the `error` component will be rendered if any, the `error` snippet if any, or nothing.
 
-The router will try to infer if a component is a lazy import by checking it's name, but for more complex cases, you can use the `toLazyComponent` wrapper.
+The router will try to infer if a component is a lazy import by checking it's name (to detect component arrow functions) and it's constructor name (to detect async arrow functions), but for more complex cases, you can use the `toLazyComponent` wrapper.
 Nested lazy components require the wrapper to be used or the function to be manually named `component`. 
 
 ```svelte
@@ -716,7 +719,7 @@ Nested lazy components require the wrapper to be used or the function to be manu
             name: 'lazy-nested',
             path: '/lazy-nested',
             components: {
-                default: toLazyComponent(() => import('./LazyComponent.svelte')),
+                default: async () => import('./LazyComponent.svelte'),
                 nested: toLazyComponent(() => import('./NestedComponent.svelte')),
             }
         }
