@@ -1,12 +1,13 @@
 import type { Action } from 'svelte/action';
 
-import { getLinkNavigateFunction, type LinkNavigateFunction, parseBooleanAttribute } from '~/models/link.model.js';
+import { getLinkNavigateFunction, type LinkNavigateFunction, type LinkNavigateOptions, parseBooleanAttribute } from '~/models/link.model.js';
 import { Logger } from '~/utils/logger.utils.js';
 
 export type NodeConditionFn = (node: HTMLElement) => boolean;
 export type LinksActionOptions = {
   apply?: NodeConditionFn;
   boundary?: HTMLElement | NodeConditionFn;
+  navigate?: LinkNavigateOptions;
 };
 
 const isLinkNode = (node: HTMLElement, apply?: LinksActionOptions['apply']): boolean => {
@@ -80,7 +81,7 @@ export const links: Action<HTMLElement, LinksActionOptions | undefined> = (node:
 
   let navigate: LinkNavigateFunction;
   try {
-    navigate = getLinkNavigateFunction();
+    navigate = getLinkNavigateFunction(_options.navigate);
   } catch (error) {
     Logger.warn('Router not found. Make sure you are using the link(s) action within a Router context.', { node, options });
     node.setAttribute('data-error', 'Router not found.');

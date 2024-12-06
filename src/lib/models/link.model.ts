@@ -68,7 +68,7 @@ export type LinkNavigateFunction = (
  *
  * @throws {MissingRouterContextError} - If the router context is not found
  */
-export const getLinkNavigateFunction = (options: LinkActionOptions = {}): LinkNavigateFunction => {
+export const getLinkNavigateFunction = (options: LinkNavigateOptions = {}): LinkNavigateFunction => {
   const router = getRouter();
   if (!router) throw new MissingRouterContextError();
 
@@ -130,7 +130,7 @@ export const getLinkNavigateFunction = (options: LinkActionOptions = {}): LinkNa
  * @param node
  * @param options
  */
-export const normalizeLinkAttributes = (node: HTMLElement, options: LinkActionOptions) => {
+export const normalizeLinkAttributes = (node: HTMLElement, options: LinkNavigateOptions) => {
   if (!isAnchorTarget(node)) {
     if (!node.hasAttribute('role')) node.setAttribute('role', 'link');
     if (!node.hasAttribute('tabindex')) node.setAttribute('tabindex', '0');
@@ -140,5 +140,5 @@ export const normalizeLinkAttributes = (node: HTMLElement, options: LinkActionOp
   return { node, options };
 };
 
-export type LinkActionOptions<Name extends RouteName = RouteName> = CommonRouteNavigation &
+export type LinkNavigateOptions<Name extends RouteName = RouteName> = CommonRouteNavigation &
   RouterNavigationOptions & { replace?: boolean; name?: Name; path?: string; disabled?: boolean };

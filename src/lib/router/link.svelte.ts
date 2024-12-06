@@ -1,7 +1,9 @@
 import type { Action } from 'svelte/action';
 
-import { getLinkNavigateFunction, type LinkActionOptions, type LinkNavigateFunction, normalizeLinkAttributes } from '~/models/link.model.js';
+import { getLinkNavigateFunction, type LinkNavigateFunction, type LinkNavigateOptions, normalizeLinkAttributes } from '~/models/link.model.js';
 import { Logger } from '~/utils/logger.utils.js';
+
+export type LinkActionOptions = LinkNavigateOptions;
 
 /**
  * A svelte action to add to an element to navigate to a new location using the router.
@@ -55,7 +57,7 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
   node.addEventListener('click', handler);
   node.addEventListener('keydown', handler);
   return {
-    update(newOptions: LinkActionOptions | undefined = {}) {
+    update(newOptions: LinkNavigateOptions | undefined = {}) {
       _options = newOptions;
     },
     destroy() {

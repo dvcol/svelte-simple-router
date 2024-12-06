@@ -21,6 +21,19 @@
     </div>
   </div>
 
+  <div data-testid="navigate" use:links={{ navigate: { replace: true } }}>
+    <a data-testid="navigate-anchor-path" href="/home">path</a>
+
+    <span data-testid="navigate-span-path" data-router-link data-path="/home">path</span>
+    <span data-testid="navigate-span-name" data-router-link data-name="home">name</span>
+
+    <div data-testid="nested">
+      <a data-testid="navigate-nested-anchor-path" href="/home">path</a>
+      <span data-testid="navigate-nested-span-path" data-router-link data-path="/home">path</span>
+      <span data-testid="navigate-nested-span-name" data-router-link data-name="home">name</span>
+    </div>
+  </div>
+
   <div data-testid="apply" use:links={{ apply: (node: HTMLElement) => node.dataset.path || node.dataset.name }}>
     <a data-testid="apply-anchor-path" href="/home">path</a>
 

@@ -6,7 +6,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import Link from './Link.test.svelte';
 
-import type { Route } from '~/models/route.model.js';
+import type { RouterNavigationOptions } from '../../src/lib';
+import type { Route, RouteNavigation } from '~/models/route.model.js';
 
 import { active } from '~/router/active.svelte.js';
 import * as GetRouterModule from '~/router/context.svelte.js';
@@ -92,7 +93,8 @@ describe('link', () => {
   });
 
   describe('click', () => {
-    const nodes = [
+    type NodeParams = { node: string; payload?: RouteNavigation; options?: RouterNavigationOptions; replace?: boolean };
+    const nodes: NodeParams[] = [
       { node: 'anchor-path', payload: { path: HomeRoute.path } },
       { node: 'anchor-name', payload: { name: HomeRoute.name } },
       { node: 'anchor-no-href', payload: { path: HomeRoute.path } },

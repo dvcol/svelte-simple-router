@@ -4,7 +4,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import Links from './Links.test.svelte';
 
-import type { Route } from '~/models/route.model.js';
+import type { RouterNavigationOptions } from '../../src/lib';
+import type { Route, RouteNavigation } from '~/models/route.model.js';
 
 import { Router } from '~/router/router.svelte.js';
 
@@ -23,19 +24,28 @@ describe('link', () => {
   });
 
   const spyPush = vi.spyOn(router, 'push').mockReturnValue(undefined);
+  const spyReplace = vi.spyOn(router, 'replace').mockReturnValue(undefined);
 
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   describe('click', () => {
-    const activeNodes = [
+    type NodeParams = { node: string; payload?: RouteNavigation; options?: RouterNavigationOptions; replace?: boolean };
+    const activeNodes: NodeParams[] = [
       // Default
       { node: 'anchor-path', payload: { path: HomeRoute.path } },
       { node: 'span-path', payload: { path: HomeRoute.path } },
       { node: 'span-name', payload: { name: HomeRoute.name } },
       { node: 'nested-anchor-path', payload: { path: HomeRoute.path } },
       { node: 'nested-span-name', payload: { name: HomeRoute.name } },
+
+      // Navigate
+      { node: 'navigate-anchor-path', payload: { path: HomeRoute.path }, replace: true },
+      { node: 'navigate-span-path', payload: { path: HomeRoute.path }, replace: true },
+      { node: 'navigate-span-name', payload: { name: HomeRoute.name }, replace: true },
+      { node: 'navigate-nested-anchor-path', payload: { path: HomeRoute.path }, replace: true },
+      { node: 'navigate-nested-span-name', payload: { name: HomeRoute.name }, replace: true },
 
       // Apply
       { node: 'apply-anchor-path', payload: { path: HomeRoute.path } },
@@ -49,8 +59,7 @@ describe('link', () => {
       { node: 'boundary-nested-span-name', payload: { name: HomeRoute.name } },
     ];
 
-    const inactiveNodes = [
-      // Boundary
+    const inactiveNodes: NodeParams[] = [
       { node: 'boundary-anchor-path' },
       { node: 'boundary-span-path' },
       { node: 'boundary-span-name' },
@@ -62,8 +71,8 @@ describe('link', () => {
       { node: 'outside-span-name' },
     ];
 
-    it.each(activeNodes)('should navigate to the link on click for `%s`', async ({ node, payload, options = {} }) => {
-      expect.assertions(1);
+    it.each(activeNodes)('should navigate to the link on click for `%s`', async ({ node, payload, options = {}, replace }) => {
+      expect.assertions(2);
 
       const user = userEvent.setup();
       render(Links, { router });
@@ -72,11 +81,12 @@ describe('link', () => {
 
       await user.click(target);
 
-      expect(spyPush).toHaveBeenCalledWith(payload, options);
+      expect(replace ? spyReplace : spyPush).toHaveBeenCalledWith(payload, { ...options });
+      expect(replace ? spyPush : spyReplace).not.toHaveBeenCalled();
     });
 
     it.each(inactiveNodes)('should not navigate on click for `%s`', async ({ node }) => {
-      expect.assertions(1);
+      expect.assertions(2);
 
       const user = userEvent.setup();
       render(Links, { router });
@@ -86,6 +96,7 @@ describe('link', () => {
       await user.click(target);
 
       expect(spyPush).not.toHaveBeenCalled();
+      expect(spyReplace).not.toHaveBeenCalled();
     });
   });
 });
