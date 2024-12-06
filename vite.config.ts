@@ -6,7 +6,7 @@ import { svelte } from '@sveltejs/vite-plugin-svelte';
 import { svelteTesting } from '@testing-library/svelte/vite';
 import { sveltePreprocess } from 'svelte-preprocess';
 import { checker } from 'vite-plugin-checker';
-import { defineConfig, type UserConfig } from 'vitest/config';
+import { defineConfig, type ViteUserConfig } from 'vitest/config';
 
 import type { PluginOption } from 'vite';
 
@@ -40,7 +40,7 @@ if (isTest) {
   plugins.push(svelteTesting());
 }
 
-const config: UserConfig = {
+const config: ViteUserConfig = {
   plugins,
   resolve: {
     alias: {
