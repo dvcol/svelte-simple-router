@@ -103,6 +103,7 @@ You can find a complete example in the [demo app](https://github.com/dvcol/svelt
   - [View Transition API](#view-transition-api)
 - [Dom actions](#dom-actions)
   - [Link action](#link-action)
+  - [Links action](#links-action)
   - [Active action](#active-action)
 - [Programmatic navigation](#programmatic-navigation)
   - [Hooks](#hooks)
@@ -307,6 +308,39 @@ Note: The action requires the router context to be present in the component tree
 <a href='/path/:param' use:link="{ params: { param: 'value' } }">link with params</a>
 <div href='/path/:param' use:link="{ params: { param: 'value' } }">div link</div>
 <button href='/path/:param' use:link="{ params: { param: 'value' } }">button link</button>
+```
+
+#### Links action
+
+The `links action` intercepts click events on dom elements and upwardly navigate the dom tree until it reaches a link element and triggers a router navigation instead.
+
+The links action will recognize a parent node as a router link if it satisfies any of the following conditions:
+- The element is an anchor element
+- The element has a `data-router-link` attribute
+- The element satisfies the `apply` selector function passed as argument
+
+When a node is recognized as a router link, the action will behave as the `link` action (all restrictions apply).
+
+Additionally:
+- The action requires either valid href or data-attributes to navigate.
+- Once the action reaches the host element or the `boundary` element (or selector function), it will stop evaluating the dom tree.
+
+Note: The action requires the router context to be present in the component tree.
+Note: Unlike use:link, use:links does not normalize link attributes (role, tabindex, href).
+
+```svelte
+<script lang="ts">
+  import { links } from '@dvcol/svelte-simple-router/router';
+</script>
+
+<div use:links>
+  <div>
+      <a href="/path/:param?query=value">simple link</a>
+  </div>
+  <div data-router-link data-name="Hello">
+    <span>simple span</span>
+  </div>
+</div>
 ```
 
 #### Active action
