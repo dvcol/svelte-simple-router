@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.9.0](https://github.com/dvcol/svelte-simple-router/compare/v1.8.0...v1.9.0) (2024-12-06)
+
+
+### Features
+
+* **action:** adds link options to top level ([983284c](https://github.com/dvcol/svelte-simple-router/commit/983284c2276ec6b06efc6802a758250e12dbf33a))
+
+
+### Bug Fixes
+
+* **package:** adds missing export ([f5b6700](https://github.com/dvcol/svelte-simple-router/commit/f5b67003d5d7257fabd45c1345825411ad75701d))
+
 ## [1.8.0](https://github.com/dvcol/svelte-simple-router/compare/v1.7.3...v1.8.0) (2024-12-06)
 
 
