@@ -57,6 +57,11 @@
   // Delay properties update until component is resolved
   let _properties: ComponentProps | undefined = $state();
 
+  // If we should force a remount on route change
+  const force = $derived(router?.routing?.options?.force);
+  // Final unique identifier for the current route change
+  let uuid = $state();
+
   const listeners = $derived.by(() => {
     const _uuid = change.uuid;
     return {
@@ -72,12 +77,14 @@
       onLoaded: (_component?: AnyComponent | AnySnippet) => {
         if (change.uuid !== _uuid) return;
         ResolvedComponent = _component;
+        uuid = _uuid;
         _properties = properties;
         return untrack(() => view.complete());
       },
       onError: (err: unknown) => {
         if (change.uuid !== _uuid) return;
         ResolvedComponent = error;
+        uuid = _uuid;
         return untrack(() => view.fail(err));
       },
     };
@@ -98,12 +105,24 @@
   });
 </script>
 
-{#snippet routed()}
+{#snippet resolved()}
   {#if ResolvedComponent}
     {#if isSnippet(ResolvedComponent)}
       {@render ResolvedComponent(view.error ?? (view.loading ? route : _properties))}
     {:else}
       <ResolvedComponent error={view.error} {..._properties} />
+    {/if}
+  {/if}
+{/snippet}
+
+{#snippet routed()}
+  {#if ResolvedComponent}
+    {#if force}
+      {#key uuid}
+        {@render resolved()}
+      {/key}
+    {:else}
+      {@render resolved()}
     {/if}
   {:else if view.loading}
     {@render loadingSnippet?.(route)}

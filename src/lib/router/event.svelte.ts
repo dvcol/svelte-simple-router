@@ -7,7 +7,7 @@ import type {
 } from '~/models/navigation.model.js';
 import type { BaseRoute, ResolvedRoute, RouteName, RouteNavigation } from '~/models/route.model.js';
 
-import type { ResolvedRouterLocationSnapshot } from '~/models/router.model.js';
+import type { ResolvedRouterLocationSnapshot, RouterNavigationOptions } from '~/models/router.model.js';
 import type { IView } from '~/models/view.model.js';
 
 import { NavigationAbortedError, NavigationCancelledError } from '~/models/error.model.js';
@@ -18,6 +18,7 @@ export class NavigationEvent<Name extends RouteName = RouteName> implements INav
   readonly uuid: string;
   readonly to: ResolvedRouteSnapshot<Name>;
   readonly from: ResolvedRouterLocationSnapshot<Name>;
+  readonly options: RouterNavigationOptions;
 
   #result?: Promise<NavigationEventStatus>;
   #resolve?: (status: NavigationEventStatus) => void;
@@ -95,10 +96,11 @@ export class NavigationEvent<Name extends RouteName = RouteName> implements INav
     return this.#result;
   }
 
-  constructor(to: ResolvedRoute<Name>, from: ResolvedRouterLocationSnapshot<Name>) {
+  constructor(to: ResolvedRoute<Name>, from: ResolvedRouterLocationSnapshot<Name>, options: RouterNavigationOptions = {}) {
     this.uuid = crypto.randomUUID();
     this.to = { ...to, route: toBaseRoute(to.route)! };
     this.from = from;
+    this.options = { ...options };
   }
 
   /**

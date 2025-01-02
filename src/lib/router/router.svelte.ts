@@ -300,6 +300,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       base: this.#base,
       hash: this.#hash,
       strict: this.#options.strict,
+      force: this.#options.force,
       failOnNotFound: this.#options.failOnNotFound,
       metaAsState: this.#options.metaAsState,
       nameAsTitle: this.#options.nameAsTitle,
@@ -701,7 +702,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     this.#error = undefined;
 
     // Update the routing state
-    const navigation = new NavigationEvent<Name>(to, from);
+    const navigation = new NavigationEvent<Name>(to, from, _options);
 
     // Broadcast the navigation start event
     await Promise.all([...this.#onStartListeners].map(listener => listener(navigation)));
