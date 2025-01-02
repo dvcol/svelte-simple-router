@@ -1,6 +1,6 @@
 import type { BaseRoute, ResolvedRoute, RouteName, RouteNavigation } from '~/models/route.model.js';
 
-import type { ResolvedRouterLocationSnapshot } from '~/models/router.model.js';
+import type { ResolvedRouterLocationSnapshot, RouterNavigationOptions } from '~/models/router.model.js';
 
 import type { IView } from '~/models/view.model.js';
 
@@ -52,6 +52,10 @@ export type INavigationEvent<Name extends RouteName = RouteName> = INavigationEv
    * The current status of the navigation event.
    */
   readonly status: NavigationEventStatus;
+  /**
+   * Optional navigation options.
+   */
+  readonly options: RouterNavigationOptions;
 };
 
 export type NavigationEventStatus = keyof INavigationEventState;
