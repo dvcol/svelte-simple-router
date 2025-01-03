@@ -1,7 +1,7 @@
 {
   "name": "@dvcol/svelte-simple-router",
   "type": "module",
-  "version": "1.9.0",
+  "version": "1.9.1",
   "packageManager": "pnpm@9.15.0",
   "description": "Simple svelte 5 client side router",
   "homepage": "https://github.com/dvcol/svelte-simple-router",

@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.9.1](https://github.com/dvcol/svelte-simple-router/compare/v1.9.0...v1.9.1) (2025-01-03)
+
+
+### Bug Fixes
+
+* **routing:** adds debounce to routing state ([e483fa1](https://github.com/dvcol/svelte-simple-router/commit/e483fa15644110d538dfea923263f609de3f944c))
+* **routing:** force component remount on navigation in place.  [#16](https://github.com/dvcol/svelte-simple-router/issues/16) ([ea87761](https://github.com/dvcol/svelte-simple-router/commit/ea877619b6b7d8c52cd872f49088fd7c73efde8a))
+
 ## [1.9.0](https://github.com/dvcol/svelte-simple-router/compare/v1.8.0...v1.9.0) (2024-12-06)
 
 
