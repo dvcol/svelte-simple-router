@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { debounce } from '@dvcol/common-utils/common/debounce';
   import { type AnyComponent, type AnySnippet, isSnippet, resolveComponent } from '@dvcol/svelte-utils/component';
   import { type Component, type Snippet, untrack } from 'svelte';
 
@@ -45,22 +46,31 @@
     routingSnippet?: RouterViewProps['routing'];
   } = $props();
 
+  type ComponentOrSnippet = Component | Snippet<[unknown]>;
+
   // Resolve route, loading or error component to be rendered
-  let ResolvedComponent = $state<Component | Snippet<[unknown]>>();
+  let ResolvedComponent = $state<ComponentOrSnippet>();
 
   // Generate a unique identifier for each loading state, to prevent cancelled navigations from updating the view
   const change: ViewChangeEvent = $derived(new ViewChangeEvent({ view: { id: view.id, name: view.name }, route }));
 
   // Extract routing state
-  const routing = $derived(!!router?.routing?.active);
+  let routing: boolean | undefined = $state();
+  const setRouting = debounce((val: boolean) => {
+    routing = val;
+    return routing;
+  }, 0);
+  $effect(() => {
+    setRouting(!!router?.routing?.active);
+  });
 
   // Delay properties update until component is resolved
   let _properties: ComponentProps | undefined = $state();
 
   // If we should force a remount on route change
-  const force = $derived(router?.routing?.options?.force);
+  const force = $derived(transition?.updateOnRouteChange || router?.routing?.options?.force);
   // Final unique identifier for the current route change
-  let uuid = $state();
+  let resolvedID = $state();
 
   const listeners = $derived.by(() => {
     const _uuid = change.uuid;
@@ -77,14 +87,14 @@
       onLoaded: (_component?: AnyComponent | AnySnippet) => {
         if (change.uuid !== _uuid) return;
         ResolvedComponent = _component;
-        uuid = _uuid;
         _properties = properties;
+        if (force) resolvedID = _uuid;
         return untrack(() => view.complete());
       },
       onError: (err: unknown) => {
         if (change.uuid !== _uuid) return;
         ResolvedComponent = error;
-        uuid = _uuid;
+        if (force) resolvedID = _uuid;
         return untrack(() => view.fail(err));
       },
     };
@@ -98,32 +108,27 @@
   // Trigger transition on route change or component update
   const transitionKey = $derived.by(() => {
     const _keys: any[] = [ResolvedComponent];
-    if (transition?.updateOnRouteChange) _keys.push(change.uuid);
     if (transition?.updateOnPropsChange) _keys.push(_properties);
     if (routingSnippet) _keys.push(routing);
     return _keys;
   });
 </script>
 
-{#snippet resolved()}
-  {#if ResolvedComponent}
-    {#if isSnippet(ResolvedComponent)}
-      {@render ResolvedComponent(view.error ?? (view.loading ? route : _properties))}
-    {:else}
-      <ResolvedComponent error={view.error} {..._properties} />
-    {/if}
+{#snippet resolved(ComponentOrSnippet: ComponentOrSnippet)}
+  <!--{#if ResolvedComponent}-->
+  {#if isSnippet(ComponentOrSnippet)}
+    {@render ComponentOrSnippet(view.error ?? (view.loading ? route : _properties))}
+  {:else}
+    <ComponentOrSnippet error={view.error} {..._properties} />
   {/if}
+  <!--{/if}-->
 {/snippet}
 
 {#snippet routed()}
   {#if ResolvedComponent}
-    {#if force}
-      {#key uuid}
-        {@render resolved()}
-      {/key}
-    {:else}
-      {@render resolved()}
-    {/if}
+    {#key resolvedID}
+      {@render resolved(ResolvedComponent)}
+    {/key}
   {:else if view.loading}
     {@render loadingSnippet?.(route)}
   {:else if view.error}

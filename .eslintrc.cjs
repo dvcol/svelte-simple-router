@@ -6,7 +6,7 @@ module.exports = {
     project: ['./tsconfig.json', './tsconfig.vite.json'],
   },
   rules: {
-    'import/no-extraneous-dependencies': ['error', { devDependencies: ['**/*.test.*', '**/*.spec.*', '**/*.config.*', 'scripts/*.*'] }],
+    'import/no-extraneous-dependencies': ['error', { devDependencies: ['**/stub/*.*', '**/*.test.*', '**/*.spec.*', '**/*.config.*', 'scripts/*.*'] }],
   },
   overrides: [
     {
