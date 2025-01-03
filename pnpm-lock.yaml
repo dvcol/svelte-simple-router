@@ -26,7 +26,7 @@ importers:
         version: 19.6.0
       '@dvcol/eslint-plugin-presets':
         specifier: ^1.3.11
-        version: 1.3.11(agofz6itv6ncrmo3lbbbgc67he)
+        version: 1.3.11(5p3iatq3r5iamq3nl32pxwwlbu)
       '@dvcol/stylelint-plugin-presets':
         specifier: ^2.1.2
         version: 2.1.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.4.49))(postcss@8.4.49)(prettier@3.4.2)(stylelint@16.11.0(typescript@5.7.2))
@@ -100,8 +100,8 @@ importers:
         specifier: ^2.44.1
         version: 2.44.1(eslint@8.57.1)(svelte@5.8.0)
       eslint-plugin-vitest:
-        specifier: ^0.4.1
-        version: 0.4.1(@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.7.2))(eslint@8.57.1)(typescript@5.7.2))(eslint@8.57.1)(typescript@5.7.2)(vitest@3.0.0-beta.1(@types/node@22.5.4)(jiti@1.21.0)(jsdom@25.0.1)(sass@1.82.0)(sugarss@2.0.0)(yaml@2.5.0))
+        specifier: ^0.5.0
+        version: 0.5.4(@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.7.2))(eslint@8.57.1)(typescript@5.7.2))(eslint@8.57.1)(typescript@5.7.2)(vitest@3.0.0-beta.1(@types/node@22.5.4)(jiti@1.21.0)(jsdom@25.0.1)(sass@1.82.0)(sugarss@2.0.0)(yaml@2.5.0))
       eslint-plugin-yml:
         specifier: ^1.14.0
         version: 1.14.0(eslint@8.57.1)
@@ -2286,12 +2286,12 @@ packages:
       svelte:
         optional: true
 
-  eslint-plugin-vitest@0.4.1:
-    resolution: {integrity: sha512-+PnZ2u/BS+f5FiuHXz4zKsHPcMKHie+K+1Uvu/x91ovkCMEOJqEI8E9Tw1Wzx2QRz4MHOBHYf1ypO8N1K0aNAA==}
+  eslint-plugin-vitest@0.5.4:
+    resolution: {integrity: sha512-um+odCkccAHU53WdKAw39MY61+1x990uXjSPguUCq3VcEHdqJrOb8OTMrbYlY6f9jAKx7x98kLVlIe3RJeJqoQ==}
     engines: {node: ^18.0.0 || >= 20.0.0}
     peerDependencies:
       '@typescript-eslint/eslint-plugin': '*'
-      eslint: '>=8.0.0'
+      eslint: ^8.57.0 || ^9.0.0
       vitest: '*'
     peerDependenciesMeta:
       '@typescript-eslint/eslint-plugin':
@@ -4005,6 +4005,10 @@ packages:
   q@1.5.1:
     resolution: {integrity: sha512-kV/CThkXo6xyFEZUugw/+pIOywXcDbFYgSct5cT3gqlbkBE1SJdwy6UQoZvodiWF/ckQLZyDE/Bu1M6gVu5lVw==}
     engines: {node: '>=0.6.0', teleport: '>=0.2.0'}
+    deprecated: |-
+      You or someone you depend on is using Q, the JavaScript Promise library that gave JavaScript developers strong feelings about promises. They can almost certainly migrate to the native JavaScript promise now. Thank you literally everyone for joining me in this bet against the odds. Be excellent to each other.
+
+      (For a CapTP with native promises, see @endo/eventual-send and @endo/captp)
 
   queue-microtask@1.2.3:
     resolution: {integrity: sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A==}
@@ -5510,7 +5514,7 @@ snapshots:
     dependencies:
       pretty-bytes: 6.1.1
 
-  '@dvcol/eslint-plugin-presets@1.3.11(agofz6itv6ncrmo3lbbbgc67he)':
+  '@dvcol/eslint-plugin-presets@1.3.11(5p3iatq3r5iamq3nl32pxwwlbu)':
     dependencies:
       chalk: 4.1.2
       dash-ast: 2.0.1
@@ -5534,7 +5538,7 @@ snapshots:
       eslint-plugin-import: 2.29.1(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.7.2))(eslint@8.57.1)
       eslint-plugin-prettier: 5.2.1(eslint-config-prettier@9.1.0(eslint@8.57.1))(eslint@8.57.1)(prettier@3.4.2)
       eslint-plugin-svelte: 2.44.1(eslint@8.57.1)(svelte@5.8.0)
-      eslint-plugin-vitest: 0.4.1(@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.7.2))(eslint@8.57.1)(typescript@5.7.2))(eslint@8.57.1)(typescript@5.7.2)(vitest@3.0.0-beta.1(@types/node@22.5.4)(jiti@1.21.0)(jsdom@25.0.1)(sass@1.82.0)(sugarss@2.0.0)(yaml@2.5.0))
+      eslint-plugin-vitest: 0.5.4(@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.7.2))(eslint@8.57.1)(typescript@5.7.2))(eslint@8.57.1)(typescript@5.7.2)(vitest@3.0.0-beta.1(@types/node@22.5.4)(jiti@1.21.0)(jsdom@25.0.1)(sass@1.82.0)(sugarss@2.0.0)(yaml@2.5.0))
       svelte: 5.8.0
 
   '@dvcol/stylelint-plugin-presets@2.1.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.4.49))(postcss@8.4.49)(prettier@3.4.2)(stylelint@16.11.0(typescript@5.7.2))':
@@ -7356,7 +7360,7 @@ snapshots:
     transitivePeerDependencies:
       - ts-node
 
-  eslint-plugin-vitest@0.4.1(@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.7.2))(eslint@8.57.1)(typescript@5.7.2))(eslint@8.57.1)(typescript@5.7.2)(vitest@3.0.0-beta.1(@types/node@22.5.4)(jiti@1.21.0)(jsdom@25.0.1)(sass@1.82.0)(sugarss@2.0.0)(yaml@2.5.0)):
+  eslint-plugin-vitest@0.5.4(@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.7.2))(eslint@8.57.1)(typescript@5.7.2))(eslint@8.57.1)(typescript@5.7.2)(vitest@3.0.0-beta.1(@types/node@22.5.4)(jiti@1.21.0)(jsdom@25.0.1)(sass@1.82.0)(sugarss@2.0.0)(yaml@2.5.0)):
     dependencies:
       '@typescript-eslint/utils': 7.18.0(eslint@8.57.1)(typescript@5.7.2)
       eslint: 8.57.1
