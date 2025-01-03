@@ -1,5 +1,16 @@
 <script lang="ts">
-  const { error }: { error: Error | any } = $props();
+  import { onDestroy, onMount } from 'svelte';
+
+  import { LifeCycle } from './mocks.js';
+
+  const {
+    error,
+    onMounted = LifeCycle.Error.onMounted,
+    onDestroyed = LifeCycle.Error.onDestroyed,
+  }: { error: Error | any; onMounted: () => unknown; onDestroyed: () => unknown } = $props();
+
+  onMount(onMounted);
+  onDestroy(onDestroyed);
 </script>
 
 <div data-testid="error-component">

@@ -13,9 +13,11 @@ import RouterView from './RouterView.test.svelte';
 import RouterViewNested from './RouterViewNested.test.svelte';
 
 import LoadingComponent from './stub/LoadingComponent.test.svelte';
+import { LifeCycle } from './stub/mocks.js';
 import { namedPartialRoute, partialRoute, routes } from './stub/routes.js';
 
 import type { RenderResult } from '@testing-library/svelte';
+
 import type { MockInstance } from 'vitest';
 
 import RouteTransition from '~/components/RouteTransition.svelte';
@@ -59,23 +61,31 @@ describe('routerView', () => {
   describe('routing', () => {
     const common = (component: typeof RouteView | typeof RouterContext | typeof RouterViewNested) => {
       it('should render no component', () => {
-        expect.assertions(1);
+        expect.assertions(4);
         render(component, { router });
 
         expect(() => screen.getByTestId('hello-component')).toThrow('Unable to find an element by: [data-testid="hello-component"]');
+
+        expect(LifeCycle.Error.onMounted).not.toHaveBeenCalled();
+        expect(LifeCycle.Hello.onMounted).not.toHaveBeenCalled();
+        expect(LifeCycle.Goodbye.onMounted).not.toHaveBeenCalled();
       });
 
       it('should render a hello component', async () => {
-        expect.assertions(5);
+        expect.assertions(8);
 
         render(component, { router });
         await router.push({ path: '/hello' });
 
         assertComponent({ id: 'hello-component', title: 'Hello', meta: 'Hello' });
+
+        expect(LifeCycle.Error.onMounted).not.toHaveBeenCalled();
+        expect(LifeCycle.Hello.onMounted).toHaveBeenCalledTimes(1);
+        expect(LifeCycle.Goodbye.onMounted).not.toHaveBeenCalled();
       });
 
       it('should render a async component', async () => {
-        expect.assertions(5);
+        expect.assertions(8);
 
         render(component, { router });
         await router.push({ path: '/goodbye' });
@@ -85,10 +95,14 @@ describe('routerView', () => {
         await wait(100);
 
         assertComponent({ id: 'goodbye-component', title: 'Goodbye', meta: 'Goodbye' });
+
+        expect(LifeCycle.Error.onMounted).not.toHaveBeenCalled();
+        expect(LifeCycle.Hello.onMounted).not.toHaveBeenCalled();
+        expect(LifeCycle.Goodbye.onMounted).toHaveBeenCalledTimes(1);
       });
 
       it('should render a loading component', async () => {
-        expect.assertions(2);
+        expect.assertions(5);
 
         render(component, { router });
         await router.push({ path: '/loading' });
@@ -100,10 +114,14 @@ describe('routerView', () => {
 
         const hello = screen.getByTestId('hello-component');
         expect(hello).toBeDefined();
+
+        expect(LifeCycle.Error.onMounted).not.toHaveBeenCalled();
+        expect(LifeCycle.Hello.onMounted).toHaveBeenCalledTimes(1);
+        expect(LifeCycle.Goodbye.onMounted).not.toHaveBeenCalled();
       });
 
       it('should render a default loading component', async () => {
-        expect.assertions(2);
+        expect.assertions(5);
 
         render(component, { router });
         await router.push({ path: '/default-loading' });
@@ -115,10 +133,14 @@ describe('routerView', () => {
 
         const hello = screen.getByTestId('hello-component');
         expect(hello).toBeDefined();
+
+        expect(LifeCycle.Error.onMounted).not.toHaveBeenCalled();
+        expect(LifeCycle.Hello.onMounted).toHaveBeenCalledTimes(1);
+        expect(LifeCycle.Goodbye.onMounted).not.toHaveBeenCalled();
       });
 
       it('should render an error component', async () => {
-        expect.assertions(3);
+        expect.assertions(6);
 
         render(component, { router });
         await router.push({ path: '/error' });
@@ -130,10 +152,14 @@ describe('routerView', () => {
         const message = errorComponent.querySelector('p[data-testid="error-message"]');
         expect(message).toBeDefined();
         expect(message?.textContent).toBe('Loading error');
+
+        expect(LifeCycle.Error.onMounted).toHaveBeenCalledTimes(1);
+        expect(LifeCycle.Hello.onMounted).not.toHaveBeenCalled();
+        expect(LifeCycle.Goodbye.onMounted).not.toHaveBeenCalled();
       });
 
       it('should render a default error component', async () => {
-        expect.assertions(3);
+        expect.assertions(6);
 
         render(component, { router });
         await router.push({ path: '/default-error' });
@@ -145,10 +171,14 @@ describe('routerView', () => {
         const message = errorComponent.querySelector('p[data-testid="error-message"]');
         expect(message).toBeDefined();
         expect(message?.textContent).toBe('Default Error');
+
+        expect(LifeCycle.Error.onMounted).not.toHaveBeenCalled();
+        expect(LifeCycle.Hello.onMounted).not.toHaveBeenCalled();
+        expect(LifeCycle.Goodbye.onMounted).not.toHaveBeenCalled();
       });
 
       it('should render a routing snippet', async () => {
-        expect.assertions(5);
+        expect.assertions(8);
 
         await router.push({ path: '/goodbye' });
         render(component, { router });
@@ -165,6 +195,7 @@ describe('routerView', () => {
         expect(to?.textContent).toBe('routing');
 
         await routing$;
+        await wait(100);
 
         const loading = screen.getByTestId('default-loading');
         expect(loading).toBeDefined();
@@ -173,6 +204,44 @@ describe('routerView', () => {
 
         const hello = screen.getByTestId('hello-component');
         expect(hello).toBeDefined();
+
+        expect(LifeCycle.Error.onMounted).not.toHaveBeenCalled();
+        expect(LifeCycle.Hello.onMounted).toHaveBeenCalledTimes(1);
+        expect(LifeCycle.Goodbye.onMounted).toHaveBeenCalledTimes(1);
+      });
+
+      it('should not render a component when navigating in place', async () => {
+        expect.assertions(9);
+
+        render(component, { router });
+        await router.push({ path: '/hello' });
+
+        assertComponent({ id: 'hello-component', title: 'Hello', meta: 'Hello' });
+        expect(LifeCycle.Hello.onMounted).toHaveBeenCalledTimes(1);
+        expect(LifeCycle.Hello.onDestroyed).not.toHaveBeenCalled();
+
+        await router.push({ path: '/hello' });
+        await tick();
+
+        expect(LifeCycle.Hello.onMounted).toHaveBeenCalledTimes(1);
+        expect(LifeCycle.Hello.onDestroyed).not.toHaveBeenCalled();
+      });
+
+      it('should force render a component when navigating in place', async () => {
+        expect.assertions(9);
+
+        render(component, { router });
+        await router.push({ path: '/hello' });
+
+        expect(LifeCycle.Hello.onMounted).toHaveBeenCalledTimes(1);
+        expect(LifeCycle.Hello.onDestroyed).not.toHaveBeenCalled();
+
+        await router.push({ path: '/hello' }, { force: true });
+
+        expect(LifeCycle.Hello.onMounted).toHaveBeenCalledTimes(2);
+        expect(LifeCycle.Hello.onDestroyed).toHaveBeenCalledTimes(1);
+
+        assertComponent({ id: 'hello-component', title: 'Hello', meta: 'Hello' });
       });
     };
 

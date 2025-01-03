@@ -400,7 +400,7 @@ Must be used within a `RouterView` or `RouterContext`.
 <script lang="ts">
   import { useRoute } from '@dvcol/svelte-simple-router/router';
   
-  const { route, location, routing } = useRoute()
+  const { route, location, routing } =  $derived(useRoute())
   
   const reactiveRoute = $derived(route)
   const reactiveLocation = $derived(location)

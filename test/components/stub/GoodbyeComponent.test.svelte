@@ -1,11 +1,22 @@
 <script lang="ts">
+  import { onDestroy, onMount } from 'svelte';
+
+  import { LifeCycle } from './mocks.js';
+
   import { useRouter } from '~/router/hooks.svelte.js';
 
-  const { title }: { title: string } = $props();
+  const {
+    title,
+    onMounted = LifeCycle.Goodbye.onMounted,
+    onDestroyed = LifeCycle.Goodbye.onDestroyed,
+  }: { title: string; onMounted: () => unknown; onDestroyed: () => unknown } = $props();
 
   const router = useRouter();
 
   const meta: string | undefined = $derived(router?.route?.meta?.key);
+
+  onMount(onMounted);
+  onDestroy(onDestroyed);
 </script>
 
 <div data-testid="goodbye-component">
