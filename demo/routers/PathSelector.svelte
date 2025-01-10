@@ -70,7 +70,7 @@
 
 <NeoCard rounded>
   <div id="route-selector" class="container">
-    <h3>Routes</h3>
+    <h4>Routes</h4>
     <table class="routes" use:links>
       <thead>
         <tr>

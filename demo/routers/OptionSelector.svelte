@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { NeoButton, NeoCard, NeoInput, NeoTextarea } from '@dvcol/neo-svelte';
+  import { NeoButton, NeoCard, NeoCheckbox, NeoInput, NeoTextarea } from '@dvcol/neo-svelte';
 
   import type { RouterOptions } from '~/models/router.model.js';
 
@@ -54,10 +54,13 @@
   const toTitleCase = (str: string) => str.replace(/([A-Z])/g, ' $1').replace(/^./, _str => _str.toUpperCase());
 </script>
 
-<NeoCard rounded>
-  <div class="row">
-    <div class="column">
-      <h3>Options</h3>
+<div class="row">
+  <div class="column">
+    <NeoCard rounded>
+      {#snippet header()}
+        <h4>Options</h4>
+      {/snippet}
+
       <table class="options">
         <thead>
           <tr>
@@ -73,69 +76,49 @@
                 {#if key === 'base'}
                   <NeoInput elevation={-2} rounded type="text" bind:value={options[key]} />
                 {:else if key === 'listen'}
-                  <select bind:value={options[key]}>
+                  <NeoInput type="select" elevation={-2} style="padding: 0.375rem 0.5rem" bind:value={options[key]}>
                     <option value={'history'}>History</option>
                     <option value={'navigation'}>Navigation</option>
                     <option value={true}>True</option>
                     <option value={false}>False</option>
-                  </select>
+                  </NeoInput>
                 {:else if key === 'syncUpdate'}
-                  <select bind:value={options[key]}>
+                  <NeoInput type="select" elevation={-2} style="padding: 0.375rem 0.5rem" bind:value={options[key]}>
                     <option value={'replace'}>Replace</option>
                     <option value={'push'}>Push</option>
                     <option value={false}>False</option>
-                  </select>
+                  </NeoInput>
                 {:else if typeof value === 'boolean'}
-                  <input type="checkbox" bind:checked={options[key]} />
+                  <NeoCheckbox rounded bind:checked={options[key]} />
                 {/if}
               </td>
             </tr>
           {/each}
         </tbody>
       </table>
-    </div>
+    </NeoCard>
   </div>
+</div>
 
-  <div class="row">
-    <div class="column">
-      <h3>External Push state</h3>
-      <table class="options">
-        <thead>
-          <tr>
-            <th>Key</th>
-            <th>Value</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td><label for="stripQuery">Strip Query</label></td>
-            <td><input id="stripQuery" type="checkbox" bind:checked={stripQuery} /></td>
-          </tr>
-          <tr>
-            <td><label for="stripHash">Strip Hash</label></td>
-            <td><input id="stripHash" type="checkbox" bind:checked={stripHash} /></td>
-          </tr>
-          <tr>
-            <td><label for="stripTrailingHash">Strip Trailing Hash</label></td>
-            <td><input id="stripTrailingHash" type="checkbox" bind:checked={stripTrailingHash} /></td>
-          </tr>
-          <tr>
-            <td><label for="input">External Push State</label></td>
-            <td>
-              <NeoTextarea elevation={-2} rows={2} id="input" bind:value={input}></NeoTextarea>
-            </td>
-          </tr>
-          <tr>
-            <td></td>
-            <td class="center">
-              <NeoButton onclick={onInputButton}>Push State</NeoButton>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+<div class="row">
+  <div class="column">
+    <NeoCard rounded>
+      {#snippet header()}
+        <h4>External Push state</h4>
+      {/snippet}
+
+      <div class="row">
+        <NeoCheckbox rounded label="Strip Query" bind:checked={stripQuery} />
+        <NeoCheckbox rounded label="Strip Hash" bind:checked={stripHash} />
+        <NeoCheckbox rounded label="Strip Trailing Hash" bind:checked={stripTrailingHash} />
+      </div>
+
+      <NeoTextarea label="External Push state" elevation={-2} rows={2} id="input" containerProps={{ style: 'display: flex' }} bind:value={input} />
+
+      <NeoButton onclick={onInputButton} style="margin-inline: auto; margin-top: 1.75rem;">Push State</NeoButton>
+    </NeoCard>
   </div>
-</NeoCard>
+</div>
 
 <style lang="scss">
   .row {
@@ -153,11 +136,6 @@
   .options {
     padding: 1rem;
     border-radius: 0.5rem;
-  }
-
-  .center {
-    display: flex;
-    justify-content: center;
   }
 
   tbody tr {

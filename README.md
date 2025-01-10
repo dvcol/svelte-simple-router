@@ -3,8 +3,8 @@
 <h3 align="center">A simple and flexible SPA router for svelte 5</h3>
 
 <p>
-  <img src="https://img.shields.io/badge/pnpm-%3E%3D7.0.0-blue.svg" />
-  <img src="https://img.shields.io/badge/node-%3E%3D17.0.0-blue.svg" />
+  <img src="https://img.shields.io/badge/pnpm-%3E%3D8.0.0-blue.svg" />
+  <img src="https://img.shields.io/badge/node-%3E%3D20.0.0-blue.svg" />
   <a href="https://github.com/dvcol/svelte-simple-router#readme" target="_blank">
     <img alt="Documentation" src="https://img.shields.io/badge/documentation-yes-brightgreen.svg" />
   </a>

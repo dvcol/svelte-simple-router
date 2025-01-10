@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { NeoButton, NeoCard } from '@dvcol/neo-svelte';
+  import { NeoButton, NeoCard, NeoCheckbox } from '@dvcol/neo-svelte';
   import { tick } from 'svelte';
 
   import DynamicRouteView from '../components/DynamicRouteView.svelte';
@@ -67,30 +67,24 @@
 
 {#snippet transitionOptions()}
   <NeoCard rounded>
-    <div class="container column">
+    <div class="container column" style="align-items: unset">
       <div class="row update">
-        <label for="update-on-route-change">Update transition on any route change</label>
-        <input id="update-on-route-change" type="checkbox" bind:checked={updateOnRouteChange} />
+        <NeoCheckbox label="Update transition on any route change" rounded bind:checked={updateOnRouteChange} />
       </div>
       <div class="row update">
-        <label for="update-on-prop-change">Update transition on any prop change</label>
-        <input id="update-on-prop-change" type="checkbox" bind:checked={updateOnPropsChange} />
+        <NeoCheckbox label="Update transition on any prop change" rounded bind:checked={updateOnPropsChange} />
       </div>
       <div class="row update">
-        <label for="routing-snippet">Enable default routing snippet</label>
-        <input id="routing-snippet" type="checkbox" bind:checked={routingSnippet} />
+        <NeoCheckbox label="Enable default routing snippet" rounded bind:checked={routingSnippet} />
       </div>
       <div class="row update">
-        <label for="loading-snippet">Enable default loading snippet</label>
-        <input id="loading-snippet" type="checkbox" bind:checked={loadingSnippet} />
+        <NeoCheckbox label="Enable default loading snippet" rounded bind:checked={loadingSnippet} />
       </div>
       <div class="row update">
-        <label for="error-snippet">Enable default error snippet</label>
-        <input id="error-snippet" type="checkbox" bind:checked={errorSnippet} />
+        <NeoCheckbox label="Enable default error snippet" rounded bind:checked={errorSnippet} />
       </div>
       <div class="row update">
-        <label for="routeView">Route View Component</label>
-        <input id="routeView" type="checkbox" bind:checked={routeView} />
+        <NeoCheckbox label="Route View Component" rounded bind:checked={routeView} />
       </div>
     </div>
   </NeoCard>
@@ -138,6 +132,8 @@
 
 <style lang="scss">
   .container {
+    --neo-btn-margin: 0.125rem;
+
     padding: 0 1rem 1rem;
     border-radius: 0.5rem;
   }

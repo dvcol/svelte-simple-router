@@ -83,6 +83,7 @@
       <RouteView route={{ path: '/inline-dynamic' }} children={LazyHelloComponent} Nested={GoodByeComponent} />
 
       <div class="router-content">
+        <h2 style="margin-block: 2rem">View default</h2>
         <RouterView
           {options}
           onLoading={_route => console.warn('View loading', _route)}
@@ -92,8 +93,6 @@
           onEnd={(navigation, resolved) => console.info('View end', { navigation, resolved })}
           beforeEach={navigation => console.info('View before each', navigation)}
         >
-          <h2>View default</h2>
-
           {#snippet loading()}
             <p>Default Loading...</p>
           {/snippet}
@@ -104,9 +103,8 @@
           {/snippet}
         </RouterView>
 
+        <h2 style="margin-block: 2rem">View nested</h2>
         <RouterView {options} name="Nested">
-          <h2>View nested</h2>
-
           <DynamicRouteView uuid="named" />
           <DynamicRouteView uuid="named-snippet">
             {#snippet Nested()}
