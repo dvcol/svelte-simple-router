@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { NeoButton, NeoCard, NeoCheckbox, NeoInput, NeoTextarea } from '@dvcol/neo-svelte';
+
   import type { RouterOptions } from '~/models/router.model.js';
 
   let {
@@ -54,82 +56,67 @@
 
 <div class="row">
   <div class="column">
-    <h3>Options</h3>
-    <table class="options">
-      <thead>
-        <tr>
-          <th>Key</th>
-          <th>Value</th>
-        </tr>
-      </thead>
-      <tbody>
-        {#each configs as [key, value]}
-          <tr title={title[key]}>
-            <td>{toTitleCase(key)}</td>
-            <td>
-              {#if key === 'base'}
-                <input type="text" bind:value={options[key]} />
-              {:else if key === 'listen'}
-                <select bind:value={options[key]}>
-                  <option value={'history'}>History</option>
-                  <option value={'navigation'}>Navigation</option>
-                  <option value={true}>True</option>
-                  <option value={false}>False</option>
-                </select>
-              {:else if key === 'syncUpdate'}
-                <select bind:value={options[key]}>
-                  <option value={'replace'}>Replace</option>
-                  <option value={'push'}>Push</option>
-                  <option value={false}>False</option>
-                </select>
-              {:else if typeof value === 'boolean'}
-                <input type="checkbox" bind:checked={options[key]} />
-              {/if}
-            </td>
+    <NeoCard rounded>
+      {#snippet header()}
+        <h4>Options</h4>
+      {/snippet}
+
+      <table class="options">
+        <thead>
+          <tr>
+            <th>Key</th>
+            <th>Value</th>
           </tr>
-        {/each}
-      </tbody>
-    </table>
+        </thead>
+        <tbody>
+          {#each configs as [key, value]}
+            <tr title={title[key]}>
+              <td>{toTitleCase(key)}</td>
+              <td>
+                {#if key === 'base'}
+                  <NeoInput elevation={-2} rounded type="text" bind:value={options[key]} />
+                {:else if key === 'listen'}
+                  <NeoInput type="select" elevation={-2} style="padding: 0.375rem 0.5rem" bind:value={options[key]}>
+                    <option value={'history'}>History</option>
+                    <option value={'navigation'}>Navigation</option>
+                    <option value={true}>True</option>
+                    <option value={false}>False</option>
+                  </NeoInput>
+                {:else if key === 'syncUpdate'}
+                  <NeoInput type="select" elevation={-2} style="padding: 0.375rem 0.5rem" bind:value={options[key]}>
+                    <option value={'replace'}>Replace</option>
+                    <option value={'push'}>Push</option>
+                    <option value={false}>False</option>
+                  </NeoInput>
+                {:else if typeof value === 'boolean'}
+                  <NeoCheckbox rounded bind:checked={options[key]} />
+                {/if}
+              </td>
+            </tr>
+          {/each}
+        </tbody>
+      </table>
+    </NeoCard>
   </div>
 </div>
 
 <div class="row">
   <div class="column">
-    <h3>External Push state</h3>
-    <table class="options">
-      <thead>
-        <tr>
-          <th>Key</th>
-          <th>Value</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td><label for="stripQuery">Strip Query</label></td>
-          <td><input id="stripQuery" type="checkbox" bind:checked={stripQuery} /></td>
-        </tr>
-        <tr>
-          <td><label for="stripHash">Strip Hash</label></td>
-          <td><input id="stripHash" type="checkbox" bind:checked={stripHash} /></td>
-        </tr>
-        <tr>
-          <td><label for="stripTrailingHash">Strip Trailing Hash</label></td>
-          <td><input id="stripTrailingHash" type="checkbox" bind:checked={stripTrailingHash} /></td>
-        </tr>
-        <tr>
-          <td><label for="input">External Push State</label></td>
-          <td>
-            <textarea rows="2" id="input" bind:value={input}></textarea>
-          </td>
-        </tr>
-        <tr>
-          <td></td>
-          <td>
-            <button onclick={onInputButton}>Push State</button>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <NeoCard rounded>
+      {#snippet header()}
+        <h4>External Push state</h4>
+      {/snippet}
+
+      <div class="row">
+        <NeoCheckbox rounded label="Strip Query" bind:checked={stripQuery} />
+        <NeoCheckbox rounded label="Strip Hash" bind:checked={stripHash} />
+        <NeoCheckbox rounded label="Strip Trailing Hash" bind:checked={stripTrailingHash} />
+      </div>
+
+      <NeoTextarea label="External Push state" elevation={-2} rows={2} id="input" containerProps={{ style: 'display: flex' }} bind:value={input} />
+
+      <NeoButton onclick={onInputButton} style="margin-inline: auto; margin-top: 1.75rem;">Push State</NeoButton>
+    </NeoCard>
   </div>
 </div>
 
@@ -148,7 +135,6 @@
 
   .options {
     padding: 1rem;
-    background-color: color-mix(in srgb, transparent, black 20%);
     border-radius: 0.5rem;
   }
 
@@ -159,11 +145,6 @@
       &:not(:first-child) {
         text-align: center;
       }
-    }
-
-    &:active,
-    &:hover {
-      background-color: color-mix(in srgb, transparent, black 40%);
     }
   }
 </style>

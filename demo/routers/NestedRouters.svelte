@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { NeoButton } from '@dvcol/neo-svelte';
   import { toLazyComponent } from '@dvcol/svelte-utils/component';
   import { tick } from 'svelte';
 
@@ -60,7 +61,7 @@
     <RouterContext {options}>
       <div class="column">
         <OptionSelector bind:options bind:stripQuery bind:stripHash bind:stripTrailingHash />
-        <button onclick={refresh}>Refresh router</button>
+        <NeoButton onclick={refresh}>Refresh router</NeoButton>
       </div>
 
       <div class="column selector">
@@ -81,7 +82,8 @@
 
       <RouteView route={{ path: '/inline-dynamic' }} children={LazyHelloComponent} Nested={GoodByeComponent} />
 
-      <div class="content">
+      <div class="router-content">
+        <h2 style="margin-block: 2rem">View default</h2>
         <RouterView
           {options}
           onLoading={_route => console.warn('View loading', _route)}
@@ -91,8 +93,6 @@
           onEnd={(navigation, resolved) => console.info('View end', { navigation, resolved })}
           beforeEach={navigation => console.info('View before each', navigation)}
         >
-          <h2>View default</h2>
-
           {#snippet loading()}
             <p>Default Loading...</p>
           {/snippet}
@@ -103,9 +103,8 @@
           {/snippet}
         </RouterView>
 
+        <h2 style="margin-block: 2rem">View nested</h2>
         <RouterView {options} name="Nested">
-          <h2>View nested</h2>
-
           <DynamicRouteView uuid="named" />
           <DynamicRouteView uuid="named-snippet">
             {#snippet Nested()}
@@ -121,7 +120,6 @@
 <style lang="scss">
   .container {
     padding: 0 1rem 1rem;
-    background-color: rgba(0 0 0 / 20%);
     border-radius: 0.5rem;
   }
 

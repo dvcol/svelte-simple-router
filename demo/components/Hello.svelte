@@ -19,8 +19,8 @@
 
 <h1>Hello !</h1>
 {#if title}
-  <h2>{title}</h2>
+  <h4>{title}</h4>
 {/if}
 {#if subtitle}
-  <h3>{subtitle}</h3>
+  <h5>{subtitle}</h5>
 {/if}

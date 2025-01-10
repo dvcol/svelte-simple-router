@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { NeoButton, NeoCard, NeoCheckbox } from '@dvcol/neo-svelte';
   import { tick } from 'svelte';
 
   import DynamicRouteView from '../components/DynamicRouteView.svelte';
@@ -65,32 +66,28 @@
 {/snippet}
 
 {#snippet transitionOptions()}
-  <div class="container column">
-    <div class="row update">
-      <label for="update-on-route-change">Update transition on any route change</label>
-      <input id="update-on-route-change" type="checkbox" bind:checked={updateOnRouteChange} />
+  <NeoCard rounded>
+    <div class="container column" style="align-items: unset">
+      <div class="row update">
+        <NeoCheckbox label="Update transition on any route change" rounded bind:checked={updateOnRouteChange} />
+      </div>
+      <div class="row update">
+        <NeoCheckbox label="Update transition on any prop change" rounded bind:checked={updateOnPropsChange} />
+      </div>
+      <div class="row update">
+        <NeoCheckbox label="Enable default routing snippet" rounded bind:checked={routingSnippet} />
+      </div>
+      <div class="row update">
+        <NeoCheckbox label="Enable default loading snippet" rounded bind:checked={loadingSnippet} />
+      </div>
+      <div class="row update">
+        <NeoCheckbox label="Enable default error snippet" rounded bind:checked={errorSnippet} />
+      </div>
+      <div class="row update">
+        <NeoCheckbox label="Route View Component" rounded bind:checked={routeView} />
+      </div>
     </div>
-    <div class="row update">
-      <label for="update-on-prop-change">Update transition on any prop change</label>
-      <input id="update-on-prop-change" type="checkbox" bind:checked={updateOnPropsChange} />
-    </div>
-    <div class="row update">
-      <label for="routing-snippet">Enable default routing snippet</label>
-      <input id="routing-snippet" type="checkbox" bind:checked={routingSnippet} />
-    </div>
-    <div class="row update">
-      <label for="loading-snippet">Enable default loading snippet</label>
-      <input id="loading-snippet" type="checkbox" bind:checked={loadingSnippet} />
-    </div>
-    <div class="row update">
-      <label for="error-snippet">Enable default error snippet</label>
-      <input id="error-snippet" type="checkbox" bind:checked={errorSnippet} />
-    </div>
-    <div class="row update">
-      <label for="routeView">Route View Component</label>
-      <input id="routeView" type="checkbox" bind:checked={routeView} />
-    </div>
-  </div>
+  </NeoCard>
 {/snippet}
 
 {#if mounted}
@@ -98,7 +95,7 @@
   <div class="container row">
     <div class="column">
       <OptionSelector bind:options bind:stripQuery bind:stripHash bind:stripTrailingHash />
-      <button onclick={refresh}>Refresh router</button>
+      <NeoButton onclick={refresh}>Refresh router</NeoButton>
       {@render transitionOptions()}
     </div>
     <RouterView
@@ -109,7 +106,7 @@
         updateOnPropsChange,
         props: {
           container: {
-            class: 'content',
+            class: 'router-content',
           },
         },
       }}
@@ -135,8 +132,9 @@
 
 <style lang="scss">
   .container {
+    --neo-btn-margin: 0.125rem;
+
     padding: 0 1rem 1rem;
-    background-color: rgba(0 0 0 / 20%);
     border-radius: 0.5rem;
   }
 
