@@ -1,9 +1,15 @@
+import type { Values } from '@dvcol/common-utils/common/class';
 import type { TransitionFunction } from '@dvcol/svelte-utils/transition';
 import type { Snippet } from 'svelte';
+import type { HTMLAttributes } from 'svelte/elements';
 import type { ErrorListener, NavigationEndListener, NavigationGuard, NavigationListener, ViewChangeListener } from '~/models/navigation.model.js';
 import type { PartialRoute, Route, RouteName } from '~/models/route.model.js';
 import type { IRouter, RouterOptions } from '~/models/router.model.js';
 import type { IDefaultView } from '~/models/view.model.js';
+
+export type HTMLProps = Partial<Omit<HTMLAttributes<HTMLDivElement>, 'style'>> & {
+  style?: Values;
+};
 
 export type RouterContextProps<Name extends RouteName = any> = {
   /**
@@ -57,8 +63,8 @@ export type TransitionProps<
     out?: T['out'];
   };
   props?: {
-    container?: Record<string, any>;
-    wrapper?: Record<string, any>;
+    container?: HTMLProps;
+    wrapper?: HTMLProps;
   };
   /**
    * The view transition api name to use.

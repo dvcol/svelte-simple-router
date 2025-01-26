@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { toStyle } from '@dvcol/common-utils/common/class';
+
   import type { TransitionFunction } from '@dvcol/svelte-utils/transition';
   import type { Snippet } from 'svelte';
   import type { TransitionProps } from '~/models/component.model.js';
@@ -29,17 +31,17 @@
   const _wrapperProps = $derived(transition?.props?.wrapper);
 
   const _style = $derived.by(() => {
-    if (!transition?.viewTransitionName) return _containerProps?.style;
+    if (!transition?.viewTransitionName) return toStyle(_containerProps?.style);
     let _name = transition?.viewTransitionName;
     if (typeof _name === 'boolean') _name = `sr-container-${id}`;
-    return [`--container-transition-name: ${_name}`, _containerProps?.style].filter(Boolean).join('; ');
+    return toStyle(`--container-transition-name: ${_name}`, _containerProps?.style);
   });
 </script>
 
 <div data-transition-id="container" {..._containerProps} style={_style}>
   {#if transition?.in || transition?.out}
     {#key key}
-      <div data-transition-id="wrapper" in:_in={_inParams} out:_out={_outParams} {..._wrapperProps}>
+      <div data-transition-id="wrapper" in:_in={_inParams} out:_out={_outParams} {..._wrapperProps} style={toStyle(_wrapperProps?.style)}>
         {@render children?.()}
       </div>
     {/key}
