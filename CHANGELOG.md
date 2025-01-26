@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.10.1](https://github.com/dvcol/svelte-simple-router/compare/v1.10.0...v1.10.1) (2025-01-26)
+
+
+### Bug Fixes
+
+* **transition:** expand api for styling containers ([b1fd32b](https://github.com/dvcol/svelte-simple-router/commit/b1fd32b242daf473d6cad9001f8d31d154566e9b))
+
 ## [1.10.0](https://github.com/dvcol/svelte-simple-router/compare/v1.9.1...v1.10.0) (2025-01-17)
 
 
