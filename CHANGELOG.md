@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.10.2](https://github.com/dvcol/svelte-simple-router/compare/v1.10.1...v1.10.2) (2025-01-28)
+
+
+### Bug Fixes
+
+* **deps:** move to uuid to support unsecured environments [#17](https://github.com/dvcol/svelte-simple-router/issues/17) ([6821f13](https://github.com/dvcol/svelte-simple-router/commit/6821f139fbe6773346e258169f53f71fce470be2))
+
 ### [1.10.1](https://github.com/dvcol/svelte-simple-router/compare/v1.10.0...v1.10.1) (2025-01-26)
 
 
