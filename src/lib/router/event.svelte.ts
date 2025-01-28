@@ -1,4 +1,4 @@
-import { v4 as uuid } from 'uuid';
+import { getUUID } from '@dvcol/common-utils/common/string';
 
 import type {
   INavigationEvent,
@@ -99,7 +99,7 @@ export class NavigationEvent<Name extends RouteName = RouteName> implements INav
   }
 
   constructor(to: ResolvedRoute<Name>, from: ResolvedRouterLocationSnapshot<Name>, options: RouterNavigationOptions = {}) {
-    this.uuid = uuid();
+    this.uuid = getUUID();
     this.to = { ...to, route: toBaseRoute(to.route)! };
     this.from = from;
     this.options = { ...options };
@@ -204,7 +204,7 @@ export class ViewChangeEvent<Name extends RouteName = RouteName> implements IVie
   }
 
   constructor({ view, route }: Pick<IViewChangeEvent<Name>, 'view' | 'route'>) {
-    this.uuid = uuid();
+    this.uuid = getUUID();
     this.view = view;
     this.route = route;
   }

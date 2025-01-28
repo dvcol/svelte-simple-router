@@ -1,13 +1,13 @@
 <script lang="ts">
+  import { getUUID } from '@dvcol/common-utils/common/string';
   import { onDestroy, onMount } from 'svelte';
-
-  import { v4 as uuid } from 'uuid';
 
   import { Logger } from '~/utils/logger.utils.js';
 
   const { title, subtitle, onMoutHook }: { title?: string; subtitle?: string; onMoutHook?: () => void } = $props();
 
-  const id = uuid();
+  const id = getUUID();
+
   onMount(() => {
     onMoutHook?.();
     console.info(...Logger.colorize('green', 'Goodbye mounted !'), id);
