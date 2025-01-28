@@ -1,3 +1,5 @@
+import { v4 as uuid } from 'uuid';
+
 import type {
   INavigationEvent,
   IViewChangeEvent,
@@ -97,7 +99,7 @@ export class NavigationEvent<Name extends RouteName = RouteName> implements INav
   }
 
   constructor(to: ResolvedRoute<Name>, from: ResolvedRouterLocationSnapshot<Name>, options: RouterNavigationOptions = {}) {
-    this.uuid = crypto.randomUUID();
+    this.uuid = uuid();
     this.to = { ...to, route: toBaseRoute(to.route)! };
     this.from = from;
     this.options = { ...options };
@@ -202,7 +204,7 @@ export class ViewChangeEvent<Name extends RouteName = RouteName> implements IVie
   }
 
   constructor({ view, route }: Pick<IViewChangeEvent<Name>, 'view' | 'route'>) {
-    this.uuid = crypto.randomUUID();
+    this.uuid = uuid();
     this.view = view;
     this.route = route;
   }

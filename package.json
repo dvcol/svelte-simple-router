@@ -111,7 +111,8 @@
   "dependencies": {
     "@dvcol/common-utils": "^1.21.2",
     "@dvcol/svelte-utils": "^1.6.0",
-    "svelte": "^5.18.0"
+    "svelte": "^5.18.0",
+    "uuid": "^11.0.5"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.6.0",
