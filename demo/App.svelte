@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { NeoThemeProvider } from '@dvcol/neo-svelte';
+  import { NeoThemeProvider } from '@dvcol/neo-svelte/providers';
   import { toLazyComponent } from '@dvcol/svelte-utils/component';
 
   import ErrorComponent from './components/Error.svelte';

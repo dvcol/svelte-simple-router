@@ -87,8 +87,8 @@
             <td>{name}</td>
             <td>{path}</td>
             <td>{redirect?.name ?? redirect?.path ?? meta?.redirect ?? '-'}</td>
-            <td><NeoButton shallow borderless onclick={e => onRouterButton(e, path)}>Go</NeoButton></td>
-            <td><NeoButton shallow borderless onclick={e => onRemoveRoute(e, name)}>Remove</NeoButton></td>
+            <td><NeoButton elevation="2" hover="-1" active="-1" onclick={e => onRouterButton(e, path)}>Go</NeoButton></td>
+            <td><NeoButton elevation="2" hover="-1" active="-1" onclick={e => onRemoveRoute(e, name)}>Remove</NeoButton></td>
           </tr>
         {/each}
       </tbody>
@@ -98,9 +98,9 @@
   {#snippet footer()}
     <div class="row add">
       <label for="route">Add Route</label>
-      <NeoInput elevation={-2} rounded id="route" bind:value={route.name} />
-      <NeoInput elevation={-2} rounded id="route.path" bind:value={route.path} />
-      <NeoInput elevation={-2} rounded id="route.redirect.name" bind:value={route.redirect.name} />
+      <NeoInput elevation={0} rounded id="route" bind:value={route.name} />
+      <NeoInput elevation={0} rounded id="route.path" bind:value={route.path} />
+      <NeoInput elevation={0} rounded id="route.redirect.name" bind:value={route.redirect.name} />
       <NeoButton onclick={() => onAddRoute()}>Add</NeoButton>
     </div>
   {/snippet}

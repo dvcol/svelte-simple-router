@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { NeoButton, NeoCard, NeoCheckbox, NeoInput, NeoTextarea } from '@dvcol/neo-svelte';
+  import { displayValue, NeoButton, NeoCard, NeoCheckbox, NeoInput, NeoSelect, NeoTextarea } from '@dvcol/neo-svelte';
 
   import type { RouterOptions } from '~/models/router.model.js';
 
@@ -74,20 +74,30 @@
               <td>{toTitleCase(key)}</td>
               <td>
                 {#if key === 'base'}
-                  <NeoInput elevation={-2} rounded type="text" bind:value={options[key]} />
+                  <NeoInput elevation="0" rounded type="text" bind:value={options[key]} />
                 {:else if key === 'listen'}
-                  <NeoInput type="select" elevation={-2} style="padding: 0.375rem 0.5rem" bind:value={options[key]}>
-                    <option value={'history'}>History</option>
-                    <option value={'navigation'}>Navigation</option>
-                    <option value={true}>True</option>
-                    <option value={false}>False</option>
-                  </NeoInput>
+                  <NeoSelect
+                    pressed
+                    bind:value={options[key]}
+                    display={displayValue}
+                    options={[
+                      { label: 'History', value: 'history' },
+                      { label: 'Navigation', value: 'navigation' },
+                      { label: 'True', value: true },
+                      { label: 'False', value: false },
+                    ]}
+                  />
                 {:else if key === 'syncUpdate'}
-                  <NeoInput type="select" elevation={-2} style="padding: 0.375rem 0.5rem" bind:value={options[key]}>
-                    <option value={'replace'}>Replace</option>
-                    <option value={'push'}>Push</option>
-                    <option value={false}>False</option>
-                  </NeoInput>
+                  <NeoSelect
+                    pressed
+                    bind:value={options[key]}
+                    display={displayValue}
+                    options={[
+                      { label: 'Replace', value: 'replace' },
+                      { label: 'Push', value: 'push' },
+                      { label: 'False', value: false },
+                    ]}
+                  />
                 {:else if typeof value === 'boolean'}
                   <NeoCheckbox rounded bind:checked={options[key]} />
                 {/if}
@@ -113,7 +123,7 @@
         <NeoCheckbox rounded label="Strip Trailing Hash" bind:checked={stripTrailingHash} />
       </div>
 
-      <NeoTextarea label="External Push state" elevation={-2} rows={2} id="input" containerProps={{ style: 'display: flex' }} bind:value={input} />
+      <NeoTextarea label="External Push state" pressed rows={2} id="input" containerProps={{ style: 'display: flex' }} bind:value={input} />
 
       <NeoButton onclick={onInputButton} style="margin-inline: auto; margin-top: 1.75rem;">Push State</NeoButton>
     </NeoCard>

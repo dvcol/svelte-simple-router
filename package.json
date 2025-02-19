@@ -109,15 +109,15 @@
     "svelte": ">=5"
   },
   "dependencies": {
-    "@dvcol/common-utils": "^1.21.3",
-    "@dvcol/svelte-utils": "^1.6.0",
+    "@dvcol/common-utils": "^1.23.1",
+    "@dvcol/svelte-utils": "^1.13.1",
     "svelte": "^5.18.0"
   },
   "devDependencies": {
     "@commitlint/cli": "^19.6.0",
     "@commitlint/config-conventional": "^19.6.0",
     "@dvcol/eslint-plugin-presets": "^1.3.11",
-    "@dvcol/neo-svelte": "^0.1.6",
+    "@dvcol/neo-svelte": "^0.1.10",
     "@dvcol/stylelint-plugin-presets": "^2.1.2",
     "@sveltejs/adapter-auto": "^3.3.1",
     "@sveltejs/kit": "^2.9.0",
