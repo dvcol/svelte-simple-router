@@ -19,6 +19,14 @@
   </a>
 </p>
 
+## Description
+
+Svelte Simple Router is a native Single Page Application (SPA) router for Svelte 5, designed for seamless client-side navigation while leveraging Svelte's reactivity and transitions.
+
+It supports both History API and hash routing, offering flexible URL management with  robust path matching, query parameter handling, and dynamic interpolation. Packed with features like nested views, route guards, lazy loading, dynamic routing, and full integration with Svelte’s Transition API and the View Transitions API, it enables smooth and interactive navigation experiences.
+
+Built to be easy to use yet powerful, Svelte Simple Router is the perfect solution for developers looking to add routing to their Svelte applications without unnecessary complexity.
+
 ## Prerequisites
 
 Note: Svelte Simple Router is a svelte 5 native library, and will not work with prior versions of svelte.
