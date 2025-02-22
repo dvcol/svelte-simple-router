@@ -1,4 +1,4 @@
-import type { CommonRouteNavigation, RouteName, RouteNavigation } from '~/models/route.model.js';
+import type { CommonRouteNavigation, ResolvedRoute, RouteName, RouteNavigation } from '~/models/route.model.js';
 import type { ResolvedRouterLocationSnapshot, RouterNavigationOptions } from '~/models/router.model.js';
 
 import { MissingRouterContextError, NavigationCancelledError } from '~/models/index.js';
@@ -46,7 +46,11 @@ const addIfFound = <T>(obj: T, key: keyof T, value: T[keyof T]): T => {
   return obj;
 };
 
-const isNotValidAnchorNavigation = (event: MouseEvent | KeyboardEvent) => {
+const isMouseOrKeyboardEvent = (event: Event): event is MouseEvent | KeyboardEvent => event instanceof MouseEvent || event instanceof KeyboardEvent;
+
+const isNotValidAnchorNavigation = (event: Event) => {
+  // If the event is not a mouse or keyboard event, we ignore it
+  if (!isMouseOrKeyboardEvent(event)) return false;
   const anchor = event.currentTarget;
 
   // if the event is not a valid navigation event (left click or enter, no modifier keys), we return
@@ -57,10 +61,11 @@ const isNotValidAnchorNavigation = (event: MouseEvent | KeyboardEvent) => {
   return !isSameHost(anchor);
 };
 
-export type LinkNavigateFunction = (
-  event: MouseEvent | KeyboardEvent,
+export type LinkNavigateFunction = <Action extends 'replace' | 'push' | 'resolve'>(
+  event: MouseEvent | KeyboardEvent | FocusEvent,
   node: HTMLElement & { disabled?: boolean },
-) => Promise<ResolvedRouterLocationSnapshot | undefined>;
+  action?: Action,
+) => Promise<Action extends 'resolve' ? ResolvedRoute | undefined : ResolvedRouterLocationSnapshot | undefined>;
 
 /**
  * Get the router link navigation function for the given options.
@@ -72,7 +77,7 @@ export const getLinkNavigateFunction = (options: LinkNavigateOptions = {}): Link
   const router = getRouter();
   if (!router) throw new MissingRouterContextError();
 
-  return async (event, node) => {
+  return async (event, node, action) => {
     // if the element is disabled, we return
     if (options?.disabled) return;
     if ('disabled' in node && node.disabled) return;
@@ -83,7 +88,8 @@ export const getLinkNavigateFunction = (options: LinkNavigateOptions = {}): Link
 
     event.preventDefault();
 
-    const replace = options?.replace || parseBooleanAttribute(node, 'replace');
+    let _action: 'replace' | 'push' | 'resolve' = action ?? 'push';
+    if (!action && (options?.replace || parseBooleanAttribute(node, 'replace'))) _action = 'replace';
 
     const name = options?.name || node.getAttribute('data-name');
     const path = (options?.path || node.getAttribute('data-path') || node.getAttribute('href')) ?? '';
@@ -111,12 +117,14 @@ export const getLinkNavigateFunction = (options: LinkNavigateOptions = {}): Link
     addIfFound(navigationOptions, 'followGuardRedirects', options.followGuardRedirects ?? parseBooleanAttribute(node, 'follow-guard-redirects'));
 
     try {
-      return await router[replace ? 'replace' : 'push'](navigation, navigationOptions);
+      return (await router[_action](navigation, navigationOptions)) as Promise<
+        typeof action extends 'resolve' ? ResolvedRoute | undefined : ResolvedRouterLocationSnapshot | undefined
+      >;
     } catch (error) {
       if (error instanceof NavigationCancelledError) {
         Logger.warn(`[${LoggerKey} Link - ${router.id}] Navigation cancelled`, { node, error, navigation, navigationOptions });
       } else {
-        Logger.error(`[${LoggerKey} Link - ${router.id}] Failed to navigate`, { node, error, navigation, navigationOptions });
+        Logger.error(`[${LoggerKey} Link - ${router.id}] Failed to ${_action} state`, { node, error, navigation, navigationOptions });
       }
     }
   };

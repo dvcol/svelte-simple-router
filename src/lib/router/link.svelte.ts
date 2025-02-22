@@ -1,9 +1,12 @@
+import { resolveComponent } from '@dvcol/svelte-utils/component';
+
 import type { Action } from 'svelte/action';
 
 import { getLinkNavigateFunction, type LinkNavigateFunction, type LinkNavigateOptions, normalizeLinkAttributes } from '~/models/link.model.js';
+import { getView } from '~/router/context.svelte.js';
 import { Logger } from '~/utils/logger.utils.js';
 
-export type LinkActionOptions = LinkNavigateOptions;
+export type LinkActionOptions = LinkNavigateOptions & { resolve?: boolean | string };
 
 /**
  * A svelte action to add to an element to navigate to a new location using the router.
@@ -52,17 +55,42 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
     return {};
   }
 
-  const handler = (event: MouseEvent | KeyboardEvent) => navigate(event, node);
+  const navigateHandler = (event: MouseEvent | KeyboardEvent) => navigate(event, node);
 
-  node.addEventListener('click', handler);
-  node.addEventListener('keydown', handler);
+  // Extract view from context
+  const view = getView();
+
+  // Add resolve on hover option && view params
+  const resolveHandler = async (event: MouseEvent | KeyboardEvent | FocusEvent) => {
+    const resolve = _options?.resolve;
+    if (!resolve) return;
+
+    const r = await navigate(event, node, 'resolve');
+    if (!r?.route) return;
+
+    // Extract view name
+    const name = (typeof resolve === 'string' ? resolve : view?.name) ?? 'default';
+
+    const components = [];
+    console.info(name, r?.route?.components);
+    if (r.route.component) components.push(r.route.component);
+    if (r.route.components?.[name]) components.push(r.route.components[name]);
+    await Promise.all(components.map(c => resolveComponent(c)));
+  };
+
+  node.addEventListener('click', navigateHandler);
+  node.addEventListener('keydown', navigateHandler);
+  node.addEventListener('mouseenter', resolveHandler);
+  node.addEventListener('focus', resolveHandler);
   return {
     update(newOptions: LinkNavigateOptions | undefined = {}) {
       _options = newOptions;
     },
     destroy() {
-      node.removeEventListener('click', handler);
-      node.removeEventListener('keydown', handler);
+      node.removeEventListener('click', navigateHandler);
+      node.removeEventListener('keydown', navigateHandler);
+      node.removeEventListener('mouseenter', resolveHandler);
+      node.removeEventListener('focus', resolveHandler);
     },
   };
 };

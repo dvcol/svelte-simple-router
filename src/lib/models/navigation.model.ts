@@ -4,16 +4,22 @@ import type { ResolvedRouterLocationSnapshot, RouterNavigationOptions } from '~/
 
 import type { IView } from '~/models/view.model.js';
 
-export type NavigationGuardReturn<Name extends RouteName = RouteName> = void | undefined | null | boolean | Error | RouteNavigation<Name>;
+export type ResolveGuardReturn = void | undefined | null | boolean | string | Error;
+export type NavigationGuardReturn<Name extends RouteName = RouteName> = ResolveGuardReturn | RouteNavigation<Name>;
 
 /**
- * Guards trigger after url change and before the route component is rendered.
+ * Navigation guards trigger after url change and before the route component is rendered.
  * If a guard returns `false`, and object of instance `Error` or `throws`, the navigation will be aborted and the error will be thrown.
  * If a guard returns an object with a `path` or `name` property, the navigation will be redirected to the provided route, if any is found and `followGuardRedirects` is enabled.
  */
 export type NavigationGuard<Name extends RouteName = RouteName> = (
   navigation: INavigationEvent<Name>,
 ) => NavigationGuardReturn<Name> | Promise<NavigationGuardReturn<Name>>;
+
+/**
+ * Resolve guards trigger before url change and before the target route is resolved.
+ */
+export type ResolveGuard<Name extends RouteName = RouteName> = (resolved: ResolvedRoute<Name>) => ResolveGuardReturn | Promise<ResolveGuardReturn>;
 
 export type INavigationEventState<Name extends RouteName = RouteName> = {
   readonly active: boolean;

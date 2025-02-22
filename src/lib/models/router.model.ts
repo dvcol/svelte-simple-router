@@ -149,6 +149,10 @@ export type RouterNavigationOptions = {
   followGuardRedirects?: boolean;
 };
 
+export type ResolveRouteOptions<Name extends RouteName = RouteName> = Omit<RouterNavigationOptions, 'metaAsState' | 'nameAsTitle'> & {
+  from?: Route<Name>;
+};
+
 export const RouterPathPriority = <T extends Route<any> = Route>(a: T, b: T): number =>
   (b.path?.length || 0) - (a.path?.length || 0) || (b.path || '').localeCompare(a.path || '');
 
@@ -446,10 +450,7 @@ export interface IRouter<Name extends RouteName = RouteName> {
    * @throws {@link NavigationNotFoundError} if the navigation is not found.
    * @throws {@link ParsingError} if the URL cannot be parsed.
    */
-  resolve(
-    to: RouteNavigation<Name>,
-    options?: Omit<RouterNavigationOptions, 'metaAsState' | 'nameAsTitle'> & { from?: Route<Name> },
-  ): ResolvedRoute<Name>;
+  resolve(to: RouteNavigation<Name>, options?: ResolveRouteOptions<Name>): ResolvedRoute<Name> | Promise<ResolvedRoute<Name>>;
 
   /**
    * Programmatically navigate to a new URL by pushing an entry in the history stack.

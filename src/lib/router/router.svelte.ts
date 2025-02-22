@@ -22,6 +22,7 @@ import type {
   IRouter,
   ResolvedRouterLocation,
   ResolvedRouterLocationSnapshot,
+  ResolveRouteOptions,
   RouterLocation,
   RouterNavigationOptions,
   RouterOptions,
@@ -32,6 +33,7 @@ import type {
 import {
   NavigationCancelledError,
   NavigationNotFoundError,
+  NavigationResolveError,
   RouterNameConflictError,
   RouterNamePathMismatchError,
   RouterPathConflictError,
@@ -557,7 +559,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    *
    * @throws {@link NavigationNotFoundError} if the navigation is not found.
    */
-  resolve(
+  async resolve(
     to: RouteNavigation<Name>,
     {
       from = this.#route,
@@ -565,8 +567,8 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       failOnNotFound = this.options?.failOnNotFound,
       base = this.options?.base,
       hash = this.options?.hash,
-    }: Omit<RouterNavigationOptions, 'metaAsState' | 'nameAsTitle'> & { from?: Route<Name> } = {},
-  ): ResolvedRoute<Name> {
+    }: ResolveRouteOptions<Name> = {},
+  ): Promise<ResolvedRoute<Name>> {
     const {
       query,
       params,
@@ -621,10 +623,8 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       query: { ...route?.query, ...query },
       current: this.#browser.href,
     });
-    Logger.debug(this.#log, 'Route resolved', route?.name, { to, from, route, path: _path, href, search, wildcards, params: _params });
 
-    //  return resolved route
-    return {
+    const resolved: ResolvedRoute<Name> = {
       route,
       path: _path,
       name: route?.name,
@@ -632,7 +632,16 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       query: Object.fromEntries(search),
       params: { ...params, ..._params },
       wildcards: { ...wildcards },
-    } satisfies ResolvedRoute<Name>;
+    };
+
+    const guard = await route?.beforeResolve?.(resolved);
+    if (typeof guard === 'string') throw new NavigationResolveError(resolved, { message: guard });
+    else if (guard instanceof Error) throw new NavigationResolveError(resolved, { error: guard });
+    else if (guard === false) throw new NavigationResolveError(resolved);
+
+    Logger.debug(this.#log, 'Route resolved', route?.name, { to, from, route, path: _path, href, search, wildcards, params: _params });
+    //  return resolved route
+    return resolved;
   }
 
   /**
@@ -668,7 +677,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @private
    */
   async #redirect(to: RouteNavigation<Name>, options: RouterNavigationOptions = {}): Promise<ResolvedRouterLocationSnapshot<Name>> {
-    const resolved = this.resolve(to, options);
+    const resolved = await this.resolve(to, options);
     return this.#navigate(resolved, options);
   }
 
@@ -778,7 +787,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     Logger.debug(this.#log, 'Syncing router ...', { update, path });
     if (update === 'push') return this.push({ path });
     if (update === 'replace') return this.replace({ path });
-    const resolve = this.resolve({ path });
+    const resolve = await this.resolve({ path });
     return this.#navigate(resolve);
   }
 
@@ -807,7 +816,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     to: RouteNavigation<Name>,
     options: RouterNavigationOptions,
   ): Promise<ResolvedRouterLocationSnapshot<Name>> {
-    const resolved = this.resolve(to, options);
+    const resolved = await this.resolve(to, options);
     const routed = await this.#navigate(resolved, options);
     const { state, title } = routeToHistoryState(routed, { ...options, state: to.state });
     try {

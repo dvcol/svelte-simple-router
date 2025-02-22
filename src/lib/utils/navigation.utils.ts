@@ -112,6 +112,7 @@ export const preventNavigation = <Name extends RouteName = RouteName>(
   result: NavigationGuardReturn<Name>,
   failure: NavigationFailureType<Name>,
 ): false | RouteNavigation<Name> => {
+  if (typeof result === 'string') throw new NavigationAbortedError(failure, { message: result });
   if (result instanceof Error) throw new NavigationAbortedError(failure, { error: result });
   if (result === false) throw new NavigationAbortedError(failure);
   if (isRouteNavigation(result)) return result;
