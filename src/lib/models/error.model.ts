@@ -14,6 +14,10 @@ export const enum ErrorTypes {
    */
   NAVIGATION_ABORTED = 'NAVIGATION_ABORTED',
   /**
+   * An aborted resolve is a navigation that failed because a resolve guard returned `false` or threw an error
+   */
+  NAVIGATION_ABORTED_RESOLVE = 'NAVIGATION_ABORTED_RESOLVE',
+  /**
    * A cancelled navigation is a navigation that failed because a more recent navigation finished started (not necessarily finished).
    */
   NAVIGATION_CANCELLED = 'NAVIGATION_CANCELLED',
@@ -74,6 +78,21 @@ export interface NavigationFailureType<Name extends RouteName = RouteName> {
 export interface ErrorPayload<E = unknown> {
   message?: string;
   error?: E;
+}
+
+/**
+ * Extended Error that contains extra information regarding a failed route resolution.
+ */
+export class NavigationResolveError<Name extends RouteName = RouteName> extends Error {
+  readonly type: ErrorTypes.NAVIGATION_ABORTED_RESOLVE;
+  readonly route: ResolvedRoute<Name>;
+  readonly error?: unknown;
+  constructor(resolved: ResolvedRoute<Name>, { message = `Failed to resolve route.`, error }: ErrorPayload = {}) {
+    super(message);
+    this.error = error;
+    this.type = ErrorTypes.NAVIGATION_ABORTED_RESOLVE;
+    this.route = resolved;
+  }
 }
 
 /**

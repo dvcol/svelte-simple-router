@@ -3,7 +3,7 @@ import { isShallowEqual, shallowClone } from '@dvcol/common-utils/common/object'
 import type { AnyComponent, ComponentOrLazy } from '@dvcol/svelte-utils/component';
 import type { Snippet } from 'svelte';
 import type { IMatcher } from '~/models/matcher.model.js';
-import type { NavigationGuard } from '~/models/navigation.model.js';
+import type { NavigationGuard, ResolveGuard } from '~/models/navigation.model.js';
 import type { IDefaultView } from '~/models/view.model.js';
 
 /**
@@ -276,6 +276,11 @@ type RouteLogic<Name extends RouteName = RouteName> = {
    * Matcher function to match the route to a location.
    */
   matcher?: IMatcher;
+  /**
+   * Before resolve guard specific to this record.
+   * @awaited
+   */
+  beforeResolve?: ResolveGuard<Name>;
   /**
    * Before Enter guard specific to this record.
    * @awaited
