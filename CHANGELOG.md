@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.11.0](https://github.com/dvcol/svelte-simple-router/compare/v1.10.3...v1.11.0) (2025-02-22)
+
+
+### Features
+
+* **link:** resolve components on hover ([00733d2](https://github.com/dvcol/svelte-simple-router/commit/00733d201873488b168c4927a7a0afc05d447ae8))
+
 ### [1.10.3](https://github.com/dvcol/svelte-simple-router/compare/v1.10.2...v1.10.3) (2025-01-28)
 
 ### [1.10.2](https://github.com/dvcol/svelte-simple-router/compare/v1.10.1...v1.10.2) (2025-01-28)
