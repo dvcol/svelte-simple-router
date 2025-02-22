@@ -4,10 +4,9 @@ import { wait } from '@dvcol/common-utils/common/promise';
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { ParsingRelativePathError } from '@dvcol/common-utils/common/error';
 import type { MockInstance } from 'vitest';
 
-import type { NavigationNotFoundError } from '~/models/error.model.js';
+import type { NavigationNotFoundError, NavigationResolveError } from '~/models/error.model.js';
 
 import type { Route, RouteParams, RouteQuery } from '~/models/route.model.js';
 
@@ -112,6 +111,32 @@ describe('router', () => {
     path: '/*/segment',
   };
 
+  const resolveError = new Error('Resolve error');
+  const ResolveErrorRoute: Route = {
+    name: 'resolve-error',
+    path: '/resolve-error',
+    beforeResolve: () => resolveError,
+  };
+
+  const ResolveErrorStringRoute: Route = {
+    name: 'resolve-error-string',
+    path: '/resolve-error-string',
+    beforeResolve: () => 'string error',
+  };
+
+  const ResolveErrorBooleanRoute: Route = {
+    name: 'resolve-error-boolean',
+    path: '/resolve-error-boolean',
+    beforeResolve: () => false,
+  };
+
+  const promiseError = new Error('Promise error');
+  const ResolveErrorPromiseRoute: Route = {
+    name: 'resolve-error-promise',
+    path: '/resolve-error-promise',
+    beforeResolve: () => Promise.resolve(promiseError),
+  };
+
   const routes: Route[] = [
     HomeRoute,
     PathRoute,
@@ -124,6 +149,10 @@ describe('router', () => {
     RedirectRoute,
     WildcardRoute,
     WildcardSegmentRoute,
+    ResolveErrorRoute,
+    ResolveErrorStringRoute,
+    ResolveErrorBooleanRoute,
+    ResolveErrorPromiseRoute,
   ];
 
   let router: Router;
@@ -816,6 +845,26 @@ describe('router', () => {
         expect(route.route).toBeUndefined();
         expect(route.name).toBeUndefined();
         expect(route.path).toBe('/not-found');
+      });
+
+      it.each([
+        { name: ResolveErrorRoute.name, message: 'Failed to resolve route.', error: resolveError },
+        { name: ResolveErrorStringRoute.name, message: 'string error' },
+        { name: ResolveErrorBooleanRoute.name, message: 'Failed to resolve route.' },
+        { name: ResolveErrorPromiseRoute.name, message: 'Failed to resolve route.', error: promiseError },
+      ])('should fail with a NavigationResolveError if a resolve guard returns an error - %s', async ({ name, message, error }) => {
+        expect.assertions(3);
+
+        let err: NavigationResolveError;
+        try {
+          await router.resolve({ name });
+        } catch (e) {
+          err = e;
+        } finally {
+          expect(err.message).toBe(message);
+          expect(err.type).toBe(ErrorTypes.NAVIGATION_ABORTED_RESOLVE);
+          expect(err.error).toBe(error);
+        }
       });
     };
 
