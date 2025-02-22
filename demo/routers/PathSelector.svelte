@@ -9,9 +9,15 @@
   import { link } from '~/router/link.svelte.js';
   import { links } from '~/router/links.svelte.js';
 
-  const { stripQuery, stripHash, stripTrailingHash }: { stripQuery?: boolean; stripHash?: boolean; stripTrailingHash?: boolean } = $props();
+  const {
+    resolve = false,
+    stripQuery,
+    stripHash,
+    stripTrailingHash,
+  }: { resolve?: boolean; stripQuery?: boolean; stripHash?: boolean; stripTrailingHash?: boolean } = $props();
 
   const navOptions = $derived({
+    resolve,
     stripQuery: stripQuery ? true : undefined,
     stripHash: stripHash ? true : undefined,
     stripTrailingHash: stripTrailingHash ? true : undefined,

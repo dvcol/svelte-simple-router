@@ -32,7 +32,8 @@
     stripQuery = $bindable(false),
     stripHash = $bindable(false),
     stripTrailingHash = $bindable(false),
-  }: { options: RouterOptions; stripQuery?: boolean; stripHash?: boolean; stripTrailingHash?: boolean } = $props();
+    resolve = $bindable(false),
+  }: { options: RouterOptions; stripQuery?: boolean; stripHash?: boolean; stripTrailingHash?: boolean; resolve?: boolean } = $props();
 
   const configs = $derived(Object.entries(options).filter(([_, v]) => typeof v === 'string' || typeof v === 'boolean')) as [
     keyof RouterOptions,
@@ -118,6 +119,7 @@
       {/snippet}
 
       <div class="row">
+        <NeoCheckbox rounded label="Resolve" bind:checked={resolve} />
         <NeoCheckbox rounded label="Strip Query" bind:checked={stripQuery} />
         <NeoCheckbox rounded label="Strip Hash" bind:checked={stripHash} />
         <NeoCheckbox rounded label="Strip Trailing Hash" bind:checked={stripTrailingHash} />

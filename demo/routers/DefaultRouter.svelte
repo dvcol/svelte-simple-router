@@ -26,6 +26,7 @@
     ...opts,
   });
 
+  let resolve = $state(false);
   let stripQuery = $state(false);
   let stripHash = $state(false);
   let stripTrailingHash = $state(false);
@@ -94,7 +95,7 @@
   <h1>Simple Router</h1>
   <div class="container row">
     <div class="column">
-      <OptionSelector bind:options bind:stripQuery bind:stripHash bind:stripTrailingHash />
+      <OptionSelector bind:options bind:stripQuery bind:stripHash bind:stripTrailingHash bind:resolve />
       <NeoButton onclick={refresh}>Refresh router</NeoButton>
       {@render transitionOptions()}
     </div>
@@ -118,7 +119,7 @@
         <DynamicRouteView />
       {/if}
       <div class="column selector">
-        <PathSelector {stripQuery} {stripHash} {stripTrailingHash} />
+        <PathSelector {resolve} {stripQuery} {stripHash} {stripTrailingHash} />
       </div>
 
       <div class="column debuggers">
