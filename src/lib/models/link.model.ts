@@ -13,9 +13,10 @@ const isTargetWithin = (element: HTMLAnchorElement) => {
   return element.target === '' || element.target === '_self';
 };
 
-const isNavigationEvent = (event: MouseEvent | KeyboardEvent) => {
+const isNavigationEvent = (event: MouseEvent | PointerEvent | KeyboardEvent) => {
   if (event.defaultPrevented) return false;
-  if (event instanceof MouseEvent && event.button !== 0) return false;
+  // 0 is the left mouse button, -1 is hover (no button)
+  if ((event instanceof PointerEvent || event instanceof MouseEvent) && event.button !== 0 && event.button !== -1) return false;
   if (event instanceof KeyboardEvent && event.key !== 'Enter') return false;
   return !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
 };
@@ -46,7 +47,8 @@ const addIfFound = <T>(obj: T, key: keyof T, value: T[keyof T]): T => {
   return obj;
 };
 
-const isMouseOrKeyboardEvent = (event: Event): event is MouseEvent | KeyboardEvent => event instanceof MouseEvent || event instanceof KeyboardEvent;
+const isMouseOrKeyboardEvent = (event: Event): event is MouseEvent | PointerEvent | KeyboardEvent =>
+  event instanceof MouseEvent || event instanceof PointerEvent || event instanceof KeyboardEvent;
 
 const isNotValidAnchorNavigation = (event: Event) => {
   // If the event is not a mouse or keyboard event, we ignore it
@@ -62,7 +64,7 @@ const isNotValidAnchorNavigation = (event: Event) => {
 };
 
 export type LinkNavigateFunction = <Action extends 'replace' | 'push' | 'resolve'>(
-  event: MouseEvent | KeyboardEvent | FocusEvent,
+  event: MouseEvent | PointerEvent | KeyboardEvent | FocusEvent,
   node: HTMLElement & { disabled?: boolean },
   action?: Action,
 ) => Promise<Action extends 'resolve' ? ResolvedRoute | undefined : ResolvedRouterLocationSnapshot | undefined>;

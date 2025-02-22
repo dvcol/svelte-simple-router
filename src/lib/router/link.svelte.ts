@@ -61,7 +61,7 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
   const view = getView();
 
   // Add resolve on hover option && view params
-  const resolveHandler = async (event: MouseEvent | KeyboardEvent | FocusEvent) => {
+  const resolveHandler = async (event: MouseEvent | KeyboardEvent | FocusEvent | PointerEvent) => {
     const resolve = _options?.resolve;
     if (!resolve) return;
 
@@ -79,7 +79,7 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
 
   node.addEventListener('click', navigateHandler);
   node.addEventListener('keydown', navigateHandler);
-  node.addEventListener('mouseenter', resolveHandler);
+  node.addEventListener('pointerenter', resolveHandler);
   node.addEventListener('focus', resolveHandler);
   return {
     update(newOptions: LinkNavigateOptions | undefined = {}) {
@@ -88,7 +88,7 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
     destroy() {
       node.removeEventListener('click', navigateHandler);
       node.removeEventListener('keydown', navigateHandler);
-      node.removeEventListener('mouseenter', resolveHandler);
+      node.removeEventListener('pointerenter', resolveHandler);
       node.removeEventListener('focus', resolveHandler);
     },
   };
