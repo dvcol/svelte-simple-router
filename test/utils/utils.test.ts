@@ -383,6 +383,11 @@ describe('guards', () => {
       expect(() => preventNavigation(false, failure)).toThrow(new NavigationAbortedError(failure));
     });
 
+    it('should return true if the guard returns string', () => {
+      expect.assertions(1);
+      expect(() => preventNavigation('string error', failure)).toThrow(new NavigationAbortedError(failure, { message: 'string error' }));
+    });
+
     it('should return the navigation event if the guard returns a navigation event', () => {
       expect.assertions(1);
       const event = { name: 'user' };
