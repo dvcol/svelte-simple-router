@@ -98,4 +98,8 @@
   <a data-testid="anchor-link-external" href="https://google.com" use:link>path external</a>
 
   <a data-testid="anchor-parsing-error" href="/home" data-params="id=12&name=john" use:link>error</a>
+
+  <a data-testid="resolve-false" href="/home" use:link>path</a>
+  <a data-testid="resolve-true" href="/home" use:link={{ resolve: true }}>path</a>
+  <a data-testid="resolve-view" href="/home" use:link={{ resolve: 'view' }}>path</a>
 </RouterView>
