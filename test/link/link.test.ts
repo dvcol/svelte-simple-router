@@ -30,6 +30,7 @@ describe('link', () => {
 
   const spyPush = vi.spyOn(router, 'push').mockReturnValue(undefined);
   const spyReplace = vi.spyOn(router, 'replace').mockReturnValue(undefined);
+  const spyResolve = vi.spyOn(router, 'resolve').mockReturnValue(undefined);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -344,6 +345,61 @@ describe('link', () => {
 
       expect(spyPush).toHaveBeenCalledTimes(1);
       expect(spyReplace).not.toHaveBeenCalled();
+    });
+
+    it('should not resolve route on hover', async () => {
+      expect.assertions(1);
+
+      const user = userEvent.setup();
+      render(Link, { router });
+
+      const target = screen.getByTestId('resolve-false');
+      await user.hover(target);
+      await target.focus();
+
+      expect(spyResolve).not.toHaveBeenCalled();
+    });
+
+    it('should resolve route on hover', async () => {
+      expect.assertions(1);
+
+      const user = userEvent.setup();
+      render(Link, { router });
+
+      const target = screen.getByTestId('resolve-true');
+      await user.hover(target);
+
+      expect(spyResolve).toHaveBeenCalledTimes(1);
+    });
+
+    it('should resolve route on focus', async () => {
+      expect.assertions(1);
+
+      render(Link, { router });
+      screen.getByTestId('resolve-true')?.focus();
+
+      expect(spyResolve).toHaveBeenCalledTimes(1);
+    });
+
+    it('should resolve route view on hover', async () => {
+      expect.assertions(1);
+
+      const user = userEvent.setup();
+      render(Link, { router });
+
+      const target = screen.getByTestId('resolve-view');
+      await user.hover(target);
+
+      expect(spyResolve).toHaveBeenCalledTimes(1);
+    });
+
+    it('should resolve route view on focus', async () => {
+      expect.assertions(1);
+
+      render(Link, { router });
+      screen.getByTestId('resolve-view')?.focus();
+
+      expect(spyResolve).toHaveBeenCalledTimes(1);
     });
   });
 });

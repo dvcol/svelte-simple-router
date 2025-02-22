@@ -72,7 +72,6 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
     const name = (typeof resolve === 'string' ? resolve : view?.name) ?? 'default';
 
     const components = [];
-    console.info(name, r?.route?.components);
     if (r.route.component) components.push(r.route.component);
     if (r.route.components?.[name]) components.push(r.route.components[name]);
     await Promise.all(components.map(c => resolveComponent(c)));
