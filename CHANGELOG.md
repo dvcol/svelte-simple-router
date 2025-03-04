@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.11.1](https://github.com/dvcol/svelte-simple-router/compare/v1.11.0...v1.11.1) (2025-03-04)
+
+
+### Bug Fixes
+
+* **imports:** add missing imports & fix typo. [#24](https://github.com/dvcol/svelte-simple-router/issues/24) ([c058729](https://github.com/dvcol/svelte-simple-router/commit/c058729036a086ddacd3bc51c92d968edad44c5c))
+* **link:** switch from mouseenter to pointerenter for stylus support ([fd925c8](https://github.com/dvcol/svelte-simple-router/commit/fd925c8080934a7de2edf4a12a67f52576e2c15e))
+
 ## [1.11.0](https://github.com/dvcol/svelte-simple-router/compare/v1.10.3...v1.11.0) (2025-02-22)
 
 
