@@ -37,6 +37,7 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
       "svelte": "./dist/index.js"
     },
     "./models": {
@@ -56,16 +57,19 @@
       "import": "./dist/components/index.js"
     },
     "./components/debug": {
-      "types": "./dist/components/index.d.ts",
-      "svetle": "./dist/components/index.js"
+      "types": "./dist/components/debug/index.d.ts",
+      "import": "./dist/components/debug/index.js",
+      "svelte": "./dist/components/debug/index.js"
     },
     "./components/router": {
       "types": "./dist/components/RouterView.svelte.d.ts",
-      "svetle": "./dist/components/RouterView.svelte"
+      "import": "./dist/components/RouterView.svelte",
+      "svelte": "./dist/components/RouterView.svelte"
     },
     "./components/context": {
       "types": "./dist/components/RouterContext.svelte.d.ts",
-      "svetle": "./dist/components/RouterContext.svelte"
+      "import": "./dist/components/RouterContext.svelte",
+      "svelte": "./dist/components/RouterContext.svelte"
     }
   },
   "files": [
