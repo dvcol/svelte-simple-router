@@ -28,8 +28,8 @@ importers:
         specifier: ^1.3.11
         version: 1.3.11(i7v2htwk2o4z3eiaonxf55o45e)
       '@dvcol/neo-svelte':
-        specifier: ^0.1.10
-        version: 0.1.10(svelte@5.18.0)
+        specifier: ^0.1.11
+        version: 0.1.11(svelte@5.18.0)
       '@dvcol/stylelint-plugin-presets':
         specifier: ^2.1.2
         version: 2.1.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.4.49))(postcss@8.4.49)(prettier@3.4.2)(stylelint@16.11.0(typescript@5.7.2))
@@ -358,6 +358,10 @@ packages:
     resolution: {integrity: sha512-ul6zo/TWr5M6+KKTO23IWAGSa4ruZh2lq4oQe16hgBbNMze3I9b8fMLZ1/H/dvUUtFFGr/zRNxUNx6F+/UPu0w==}
     engines: {node: '>=20', pnpm: '>= 8'}
 
+  '@dvcol/common-utils@1.25.0':
+    resolution: {integrity: sha512-GP39h+iQJiz4xd+mLQKiXwb8+alhEaJ1SL7mJ7g97NM00ISKaq7lYOc2SA9e5E5FYVNOs0NaScmzS7uBWT2kPw==}
+    engines: {node: '>=20', pnpm: '>= 8'}
+
   '@dvcol/eslint-plugin-presets@1.3.11':
     resolution: {integrity: sha512-kZ926sQcW65hy8NCt9A5CJSdFMH4Rj1IePby5sAJ/5OzqDKx8/Zhpns+So2xDpR9fghuSQwhG0h5zYY86x5WNg==}
     engines: {node: ' >=14.13.1 || >=16', yarn: '>= 3.2.0'}
@@ -434,8 +438,8 @@ packages:
       vue:
         optional: true
 
-  '@dvcol/neo-svelte@0.1.10':
-    resolution: {integrity: sha512-u6vc1RKkOO/iMjweu9ttltqdUdN99U4zzwI3dWvaKTvBDno6S3Z5gibUA+rP9UJAnp+FT3UQyUHS42I7kDXH8g==}
+  '@dvcol/neo-svelte@0.1.11':
+    resolution: {integrity: sha512-Zu9RT43Co8kfcPbZzofwyY72iuPXUPhPj4JSlUsWYWx1mzM0eBtvokFmWEbzUWz1Z0TCLfVVwQN+SbmQ7JE4ng==}
     engines: {node: '>=20', pnpm: '>= 8'}
     peerDependencies:
       svelte: '>=5'
@@ -462,6 +466,12 @@ packages:
 
   '@dvcol/svelte-utils@1.13.1':
     resolution: {integrity: sha512-5CmvfScRnUI3/sHgcFKOP+Q+5lYz3HXfWphqVw+y9cqQxU4IKTp1VNlkrPrslO6KIiTgZTb8UqSsUQTYuTAUaA==}
+    engines: {node: '>=20', pnpm: '>= 8'}
+    peerDependencies:
+      svelte: '>=5'
+
+  '@dvcol/svelte-utils@1.16.1':
+    resolution: {integrity: sha512-LLQcYaXY0990SpSGbtHnkBlFbYd7wHGnvzV8CawrkoLDBXxmDn8AOz1js/vqRxJmMdosEz9qpx+uxFdJ8gpQig==}
     engines: {node: '>=20', pnpm: '>= 8'}
     peerDependencies:
       svelte: '>=5'
@@ -5292,6 +5302,11 @@ snapshots:
       pretty-bytes: 6.1.1
       uuid: 11.0.5
 
+  '@dvcol/common-utils@1.25.0':
+    dependencies:
+      pretty-bytes: 6.1.1
+      uuid: 11.0.5
+
   '@dvcol/eslint-plugin-presets@1.3.11(i7v2htwk2o4z3eiaonxf55o45e)':
     dependencies:
       chalk: 4.1.2
@@ -5319,10 +5334,10 @@ snapshots:
       eslint-plugin-vitest: 0.4.1(@typescript-eslint/eslint-plugin@7.18.0(@typescript-eslint/parser@7.18.0(eslint@8.57.1)(typescript@5.7.2))(eslint@8.57.1)(typescript@5.7.2))(eslint@8.57.1)(typescript@5.7.2)(vitest@3.0.0-beta.1(@types/node@22.5.4)(jiti@1.21.0)(jsdom@25.0.1)(sass@1.82.0)(sugarss@2.0.0)(yaml@2.5.0))
       svelte: 5.18.0
 
-  '@dvcol/neo-svelte@0.1.10(svelte@5.18.0)':
+  '@dvcol/neo-svelte@0.1.11(svelte@5.18.0)':
     dependencies:
-      '@dvcol/common-utils': 1.23.1
-      '@dvcol/svelte-utils': 1.13.1(svelte@5.18.0)
+      '@dvcol/common-utils': 1.25.0
+      '@dvcol/svelte-utils': 1.16.1(svelte@5.18.0)
       '@skeletonlabs/floating-ui-svelte': 0.3.9(svelte@5.18.0)
       svelte: 5.18.0
 
@@ -5353,6 +5368,11 @@ snapshots:
   '@dvcol/svelte-utils@1.13.1(svelte@5.18.0)':
     dependencies:
       '@dvcol/common-utils': 1.23.1
+      svelte: 5.18.0
+
+  '@dvcol/svelte-utils@1.16.1(svelte@5.18.0)':
+    dependencies:
+      '@dvcol/common-utils': 1.25.0
       svelte: 5.18.0
 
   '@esbuild/aix-ppc64@0.24.0':

@@ -85,11 +85,22 @@ export const active: Action<HTMLElement, ActiveActionOptions | undefined> = (nod
   let _path: string | null = $state(_options.path || node.getAttribute('data-path') || node.getAttribute('href'));
   let _name: RouteName | null = $state(_options.name || node.getAttribute('data-name'));
 
+  const update = (newOptions: ActiveActionOptions | undefined = {}) => {
+    _options = newOptions;
+    _path = newOptions.path || node.getAttribute('data-path') || node.getAttribute('href');
+    _name = newOptions.name || node.getAttribute('data-name');
+
+    if (!_path && !_name) {
+      Logger.warn('No path or name found. Make sure you are using the active action with the proper parameters.', { node, options });
+    }
+  };
+
   if (!_path && !_name) {
     Logger.warn('No path or name found. Make sure you are using the active action with the proper parameters.', { node, options });
     node.setAttribute('data-error', 'No path or name found.');
-    return {};
+    return { update };
   }
+  node.removeAttribute('data-error');
 
   const route = $derived(router.route);
   const caseSensitive = $derived(_options?.caseSensitive ?? router.options?.caseSensitive);
@@ -132,15 +143,5 @@ export const active: Action<HTMLElement, ActiveActionOptions | undefined> = (nod
     }
   });
 
-  return {
-    update: (newOptions: ActiveActionOptions | undefined = {}) => {
-      _options = newOptions;
-      _path = newOptions.path || node.getAttribute('data-path') || node.getAttribute('href');
-      _name = newOptions.name || node.getAttribute('data-name');
-
-      if (!_path && !_name) {
-        Logger.warn('No path or name found. Make sure you are using the active action with the proper parameters.', { node, options });
-      }
-    },
-  };
+  return { update };
 };

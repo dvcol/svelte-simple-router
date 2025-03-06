@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { displayValue, NeoButton, NeoCard, NeoCheckbox, NeoInput, NeoSelect, NeoTextarea } from '@dvcol/neo-svelte';
+  import { NeoButton, NeoCard, NeoCheckbox, NeoInput, NeoSelect, NeoTextarea } from '@dvcol/neo-svelte';
 
   import type { RouterOptions } from '~/models/router.model.js';
 
@@ -80,7 +80,7 @@
                   <NeoSelect
                     pressed
                     bind:value={options[key]}
-                    display={displayValue}
+                    listProps={{ nullable: false }}
                     options={[
                       { label: 'History', value: 'history' },
                       { label: 'Navigation', value: 'navigation' },
@@ -92,7 +92,7 @@
                   <NeoSelect
                     pressed
                     bind:value={options[key]}
-                    display={displayValue}
+                    listProps={{ nullable: false }}
                     options={[
                       { label: 'Replace', value: 'replace' },
                       { label: 'Push', value: 'push' },

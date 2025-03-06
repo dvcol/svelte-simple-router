@@ -77,20 +77,26 @@ const findLinkNode = (node: HTMLElement, { apply, boundary, host }: InternalLink
  * ```
  */
 export const links: Action<HTMLElement, LinksActionOptions | undefined> = (node: HTMLElement, options: LinksActionOptions | undefined = {}) => {
-  let _options: InternalLinksActionOptions = { ...options, host: node };
+  let _options: InternalLinksActionOptions = $state({ ...options, host: node });
+  const update = (newOptions: LinksActionOptions | undefined = {}) => {
+    _options = { ...newOptions, host: node };
+  };
 
-  let navigate: LinkNavigateFunction;
-  try {
-    navigate = getLinkNavigateFunction(_options.navigate);
-  } catch (error) {
-    Logger.warn('Router not found. Make sure you are using the link(s) action within a Router context.', { node, options });
-    node.setAttribute('data-error', 'Router not found.');
-    return {};
-  }
+  const navigate = $derived.by<LinkNavigateFunction | undefined>(() => {
+    try {
+      return getLinkNavigateFunction(_options.navigate);
+    } catch (error) {
+      Logger.warn('Router not found. Make sure you are using the link(s) action within a Router context.', { node, options });
+      node.setAttribute('data-error', 'Router not found.');
+    }
+  });
+  if (!navigate) return { update };
+  node.removeAttribute('data-error');
 
   const handler = (event: MouseEvent | KeyboardEvent) => {
     const { target } = event;
     if (!(target instanceof HTMLElement)) return;
+    if (!navigate) return;
 
     const nodeLink = findLinkNode(target, _options);
     if (!nodeLink) return;
@@ -100,9 +106,7 @@ export const links: Action<HTMLElement, LinksActionOptions | undefined> = (node:
   node.addEventListener('click', handler);
   node.addEventListener('keydown', handler);
   return {
-    update(newOptions: LinksActionOptions | undefined = {}) {
-      _options = { ...newOptions, host: node };
-    },
+    update,
     destroy() {
       node.removeEventListener('click', handler);
       node.removeEventListener('keydown', handler);

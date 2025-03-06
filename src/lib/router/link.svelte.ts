@@ -44,18 +44,23 @@ export type LinkActionOptions = LinkNavigateOptions & { resolve?: boolean | stri
 export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: HTMLElement, options: LinkActionOptions | undefined = {}) => {
   normalizeLinkAttributes(node, options);
 
-  let _options = options;
+  let _options = $state(options);
+  const update = (newOptions: LinkNavigateOptions | undefined = {}) => {
+    _options = newOptions;
+  };
 
-  let navigate: LinkNavigateFunction;
-  try {
-    navigate = getLinkNavigateFunction(_options);
-  } catch (error) {
-    Logger.warn('Router not found. Make sure you are using the link(s) action within a Router context.', { node, options });
-    node.setAttribute('data-error', 'Router not found.');
-    return {};
-  }
+  const navigate = $derived.by<LinkNavigateFunction | undefined>(() => {
+    try {
+      return getLinkNavigateFunction(_options);
+    } catch (error) {
+      Logger.warn('Router not found. Make sure you are using the link(s) action within a Router context.', { node, options });
+      node.setAttribute('data-error', 'Router not found.');
+    }
+  });
+  if (!navigate) return { update };
+  node.removeAttribute('data-error');
 
-  const navigateHandler = (event: MouseEvent | KeyboardEvent) => navigate(event, node);
+  const navigateHandler = (event: MouseEvent | KeyboardEvent) => navigate?.(event, node);
 
   // Extract view from context
   const view = getView();
@@ -63,7 +68,7 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
   // Add resolve on hover option && view params
   const resolveHandler = async (event: MouseEvent | KeyboardEvent | FocusEvent | PointerEvent) => {
     const resolve = _options?.resolve;
-    if (!resolve) return;
+    if (!resolve || !navigate) return;
 
     const r = await navigate(event, node, 'resolve');
     if (!r?.route) return;
@@ -82,9 +87,7 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
   node.addEventListener('pointerenter', resolveHandler);
   node.addEventListener('focus', resolveHandler);
   return {
-    update(newOptions: LinkNavigateOptions | undefined = {}) {
-      _options = newOptions;
-    },
+    update,
     destroy() {
       node.removeEventListener('click', navigateHandler);
       node.removeEventListener('keydown', navigateHandler);
