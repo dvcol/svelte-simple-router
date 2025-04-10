@@ -45,7 +45,7 @@ The minimal setup requires a `RouterView` component and a list of routes.
 
 The `RouterView` component will render the component associated with the current route in place.
 
-You can find a complete example in the [demo app](https://github.com/dvcol/svelte-simple-router/blob/main/demo/App.svelte).
+You can find a complete example in the [demo app](https://github.com/dvcol/svelte-simple-router/blob/main/demo/App.svelte), or [this playground](https://svelte.dev/playground/4dff6a053c024e729e203b5c37d9029c?version=5.25.10).
 
 ```svelte
 <script lang="ts">
@@ -65,7 +65,7 @@ You can find a complete example in the [demo app](https://github.com/dvcol/svelt
 
   type RouteNames = (typeof RouteName)[keyof typeof RouteName];
 
-  export const routes: Readonly<Route<RouteNames>[]> = [
+  const routes: Readonly<Route<RouteNames>[]> = [
     {
       name: RouteName.Home,
       path: '/',
@@ -92,7 +92,7 @@ You can find a complete example in the [demo app](https://github.com/dvcol/svelt
     },
   ] as const;
 
-  export const options: RouterOptions<RouteNames> = {
+  const options: RouterOptions<RouteNames> = {
     routes,
   } as const;
   
