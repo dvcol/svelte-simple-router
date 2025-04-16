@@ -162,9 +162,11 @@ describe('router', () => {
   let replace: MockInstance;
 
   const getRouter = async (options: RouterOptions = { routes }, clearInit = false) => {
-    const _router = new Router(options);
+    const _router: Router = new Router(options);
     // Flush the microtask queue to ensure the router is initialized
     await wait();
+    // Wait for the router to be ready
+    await _router.syncing;
     resolve = vi.spyOn(_router, 'resolve');
     sync = vi.spyOn(_router, 'sync');
     push = vi.spyOn(_router, 'push');
@@ -1409,16 +1411,20 @@ describe('router', () => {
         router = await getRouter({ routes, listen: 'history' });
         expect(sync).not.toHaveBeenCalled();
 
+        console.info('First dispatch');
         window.dispatchEvent(new PopStateEvent('popstate'));
         await wait();
+        await router.syncing;
 
         // popstate is ignored because the state is already synced
         expect(sync).not.toHaveBeenCalled();
         expect(router.route).toBeUndefined();
 
+        console.info('Second dispatch');
         window.history.pushState(null, '', PathRoute.path);
         window.dispatchEvent(new PopStateEvent('popstate'));
         await wait();
+        await router.syncing;
 
         expect(sync).toHaveBeenCalledTimes(1);
         expect(replace).toHaveBeenCalledWith({ path: PathRoute.path });

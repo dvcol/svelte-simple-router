@@ -1,7 +1,7 @@
 /// <reference types="navigation-api-types" />
 
 import { randomHex } from '@dvcol/common-utils';
-import { debounce } from '@dvcol/common-utils/common/debounce';
+import { debounce, type DebouncedFunction } from '@dvcol/common-utils/common/debounce';
 import { raceUntil } from '@dvcol/common-utils/common/promise';
 
 import { computeAbsolutePath, toPathSegment } from '@dvcol/common-utils/common/string';
@@ -796,6 +796,13 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @debounced
    */
   readonly sync: () => Promise<ResolvedRouterLocationSnapshot<Name>>;
+
+  /**
+   * Whether the router is currently syncing with the current location.
+   */
+  get syncing() {
+    return (this.sync as DebouncedFunction<ResolvedRouterLocationSnapshot<Name>>).promise;
+  }
 
   /**
    * Internal method to update the history state and navigate to a new URL.
