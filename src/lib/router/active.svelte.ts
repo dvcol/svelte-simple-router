@@ -6,7 +6,7 @@ import { Matcher } from '~/models/index.js';
 import { getRouter } from '~/router/context.svelte.js';
 import { Logger } from '~/utils/logger.utils.js';
 
-export type ActiveActionOptions<Name extends RouteName = RouteName> = {
+export interface ActiveActionOptions<Name extends RouteName = RouteName> {
   /**
    * Route name to match against.
    * This takes precedence over the path option.
@@ -40,14 +40,14 @@ export type ActiveActionOptions<Name extends RouteName = RouteName> = {
    * @see {@link RouterOptions.caseSensitive}
    */
   caseSensitive?: boolean;
-};
+}
 
 // recursively extract route.parent.name
-const getParentName = (route?: ParsedRoute, names: ParsedRoute['name'][] = []) => {
+function getParentName(route?: ParsedRoute, names: ParsedRoute['name'][] = []) {
   if (route?.name) names.push(route.name);
   if (!route?.parent) return names;
   return getParentName(route.parent, names);
-};
+}
 
 /**
  * A svelte action to add an active state (class, style or attribute) to an element when the route matches.

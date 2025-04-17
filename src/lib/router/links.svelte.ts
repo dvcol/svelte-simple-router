@@ -1,27 +1,29 @@
 import type { Action } from 'svelte/action';
 
-import { getLinkNavigateFunction, type LinkNavigateFunction, type LinkNavigateOptions, parseBooleanAttribute } from '~/models/link.model.js';
+import type { LinkNavigateFunction, LinkNavigateOptions } from '~/models/link.model.js';
+
+import { getLinkNavigateFunction, parseBooleanAttribute } from '~/models/link.model.js';
 import { Logger } from '~/utils/logger.utils.js';
 
 export type NodeConditionFn = (node: HTMLElement) => boolean;
-export type LinksActionOptions = {
+export interface LinksActionOptions {
   apply?: NodeConditionFn;
   boundary?: HTMLElement | NodeConditionFn;
   navigate?: LinkNavigateOptions;
-};
+}
 
-const isLinkNode = (node: HTMLElement, apply?: LinksActionOptions['apply']): boolean => {
+function isLinkNode(node: HTMLElement, apply?: LinksActionOptions['apply']): boolean {
   if (node instanceof HTMLAnchorElement) return true;
   if (parseBooleanAttribute(node, 'router-link')) return true;
   return apply?.(node) ?? false;
-};
+}
 
-const isBoundaryNode = (node: HTMLElement, boundary: HTMLElement | NodeConditionFn): boolean => {
+function isBoundaryNode(node: HTMLElement, boundary: HTMLElement | NodeConditionFn): boolean {
   if (typeof boundary === 'function') return boundary(node);
   return node === boundary;
-};
+}
 
-const isWithinBoundary = (node: HTMLElement, boundary: HTMLElement | NodeConditionFn): boolean => {
+function isWithinBoundary(node: HTMLElement, boundary: HTMLElement | NodeConditionFn): boolean {
   if (isBoundaryNode(node, boundary)) return true;
   let _node: HTMLElement = node;
   while (_node?.parentElement) {
@@ -29,10 +31,10 @@ const isWithinBoundary = (node: HTMLElement, boundary: HTMLElement | NodeConditi
     if (isBoundaryNode(_node, boundary)) return true;
   }
   return false;
-};
+}
 
 type InternalLinksActionOptions = LinksActionOptions & { host: HTMLElement };
-const findLinkNode = (node: HTMLElement, { apply, boundary, host }: InternalLinksActionOptions): HTMLElement | undefined => {
+function findLinkNode(node: HTMLElement, { apply, boundary, host }: InternalLinksActionOptions): HTMLElement | undefined {
   if (boundary && !isWithinBoundary(node, boundary ?? host)) return;
   if (isLinkNode(node, apply)) return node;
   let link: HTMLElement = node;
@@ -42,7 +44,7 @@ const findLinkNode = (node: HTMLElement, { apply, boundary, host }: InternalLink
     if (isBoundaryNode(link, boundary ?? host)) return;
     if (isLinkNode(link, apply)) return link;
   }
-};
+}
 
 /**
  * The `links action` intercepts click events on dom elements and upwardly navigate the dom tree until it reaches a link element and triggers a router navigation instead.
@@ -86,14 +88,14 @@ export const links: Action<HTMLElement, LinksActionOptions | undefined> = (node:
     try {
       return getLinkNavigateFunction(_options.navigate);
     } catch (error) {
-      Logger.warn('Router not found. Make sure you are using the link(s) action within a Router context.', { node, options });
+      Logger.warn('Router not found. Make sure you are using the link(s) action within a Router context.', { node, options, error });
       node.setAttribute('data-error', 'Router not found.');
     }
   });
   if (!navigate) return { update };
   node.removeAttribute('data-error');
 
-  const handler = (event: MouseEvent | KeyboardEvent) => {
+  const handler = async (event: MouseEvent | KeyboardEvent) => {
     const { target } = event;
     if (!(target instanceof HTMLElement)) return;
     if (!navigate) return;

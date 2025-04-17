@@ -1,5 +1,3 @@
-import { getUUID } from '@dvcol/common-utils/common/string';
-
 import type {
   INavigationEvent,
   IViewChangeEvent,
@@ -8,9 +6,10 @@ import type {
   ViewChangeEventStatus,
 } from '~/models/navigation.model.js';
 import type { BaseRoute, ResolvedRoute, RouteName, RouteNavigation } from '~/models/route.model.js';
-
 import type { ResolvedRouterLocationSnapshot, RouterNavigationOptions } from '~/models/router.model.js';
 import type { IView } from '~/models/view.model.js';
+
+import { getUUID } from '@dvcol/common-utils/common/string';
 
 import { NavigationAbortedError, NavigationCancelledError } from '~/models/error.model.js';
 import { toBaseRoute } from '~/models/route.model.js';
@@ -210,20 +209,29 @@ export class ViewChangeEvent<Name extends RouteName = RouteName> implements IVie
   }
 
   load(): this {
-    if (!this.pending) return Logger.error('Cannot load a change event that is not pending', this);
+    if (!this.pending) {
+      Logger.error('Cannot load a change event that is not pending', this);
+      return this;
+    }
     this.#status = 'loading';
     return this;
   }
 
   complete(): this {
-    if (!this.pending) return Logger.error('Cannot complete a change event that is not pending', this);
+    if (!this.pending) {
+      Logger.error('Cannot complete a change event that is not pending', this);
+      return this;
+    }
     this.#status = 'loaded';
     this.#resolve?.(this.#status);
     return this;
   }
 
   fail(error?: unknown): this {
-    if (!this.pending) return Logger.error('Cannot fail a change event that is not pending', this);
+    if (!this.pending) {
+      Logger.error('Cannot fail a change event that is not pending', this);
+      return this;
+    }
     this.#status = 'error';
     this.#error = error;
     this.#reject?.(error);

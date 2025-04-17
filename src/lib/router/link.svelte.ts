@@ -1,8 +1,11 @@
-import { resolveComponent } from '@dvcol/svelte-utils/component';
-
 import type { Action } from 'svelte/action';
 
-import { getLinkNavigateFunction, type LinkNavigateFunction, type LinkNavigateOptions, normalizeLinkAttributes } from '~/models/link.model.js';
+import type { RouteName } from '~/models/index.js';
+import type { LinkNavigateFunction, LinkNavigateOptions } from '~/models/link.model.js';
+
+import { resolveComponent } from '@dvcol/svelte-utils/component';
+
+import { getLinkNavigateFunction, normalizeLinkAttributes } from '~/models/link.model.js';
 import { getView } from '~/router/context.svelte.js';
 import { Logger } from '~/utils/logger.utils.js';
 
@@ -53,17 +56,17 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
     try {
       return getLinkNavigateFunction(_options);
     } catch (error) {
-      Logger.warn('Router not found. Make sure you are using the link(s) action within a Router context.', { node, options });
+      Logger.warn('Router not found. Make sure you are using the link(s) action within a Router context.', { node, options, error });
       node.setAttribute('data-error', 'Router not found.');
     }
   });
   if (!navigate) return { update };
   node.removeAttribute('data-error');
 
-  const navigateHandler = (event: MouseEvent | KeyboardEvent) => navigate?.(event, node);
+  const navigateHandler = async (event: MouseEvent | KeyboardEvent) => navigate?.(event, node);
 
   // Extract view from context
-  const view = getView();
+  const view = getView<RouteName>();
 
   // Add resolve on hover option && view params
   const resolveHandler = async (event: MouseEvent | KeyboardEvent | FocusEvent | PointerEvent) => {
@@ -79,7 +82,7 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
     const components = [];
     if (r.route.component) components.push(r.route.component);
     if (r.route.components?.[name]) components.push(r.route.components[name]);
-    await Promise.all(components.map(c => resolveComponent(c)));
+    await Promise.all(components.map(async c => resolveComponent(c)));
   };
 
   node.addEventListener('click', navigateHandler);
