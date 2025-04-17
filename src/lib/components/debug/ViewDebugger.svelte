@@ -1,5 +1,7 @@
 <script lang="ts" module>
-  import { type IView, ViewDebuggerConstant } from '~/models/index.js';
+  import type { IView } from '~/models/index.js';
+
+  import { ViewDebuggerConstant } from '~/models/index.js';
 
   declare global {
     interface Window {

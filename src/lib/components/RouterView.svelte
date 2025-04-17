@@ -1,10 +1,9 @@
 <script lang="ts">
   import type { RouterViewProps } from '~/models/component.model.js';
+  import type { IRouter } from '~/models/router.model.js';
 
   import RouteContainer from '~/components/RouteContainer.svelte';
   import RouterContext from '~/components/RouterContext.svelte';
-  import { type IRouter } from '~/models/router.model.js';
-
   import { getRouter } from '~/router/context.svelte.js';
 
   const { options, router, ..._props }: RouterViewProps = $props();

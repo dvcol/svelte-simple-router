@@ -1,9 +1,8 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
-
   import type { RouterContextProps } from '~/models/component.model.js';
+  import type { IRouter } from '~/models/router.model.js';
 
-  import { type IRouter } from '~/models/router.model.js';
+  import { onDestroy } from 'svelte';
 
   import { getRouter, setRouter } from '~/router/context.svelte.js';
   import { Router } from '~/router/router.svelte.js';

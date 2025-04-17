@@ -1,9 +1,10 @@
 <script lang="ts">
-  import { toStyle } from '@dvcol/common-utils/common/class';
-
   import type { TransitionFunction } from '@dvcol/svelte-utils/transition';
   import type { Snippet } from 'svelte';
+
   import type { TransitionProps } from '~/models/component.model.js';
+
+  import { toStyle } from '@dvcol/common-utils/common/class';
 
   const { children, key, id, transition }: { children: Snippet; id: string; key: any | any[]; transition: TransitionProps } = $props();
 

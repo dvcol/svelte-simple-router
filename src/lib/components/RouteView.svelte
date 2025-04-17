@@ -1,11 +1,10 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
-
   import type { RouteViewProps } from '~/models/component.model.js';
   import type { Route } from '~/models/route.model.js';
 
-  import { NavigationCancelledError } from '~/models/error.model.js';
+  import { onDestroy } from 'svelte';
 
+  import { NavigationCancelledError } from '~/models/error.model.js';
   import { DefaultView } from '~/models/view.model.js';
   import { getView } from '~/router/context.svelte.js';
   import { useRouter } from '~/router/hooks.svelte.js';
@@ -54,9 +53,9 @@
 
   const handleError = (err: Error | unknown) => {
     if (err instanceof NavigationCancelledError) {
-      Logger.warn(log, `Failed to sync, navigation cancelled`, err);
+      Logger.warn(log, 'Failed to sync, navigation cancelled', err);
     } else {
-      Logger.error(log, `Failed to sync`, err);
+      Logger.error(log, 'Failed to sync', err);
     }
   };
 

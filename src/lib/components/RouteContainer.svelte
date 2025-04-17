@@ -1,10 +1,9 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
-
   import type { RouteContainerProps } from '~/models/component.model.js';
 
-  import RouteComponent from '~/components/RouteComponent.svelte';
+  import { onDestroy } from 'svelte';
 
+  import RouteComponent from '~/components/RouteComponent.svelte';
   import { setView } from '~/router/context.svelte.js';
   import { useRouter } from '~/router/hooks.svelte.js';
   import { View } from '~/router/view.svelte.js';

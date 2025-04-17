@@ -1,15 +1,17 @@
 <script lang="ts">
-  import { debounce } from '@dvcol/common-utils/common/debounce';
-  import { type AnyComponent, type AnySnippet, isSnippet, resolveComponent } from '@dvcol/svelte-utils/component';
-  import { type Component, type Snippet, untrack } from 'svelte';
+  import type { AnyComponent, AnySnippet } from '@dvcol/svelte-utils/component';
+  import type { Component, Snippet } from 'svelte';
 
   import type { RouterViewProps } from '~/models/component.model.js';
+  import type { ComponentProps, Route } from '~/models/route.model.js';
   import type { IRouter } from '~/models/router.model.js';
-
   import type { View } from '~/router/view.svelte.js';
 
+  import { debounce } from '@dvcol/common-utils/common/debounce';
+  import { isSnippet, resolveComponent } from '@dvcol/svelte-utils/component';
+  import { untrack } from 'svelte';
+
   import RouteTransition from '~/components/RouteTransition.svelte';
-  import { type ComponentProps, type Route } from '~/models/route.model.js';
   import { ViewChangeEvent } from '~/router/event.svelte.js';
 
   const {
@@ -115,13 +117,13 @@
 </script>
 
 {#snippet resolved(ComponentOrSnippet: ComponentOrSnippet)}
-  <!--{#if ResolvedComponent}-->
+  <!-- {#if ResolvedComponent} -->
   {#if isSnippet(ComponentOrSnippet)}
     {@render ComponentOrSnippet(view.error ?? (view.loading ? route : _properties))}
   {:else}
     <ComponentOrSnippet error={view.error} {..._properties} />
   {/if}
-  <!--{/if}-->
+  <!-- {/if} -->
 {/snippet}
 
 {#snippet routed()}
