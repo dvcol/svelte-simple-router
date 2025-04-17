@@ -1,9 +1,9 @@
 import type { LoadingErrorListener, ViewChangeListener } from '~/models/navigation.model.js';
 import type { RouteName } from '~/models/route.model.js';
 
-export const ViewDebuggerConstant = '__SVELTE_SIMPLE_VIEW_DEBUGGER__' as const;
+export const ViewDebuggerConstant = '__SVELTE_SIMPLE_VIEW_DEBUGGER__';
 
-export type IView<Name extends RouteName = RouteName> = {
+export interface IView<Name extends RouteName = RouteName> {
   /**
    * Unique identifier of the router instance.
    */
@@ -37,7 +37,7 @@ export type IView<Name extends RouteName = RouteName> = {
    *
    * @param listener - listener to add
    */
-  onChange(listener: ViewChangeListener<Name>): () => void;
+  onChange: (listener: ViewChangeListener<Name>) => () => void;
 
   /**
    * Add a listener that is executed when a view start loading a component.
@@ -46,7 +46,7 @@ export type IView<Name extends RouteName = RouteName> = {
    *
    * @returns a function that removes the registered listener
    */
-  onLoading(listener: ViewChangeListener<Name>): () => void;
+  onLoading: (listener: ViewChangeListener<Name>) => () => void;
 
   /**
    * Add a listener that is executed when a view start loading a component.
@@ -55,7 +55,7 @@ export type IView<Name extends RouteName = RouteName> = {
    *
    * @returns a function that removes the registered listener
    */
-  onLoaded(listener: ViewChangeListener<Name>): () => void;
+  onLoaded: (listener: ViewChangeListener<Name>) => () => void;
 
   /**
    * Add a listener that is executed when an error occurs during view loading.
@@ -64,8 +64,8 @@ export type IView<Name extends RouteName = RouteName> = {
    *
    * @returns a function that removes the registered listener
    */
-  onError(listener: LoadingErrorListener<Name>): () => void;
-};
+  onError: (listener: LoadingErrorListener<Name>) => () => void;
+}
 
 export const DefaultView = 'default';
 export type IDefaultView = typeof DefaultView;

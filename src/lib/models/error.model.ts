@@ -8,7 +8,7 @@ import type { ResolvedRouterLocationSnapshot } from '~/models/router.model.js';
  *
  * @internal
  */
-export const enum ErrorTypes {
+export enum ErrorTypes {
   /**
    * An aborted navigation is a navigation that failed because a navigation guard returned `false` or threw an error
    */
@@ -87,7 +87,7 @@ export class NavigationResolveError<Name extends RouteName = RouteName> extends 
   readonly type: ErrorTypes.NAVIGATION_ABORTED_RESOLVE;
   readonly route: ResolvedRoute<Name>;
   readonly error?: unknown;
-  constructor(resolved: ResolvedRoute<Name>, { message = `Failed to resolve route.`, error }: ErrorPayload = {}) {
+  constructor(resolved: ResolvedRoute<Name>, { message = 'Failed to resolve route.', error }: ErrorPayload = {}) {
     super(message);
     this.error = error;
     this.type = ErrorTypes.NAVIGATION_ABORTED_RESOLVE;
@@ -181,12 +181,12 @@ export class RouterPathConflictError<Path extends Route['path'] = string> extend
   }
 }
 
-type MisMatchErrorPayload<Name extends RouteName = RouteName> = {
+interface MisMatchErrorPayload<Name extends RouteName = RouteName> {
   name: Name;
   path: Route<Name>['path'];
   registeredName?: Name;
   registeredPath?: Route<Name>['path'];
-};
+}
 export class RouterNamePathMismatchError<Name extends RouteName = RouteName> extends RouterConfigurationError<MisMatchErrorPayload<Name>> {
   declare readonly type: ErrorTypes.ROUTER_CONFIG_NAME_PATH_MISMATCH;
   constructor(
@@ -226,7 +226,11 @@ export class ParsingError<E = unknown> extends Error {
   }
 }
 
-type ParsingMissingRequiredParamPayload = { template: string; missing: string; params: Record<string, unknown> };
+interface ParsingMissingRequiredParamPayload {
+  template: string;
+  missing: string;
+  params: Record<string, unknown>;
+}
 export class ParsingMissingRequiredParamError extends ParsingError<ParsingMissingRequiredParamPayload> {
   declare readonly type: ErrorTypes.PARSING_MISSING_REQUIRED_PARAM;
   constructor(

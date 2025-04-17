@@ -2,6 +2,7 @@ import type { Values } from '@dvcol/common-utils/common/class';
 import type { TransitionFunction } from '@dvcol/svelte-utils/transition';
 import type { Snippet } from 'svelte';
 import type { HTMLAttributes } from 'svelte/elements';
+
 import type { ErrorListener, NavigationEndListener, NavigationGuard, NavigationListener, ViewChangeListener } from '~/models/navigation.model.js';
 import type { PartialRoute, Route, RouteName } from '~/models/route.model.js';
 import type { IRouter, RouterOptions } from '~/models/router.model.js';
@@ -11,7 +12,7 @@ export type HTMLProps = Partial<Omit<HTMLAttributes<HTMLDivElement>, 'style'>> &
   style?: Values;
 };
 
-export type RouterContextProps<Name extends RouteName = any> = {
+export interface RouterContextProps<Name extends RouteName = any> {
   /**
    * Router instance to use.
    */
@@ -24,11 +25,11 @@ export type RouterContextProps<Name extends RouteName = any> = {
    * Children to render within the view container.
    */
   children?: Snippet<[IRouter<Name>]>;
-};
+}
 
-export type TransitionProps<
+export interface TransitionProps<
   T extends { in?: Record<string, any>; out?: Record<string, any> } = { in?: Record<string, any>; out?: Record<string, any> },
-> = {
+> {
   /**
    * Skip the first enter transition.
    * This is useful when the first route load is fast and the transition is not needed.
@@ -74,9 +75,9 @@ export type TransitionProps<
    * @see [view transition api](https://developer.mozilla.org/en-US/docs/Web/API/View_Transitions_API)
    */
   viewTransitionName?: boolean | string;
-};
+}
 
-export type RouteContainerProps<Name extends RouteName = any> = {
+export interface RouteContainerProps<Name extends RouteName = any> {
   /**
    * Name of the router view to render.
    * If not provided, the default view will be used.
@@ -143,7 +144,7 @@ export type RouteContainerProps<Name extends RouteName = any> = {
    * Children to render when the router is ready.
    */
   children?: Snippet<[IRouter<Name>]>;
-};
+}
 
 export type RouterViewProps<Name extends RouteName = any> = RouterContextProps<Name> & RouteContainerProps<Name>;
 export type RouteViewProps<Name extends RouteName = any> = Pick<RouterViewProps<Name>, 'loading' | 'error' | 'name'> & {

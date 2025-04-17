@@ -1,7 +1,5 @@
 import type { BaseRoute, ResolvedRoute, RouteName, RouteNavigation } from '~/models/route.model.js';
-
 import type { ResolvedRouterLocationSnapshot, RouterNavigationOptions } from '~/models/router.model.js';
-
 import type { IView } from '~/models/view.model.js';
 
 export type ResolveGuardReturn = void | undefined | null | boolean | string | Error;
@@ -21,13 +19,13 @@ export type NavigationGuard<Name extends RouteName = RouteName> = (
  */
 export type ResolveGuard<Name extends RouteName = RouteName> = (resolved: ResolvedRoute<Name>) => ResolveGuardReturn | Promise<ResolveGuardReturn>;
 
-export type INavigationEventState<Name extends RouteName = RouteName> = {
+export interface INavigationEventState<Name extends RouteName = RouteName> {
   readonly active: boolean;
   readonly failed: boolean | unknown;
   readonly cancelled: boolean;
   readonly completed: boolean;
   readonly redirected: boolean | RouteNavigation<Name>;
-};
+}
 
 export type ResolvedRouteSnapshot<Name extends RouteName = RouteName> = Omit<ResolvedRoute<Name>, 'route'> & {
   route: BaseRoute<Name>;
@@ -79,7 +77,7 @@ export type NavigationErrorListener<Name extends RouteName = RouteName> = (
 ) => void | Promise<void>;
 
 export type ViewChangeEventStatus = 'pending' | 'loading' | 'loaded' | 'error';
-export type IViewChangeEvent<Name extends RouteName = RouteName> = {
+export interface IViewChangeEvent<Name extends RouteName = RouteName> {
   /**
    * Unique identifier of the router instance.
    */
@@ -120,7 +118,7 @@ export type IViewChangeEvent<Name extends RouteName = RouteName> = {
    * Promise that resolves when the loading event is completed.
    */
   readonly result: Promise<ViewChangeEventStatus>;
-};
+}
 
 export type ViewChangeListener<Name extends RouteName = RouteName> = (event: IViewChangeEvent<Name>) => void | Promise<void>;
 export type LoadingErrorListener<Name extends RouteName = RouteName> = (

@@ -5,28 +5,28 @@ import { MatcherInvalidPathError, ParsingMissingRequiredParamError } from '~/mod
 const templateParamRegex = /\/:[^/]+/g;
 const templateParamReplace = '/([^/]+)';
 
-const templateParamRegexNumber = /\/:{number}:[^/]+/g;
+const templateParamRegexNumber = /\/:\{number\}:[^/]+/g;
 const templateParamReplaceNumber = '/(\\d+)';
 
-const templateParamRegexString = /\/:{string}:[^/]+/g;
+const templateParamRegexString = /\/:\{string\}:[^/]+/g;
 const templateParamReplaceString = '/(\\w+)';
 
 const optionalTemplateParamRegex = /\/:[^/]+:\?/g;
 const optionalTemplateParamReplace = '/?([^/]+)?';
 
-const optionalTemplateParamRegexNumber = /\/:{number}:[^/]+:\?/g;
+const optionalTemplateParamRegexNumber = /\/:\{number\}:[^/]+:\?/g;
 const optionalTemplateParamReplaceNumber = '/?(\\d+)?';
 
-const optionalTemplateParamRegexString = /\/:{string}:[^/]+:\?/g;
+const optionalTemplateParamRegexString = /\/:\{string\}:[^/]+:\?/g;
 const optionalTemplateParamReplaceString = '/?(\\w+)?';
 
 const relativePathRegex = /^\.+\//;
 const hashPathRegex = /^\/?#/;
 
-const templateParamRegexPrefix = /\/:{(number|string)}:/g;
+const templateParamRegexPrefix = /\/:\{(?:number|string)\}:/g;
 const templateParamReplacePrefix = '/:';
 
-const templateParamRegexSuffix = /:\?(\/|$)/g;
+const templateParamRegexSuffix = /:\?(?:\/|$)/g;
 const templateParamReplaceSuffix = '/';
 
 const templateWildcardRegex = /\/\*$/g;
@@ -35,28 +35,29 @@ const templateWildcardReplace = '/(.*)';
 const templateWildcardSegment = /\/\*\//g;
 const templateWildcardSegmentReplace = '/([^/]+)/';
 
-const templateWildcardOrParamRegex = /\/((\*)|(:[^/]+))/g;
+const templateWildcardOrParamRegex = /\/(?:\*|:[^/]+)/g;
 const templateWildcardOrParamPrefixRegex = /^\/:?/g;
 
-const titleParamRegexPrefix = /:{number|string}:/g;
+const titleParamRegexPrefix = /:\{number|string\}:/g;
 const titleParamReplacePrefix = ':';
-const titleParamRegex = /:(\w|[:?{}])+/g;
+const titleParamRegex = /:([\w:?{}])+/g;
 
-const replacer = (match: string, params: RouteParams, slice = 2) => {
+function replacer(match: string, params: RouteParams, slice = 2) {
   let paramName = match.slice(slice);
   const optional = paramName.endsWith(':?');
   if (optional) paramName = paramName.slice(0, -2);
   return { param: paramName, value: params[paramName], optional };
-};
+}
 
-export const replaceTitleParams = (title: string, params: RouteParams = {}) =>
-  title
+export function replaceTitleParams(title: string, params: RouteParams = {}) {
+  return title
     ?.replace(titleParamRegexPrefix, titleParamReplacePrefix)
-    .replace(titleParamRegex, match => {
+    .replace(titleParamRegex, (match) => {
       const { value, optional } = replacer(match, params, 1);
       return String(value ?? (optional ? '' : match));
     })
     .trim();
+}
 
 /**
  * Replaces template params with their values
@@ -64,8 +65,8 @@ export const replaceTitleParams = (title: string, params: RouteParams = {}) =>
  * @param params
  * @throws {ParsingMissingRequiredParamError} when a required param is missing
  */
-export const replaceTemplateParams = (template: string, params: RouteParams = {}) =>
-  template?.replace(templateParamRegexPrefix, templateParamReplacePrefix).replace(templateParamRegex, match => {
+export function replaceTemplateParams(template: string, params: RouteParams = {}) {
+  return template?.replace(templateParamRegexPrefix, templateParamReplacePrefix).replace(templateParamRegex, (match) => {
     const { param, value, optional } = replacer(match, params);
 
     if (value === undefined) {
@@ -75,13 +76,14 @@ export const replaceTemplateParams = (template: string, params: RouteParams = {}
 
     return `/${value}`;
   });
+}
 
 /**
  * Converts a template path to a regex
  * @param template
  * @throws {MatcherInvalidPathError} when the template is invalid (empty or relative)
  */
-export const templateToRegex = (template: string) => {
+export function templateToRegex(template: string) {
   let _template = template?.trim();
   if (!_template?.length) throw new MatcherInvalidPathError(template);
   if (relativePathRegex.test(_template))
@@ -102,14 +104,14 @@ export const templateToRegex = (template: string) => {
     regex: new RegExp(`^${strRegex}`),
     strictRegex: new RegExp(`^${strRegex}$`),
   };
-};
+}
 
 /**
  * Extracts params from a template path
  * @param template
  * @throws {MatcherInvalidPathError} when the template is invalid (empty)
  */
-export const templateToParams = (template: string) => {
+export function templateToParams(template: string) {
   const _template = template?.trim();
   if (!_template?.length) throw new MatcherInvalidPathError(template);
   return (
@@ -119,24 +121,27 @@ export const templateToParams = (template: string) => {
       .match(templateWildcardOrParamRegex)
       ?.map(r => r.replace(templateWildcardOrParamPrefixRegex, '')) ?? []
   );
-};
+}
 
-export type PathParamsResult = { params: Record<string, string>; wildcards: Record<string, string> };
-export type IMatcher = {
+export interface PathParamsResult {
+  params: Record<string, string>;
+  wildcards: Record<string, string>;
+}
+export interface IMatcher {
   /**
    * Matches a path against the template
    * @param path
    * @param strict
    * @returns {boolean} whether the path matches the template
    */
-  match(path: string, strict?: boolean): boolean;
+  match: (path: string, strict?: boolean) => boolean;
   /**
    * Extracts params from a path
    * @param path
    * @returns {PathParamsResult} extracted params
    */
-  extract(path: string): PathParamsResult;
-};
+  extract: (path: string) => PathParamsResult;
+}
 
 export class Matcher<Name extends RouteName = RouteName> implements IMatcher {
   readonly #regex: RegExp;

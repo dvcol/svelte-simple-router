@@ -5,27 +5,27 @@ import { MissingRouterContextError, NavigationCancelledError } from '~/models/in
 import { getRouter } from '~/router/context.svelte.js';
 import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 
-const isAnchorTarget = (target: EventTarget | null): target is HTMLAnchorElement => {
+function isAnchorTarget(target: EventTarget | null): target is HTMLAnchorElement {
   return target instanceof HTMLAnchorElement;
-};
+}
 
-const isTargetWithin = (element: HTMLAnchorElement) => {
+function isTargetWithin(element: HTMLAnchorElement) {
   return element.target === '' || element.target === '_self';
-};
+}
 
-const isNavigationEvent = (event: MouseEvent | PointerEvent | KeyboardEvent) => {
+function isNavigationEvent(event: MouseEvent | PointerEvent | KeyboardEvent) {
   if (event.defaultPrevented) return false;
   // 0 is the left mouse button, -1 is hover (no button)
   if ((event instanceof PointerEvent || event instanceof MouseEvent) && event.button !== 0 && event.button !== -1) return false;
   if (event instanceof KeyboardEvent && event.key !== 'Enter') return false;
   return !(event.metaKey || event.altKey || event.ctrlKey || event.shiftKey);
-};
+}
 
-const isSameHost = (anchor: HTMLAnchorElement, host = window.location.host) => {
+function isSameHost(anchor: HTMLAnchorElement, host = window.location.host) {
   return anchor.host === host || anchor.href.startsWith(`https://${host}`) || anchor.href.indexOf(`http://${host}`) === 0;
-};
+}
 
-const parseJsonAttribute = <T = Record<string, any>>(element: HTMLElement, name: string, prefix = 'data'): T | undefined => {
+function parseJsonAttribute<T = Record<string, any>>(element: HTMLElement, name: string, prefix = 'data'): T | undefined {
   const value = element.getAttribute([prefix, name].join('-'));
   if (value === undefined || value === null) return;
   try {
@@ -34,23 +34,24 @@ const parseJsonAttribute = <T = Record<string, any>>(element: HTMLElement, name:
     Logger.error(`Failed to parse JSON attribute "${name}" on <a> element`, { element, name, error });
     element.setAttribute('data-error', `Failed to parse JSON attribute "${name}"`);
   }
-};
+}
 
-export const parseBooleanAttribute = (element: HTMLElement, name: string, prefix = 'data'): boolean | undefined => {
+export function parseBooleanAttribute(element: HTMLElement, name: string, prefix = 'data'): boolean | undefined {
   const value = element.getAttribute([prefix, name].join('-'));
   if (value === undefined || value === null) return;
   return value !== 'false';
-};
+}
 
-const addIfFound = <T>(obj: T, key: keyof T, value: T[keyof T]): T => {
+function addIfFound<T>(obj: T, key: keyof T, value: T[keyof T]): T {
   if (value !== undefined) obj[key] = value;
   return obj;
-};
+}
 
-const isMouseOrKeyboardEvent = (event: Event): event is MouseEvent | PointerEvent | KeyboardEvent =>
-  event instanceof MouseEvent || event instanceof PointerEvent || event instanceof KeyboardEvent;
+function isMouseOrKeyboardEvent(event: Event): event is MouseEvent | PointerEvent | KeyboardEvent {
+  return event instanceof MouseEvent || event instanceof PointerEvent || event instanceof KeyboardEvent;
+}
 
-const isNotValidAnchorNavigation = (event: Event) => {
+function isNotValidAnchorNavigation(event: Event) {
   // If the event is not a mouse or keyboard event, we ignore it
   if (!isMouseOrKeyboardEvent(event)) return false;
   const anchor = event.currentTarget;
@@ -61,7 +62,7 @@ const isNotValidAnchorNavigation = (event: Event) => {
   if (!isAnchorTarget(anchor)) return false;
   if (!isTargetWithin(anchor)) return true;
   return !isSameHost(anchor);
-};
+}
 
 export type LinkNavigateFunction = <Action extends 'replace' | 'push' | 'resolve'>(
   event: MouseEvent | PointerEvent | KeyboardEvent | FocusEvent,
@@ -75,7 +76,7 @@ export type LinkNavigateFunction = <Action extends 'replace' | 'push' | 'resolve
  *
  * @throws {MissingRouterContextError} - If the router context is not found
  */
-export const getLinkNavigateFunction = (options: LinkNavigateOptions = {}): LinkNavigateFunction => {
+export function getLinkNavigateFunction(options: LinkNavigateOptions = {}): LinkNavigateFunction {
   const router = getRouter();
   if (!router) throw new MissingRouterContextError();
 
@@ -119,9 +120,9 @@ export const getLinkNavigateFunction = (options: LinkNavigateOptions = {}): Link
     addIfFound(navigationOptions, 'followGuardRedirects', options.followGuardRedirects ?? parseBooleanAttribute(node, 'follow-guard-redirects'));
 
     try {
-      return (await router[_action](navigation, navigationOptions)) as Promise<
+      return await (router[_action](navigation, navigationOptions) as Promise<
         typeof action extends 'resolve' ? ResolvedRoute | undefined : ResolvedRouterLocationSnapshot | undefined
-      >;
+      >);
     } catch (error) {
       if (error instanceof NavigationCancelledError) {
         Logger.warn(`[${LoggerKey} Link - ${router.id}] Navigation cancelled`, { node, error, navigation, navigationOptions });
@@ -130,7 +131,7 @@ export const getLinkNavigateFunction = (options: LinkNavigateOptions = {}): Link
       }
     }
   };
-};
+}
 
 /**
  * Normalize the link attributes and options.
@@ -140,7 +141,7 @@ export const getLinkNavigateFunction = (options: LinkNavigateOptions = {}): Link
  * @param node
  * @param options
  */
-export const normalizeLinkAttributes = (node: HTMLElement, options: LinkNavigateOptions) => {
+export function normalizeLinkAttributes(node: HTMLElement, options: LinkNavigateOptions) {
   if (!isAnchorTarget(node)) {
     if (!node.hasAttribute('role')) node.setAttribute('role', 'link');
     if (!node.hasAttribute('tabindex')) node.setAttribute('tabindex', '0');
@@ -148,7 +149,7 @@ export const normalizeLinkAttributes = (node: HTMLElement, options: LinkNavigate
     node.setAttribute('href', options.path);
   }
   return { node, options };
-};
+}
 
 export type LinkNavigateOptions<Name extends RouteName = RouteName> = CommonRouteNavigation &
   RouterNavigationOptions & { replace?: boolean; name?: Name; path?: string; disabled?: boolean };

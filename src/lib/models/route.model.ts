@@ -1,10 +1,11 @@
-import { isShallowEqual, shallowClone } from '@dvcol/common-utils/common/object';
-
 import type { AnyComponent, ComponentOrLazy } from '@dvcol/svelte-utils/component';
 import type { Snippet } from 'svelte';
+
 import type { IMatcher } from '~/models/matcher.model.js';
 import type { NavigationGuard, ResolveGuard } from '~/models/navigation.model.js';
 import type { IDefaultView } from '~/models/view.model.js';
+
+import { isShallowEqual, shallowClone } from '@dvcol/common-utils/common/object';
 
 /**
  * Allowed variables in HTML5 history state. Note that pushState clones the state
@@ -17,17 +18,17 @@ export type HistoryStateValue = string | number | boolean | null | undefined | H
 /**
  * Allowed HTML history.state
  */
-export type HistoryState = {
+export interface HistoryState {
   [x: number]: HistoryStateValue;
   [x: string]: HistoryStateValue;
-};
+}
 
 export type RouteParamValue = string | number | boolean;
 export type RouteQuery = Record<string, RouteParamValue>;
 export type RouteParams = Record<string, RouteParamValue>;
 export type RouteWildcards = Record<string, string>;
 
-export type RouteNavigationOptions = {
+export interface RouteNavigationOptions {
   /**
    * Strip current query parameters when navigating.
    * @default false
@@ -45,7 +46,7 @@ export type RouteNavigationOptions = {
    * @default false
    */
   stripTrailingHash?: boolean;
-};
+}
 
 export type CommonRouteNavigation = RouteNavigationOptions & {
   /**
@@ -96,7 +97,7 @@ export type RouteNavigation<Name extends RouteName = RouteName> = RouteLocationN
 
 export type ComponentProps = Record<RouteName, unknown>;
 
-export type RouteComponent = {
+export interface RouteComponent {
   /**
    * Component to display when the URL matches this route.
    */
@@ -133,9 +134,9 @@ export type RouteComponent = {
    * Properties are forbidden in this case.
    */
   properties?: never;
-};
+}
 
-export type RouteComponents<Name extends RouteName = RouteName> = {
+export interface RouteComponents<Name extends RouteName = RouteName> {
   /**
    * Components to display when the URL matches this route.
    */
@@ -172,9 +173,9 @@ export type RouteComponents<Name extends RouteName = RouteName> = {
    * Props are forbidden in this case.
    */
   props?: never;
-};
+}
 
-export type RouteRedirect<Name extends RouteName = RouteName> = {
+export interface RouteRedirect<Name extends RouteName = RouteName> {
   /**
    * Where to redirect if the route is directly matched. The redirection happens
    * before any navigation guard and triggers a new navigation with the new
@@ -213,9 +214,9 @@ export type RouteRedirect<Name extends RouteName = RouteName> = {
    * Error components is forbidden in this case.
    */
   errors?: never;
-};
+}
 
-export type BaseRoute<Name extends RouteName = RouteName> = {
+export interface BaseRoute<Name extends RouteName = RouteName> {
   /**
    * Path of the record.
    *
@@ -261,9 +262,9 @@ export type BaseRoute<Name extends RouteName = RouteName> = {
    * Note that params passed in navigation events will override these.
    */
   params?: RouteParams;
-};
+}
 
-type RouteLogic<Name extends RouteName = RouteName> = {
+interface RouteLogic<Name extends RouteName = RouteName> {
   /**
    * Array of nested routes.
    */
@@ -291,7 +292,7 @@ type RouteLogic<Name extends RouteName = RouteName> = {
    * @awaited
    */
   beforeLeave?: NavigationGuard<Name>;
-};
+}
 
 export type Route<Name extends RouteName = RouteName> = BaseRoute<Name> &
   RouteLogic<Name> &
@@ -301,12 +302,13 @@ export type PartialRoute<Name extends RouteName = RouteName> = BaseRoute<Name> &
   RouteLogic<Name> &
   Partial<RouteRedirect<Name> | RouteComponent | RouteComponents<Name>>;
 
-export const cloneRoute = <Name extends RouteName = RouteName>(route: Route<Name>): Route<Name> =>
-  shallowClone<Route<Name>, keyof Route<Name>>(route, 2, ['parent', 'component', 'components', 'loading', 'loadings', 'error', 'errors']);
+export function cloneRoute<Name extends RouteName = RouteName>(route: Route<Name>): Route<Name> {
+  return shallowClone<Route<Name>, keyof Route<Name>>(route, 2, ['parent', 'component', 'components', 'loading', 'loadings', 'error', 'errors']);
+}
 
 export const isRouteEqual = <Name extends RouteName = RouteName>(a?: Route<Name>, b?: Route<Name>): boolean => isShallowEqual(a, b, 2);
 
-export const toBaseRoute = <Name extends RouteName = RouteName>(route?: Route<Name>): BaseRoute<Name> | undefined => {
+export function toBaseRoute<Name extends RouteName = RouteName>(route?: Route<Name>): BaseRoute<Name> | undefined {
   if (!route) return route;
   return {
     path: route.path,
@@ -316,11 +318,11 @@ export const toBaseRoute = <Name extends RouteName = RouteName>(route?: Route<Na
     query: { ...route.query },
     params: { ...route.params },
   };
-};
+}
 
 export type ParsedRoute<Name extends RouteName = RouteName> = Route<Name> & { parent?: ParsedRoute<Name>; matcher: IMatcher };
 
-export type ResolvedRoute<Name extends RouteName = RouteName> = {
+export interface ResolvedRoute<Name extends RouteName = RouteName> {
   /**
    * Matched route record if any.
    */
@@ -349,4 +351,4 @@ export type ResolvedRoute<Name extends RouteName = RouteName> = {
    * Wildcards parsed from the path.
    */
   wildcards: RouteWildcards;
-};
+}
