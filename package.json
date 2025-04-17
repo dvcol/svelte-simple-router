@@ -160,7 +160,7 @@
     "vitest": "^3.1.1"
   },
   "lint-staged": {
-    "*.{js,jsx,ts,tsx,vue,svelte,json}": [
+    "*.{js,cjs,mjs,jsx,ts,tsx,vue,svelte,json,md,yml,html,md,svg,xml}": [
       "eslint --fix"
     ],
     "*.{css,scss,less,vue,svelte}": [
