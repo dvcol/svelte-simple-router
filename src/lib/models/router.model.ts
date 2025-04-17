@@ -82,7 +82,7 @@ export interface RouterStateLocation<Name extends RouteName = RouteName> {
   meta?: Route<Name>['meta'];
   name?: Route<Name>['name'];
   path?: Route<Name>['path'];
-  href?: RouterLocation<Name>['href'];
+  href?: string;
   query?: RouterLocation<Name>['query'];
   params?: RouterLocation<Name>['params'];
 }

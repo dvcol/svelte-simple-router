@@ -1,6 +1,8 @@
-import { scaleFreeze, type ScaleFreezeParams } from '@dvcol/svelte-utils/transition';
+import type { ScaleFreezeParams } from '@dvcol/svelte-utils/transition';
 
 import type { TransitionProps } from '~/models/component.model.js';
+
+import { scaleFreeze } from '@dvcol/svelte-utils/transition';
 
 export const transition: TransitionProps<{ in?: ScaleFreezeParams; out?: ScaleFreezeParams }> = {
   in: scaleFreeze,

@@ -1,36 +1,34 @@
-import { toPathSegment } from '@dvcol/common-utils/common/string';
-
+import type { NavigationFailureType } from '~/models/error.model.js';
 import type { NavigationGuardReturn } from '~/models/navigation.model.js';
 import type { HistoryState, RouteName, RouteNavigation, RouteQuery } from '~/models/route.model.js';
-import type { ResolvedRouterLocationSnapshot, RouterState } from '~/models/router.model.js';
+import type { ResolvedRouterLocationSnapshot, RouterState, RouterStateLocation } from '~/models/router.model.js';
 
-import { NavigationAbortedError, type NavigationFailureType } from '~/models/error.model.js';
+import { toPathSegment } from '@dvcol/common-utils/common/string';
+
+import { NavigationAbortedError } from '~/models/error.model.js';
 import { replaceTitleParams } from '~/models/matcher.model.js';
 import { RouterScrollConstant, RouterStateConstant } from '~/models/router.model.js';
 
-export const routeToHistoryState = <Name extends RouteName = RouteName>(
-  { route, location }: Partial<ResolvedRouterLocationSnapshot<Name>>,
-  {
-    metaAsState,
-    nameAsTitle,
-    state,
-    scrollState = { x: globalThis?.scrollX, y: globalThis?.scrollY },
-  }: {
-    metaAsState?: boolean;
-    nameAsTitle?: boolean;
-    state?: HistoryState;
-    scrollState?: { x: number; y: number };
-  } = {},
-): {
-  state: RouterState<Name>;
-  title?: string;
-} => {
+export function routeToHistoryState<Name extends RouteName = RouteName>({ route, location }: Partial<ResolvedRouterLocationSnapshot<Name>>, {
+  metaAsState,
+  nameAsTitle,
+  state,
+  scrollState = { x: globalThis?.scrollX, y: globalThis?.scrollY },
+}: {
+  metaAsState?: boolean;
+  nameAsTitle?: boolean;
+  state?: HistoryState;
+  scrollState?: { x: number; y: number };
+} = {}): {
+    state: RouterState<Name>;
+    title?: string;
+  } {
   const { href, query, params, name, path } = location ?? {};
   const _name = name ?? route?.name;
   const _path = path ?? route?.path;
   const title: string | undefined = route?.title ?? (nameAsTitle ? _name?.toString() : undefined);
-  const routerState: History['state'] = {};
-  if (metaAsState && route?.meta) routerState.meta = JSON.parse(JSON.stringify(route.meta));
+  const routerState: RouterStateLocation<Name> = {};
+  if (metaAsState && route?.meta) routerState.meta = JSON.parse(JSON.stringify(route.meta)) as RouterStateLocation<Name>['meta'];
   if (name) routerState.name = _name;
   if (path) routerState.path = _path;
   if (href) routerState.href = href.toString();
@@ -45,28 +43,25 @@ export const routeToHistoryState = <Name extends RouteName = RouteName>(
     },
     title: title?.length ? replaceTitleParams(title, params) : title,
   };
-};
+}
 
-export const resolveNewHref = (
-  target: string,
-  {
-    base,
-    hash,
-    query,
-    stripQuery,
-    stripHash,
-    stripTrailingHash,
-    current = globalThis?.location.href,
-  }: {
-    base?: string;
-    hash?: boolean;
-    query?: RouteQuery;
-    current?: string;
-    stripQuery?: boolean;
-    stripHash?: boolean;
-    stripTrailingHash?: boolean;
-  } = {},
-): { href: URL; search: URLSearchParams } => {
+export function resolveNewHref(target: string, {
+  base,
+  hash,
+  query,
+  stripQuery,
+  stripHash,
+  stripTrailingHash,
+  current = globalThis?.location.href,
+}: {
+  base?: string;
+  hash?: boolean;
+  query?: RouteQuery;
+  current?: string;
+  stripQuery?: boolean;
+  stripHash?: boolean;
+  stripTrailingHash?: boolean;
+} = {}): { href: URL; search: URLSearchParams } {
   const href = new URL(current);
   // In hash mode, we extract the query from the hash, else we use the search params
   let search: URLSearchParams;
@@ -100,21 +95,18 @@ export const resolveNewHref = (
     if (stripQuery) href.search = search.toString();
   }
   return { href, search };
-};
+}
 
-export const isRouteNavigation = <Name extends RouteName = RouteName>(navigation: unknown): navigation is RouteNavigation<Name> => {
+export function isRouteNavigation<Name extends RouteName = RouteName>(navigation: unknown): navigation is RouteNavigation<Name> {
   if (!navigation) return false;
   if (typeof navigation !== 'object') return false;
   return !!(('name' in navigation && navigation?.name) || ('path' in navigation && navigation?.path));
-};
+}
 
-export const preventNavigation = <Name extends RouteName = RouteName>(
-  result: NavigationGuardReturn<Name>,
-  failure: NavigationFailureType<Name>,
-): false | RouteNavigation<Name> => {
+export function preventNavigation<Name extends RouteName = RouteName>(result: NavigationGuardReturn<Name>, failure: NavigationFailureType<Name>): false | RouteNavigation<Name> {
   if (typeof result === 'string') throw new NavigationAbortedError(failure, { message: result });
   if (result instanceof Error) throw new NavigationAbortedError(failure, { error: result });
   if (result === false) throw new NavigationAbortedError(failure);
   if (isRouteNavigation(result)) return result;
   return false;
-};
+}
