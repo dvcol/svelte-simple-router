@@ -82,25 +82,25 @@ export const active: Action<HTMLElement, ActiveActionOptions | undefined> = (nod
   }
 
   let _options = $state(options);
-  let _path: string | null = $state(_options.path || node.getAttribute('data-path') || node.getAttribute('href'));
-  let _name: RouteName | null = $state(_options.name || node.getAttribute('data-name'));
+  let _path: string | null = $state(options.path || node.getAttribute('data-path') || node.getAttribute('href'));
+  let _name: RouteName | null = $state(options.name || node.getAttribute('data-name'));
+
+  const checkPathAndName = () => {
+    if (!_path && !_name) {
+      Logger.warn('No path or name found. Make sure you are using the active action with the proper parameters.', { node, options });
+      node.setAttribute('data-error', 'No path or name found.');
+    } else {
+      node.removeAttribute('data-error');
+    }
+  };
 
   const update = (newOptions: ActiveActionOptions | undefined = {}) => {
     _options = newOptions;
     _path = newOptions.path || node.getAttribute('data-path') || node.getAttribute('href');
     _name = newOptions.name || node.getAttribute('data-name');
 
-    if (!_path && !_name) {
-      Logger.warn('No path or name found. Make sure you are using the active action with the proper parameters.', { node, options });
-    }
+    checkPathAndName();
   };
-
-  if (!_path && !_name) {
-    Logger.warn('No path or name found. Make sure you are using the active action with the proper parameters.', { node, options });
-    node.setAttribute('data-error', 'No path or name found.');
-    return { update };
-  }
-  node.removeAttribute('data-error');
 
   const route = $derived(router.route);
   const caseSensitive = $derived(_options?.caseSensitive ?? router.options?.caseSensitive);
@@ -124,7 +124,7 @@ export const active: Action<HTMLElement, ActiveActionOptions | undefined> = (nod
 
   const match = $derived(matchName || matchPath);
 
-  const originalStyle = Object.fromEntries(Object.keys(_options.style || {}).map(key => [key, node.style[key as keyof CSSStyleDeclaration]]));
+  const originalStyle = $derived(Object.fromEntries(Object.keys(_options.style || {}).map(key => [key, node.style[key as keyof CSSStyleDeclaration]])));
 
   $effect(() => {
     if (match) {
@@ -143,5 +143,6 @@ export const active: Action<HTMLElement, ActiveActionOptions | undefined> = (nod
     }
   });
 
+  checkPathAndName();
   return { update };
 };

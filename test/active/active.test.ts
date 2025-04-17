@@ -1,14 +1,14 @@
-import { render, screen } from "@testing-library/svelte";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { Route } from '~/models/route.model.js';
 
-import Active from "./Active.test.svelte";
+import { render, screen } from '@testing-library/svelte';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { Route } from "~/models/route.model.js";
+import { active } from '~/router/active.svelte.js';
+import * as GetRouterModule from '~/router/context.svelte.js';
+import { Router } from '~/router/router.svelte.js';
+import { Logger } from '~/utils/logger.utils.js';
 
-import { active } from "~/router/active.svelte.js";
-import * as GetRouterModule from "~/router/context.svelte.js";
-import { Router } from "~/router/router.svelte.js";
-import { Logger } from "~/utils/logger.utils.js";
+import Active from './Active.test.svelte';
 
 describe('active', () => {
   const HomeRoute: Route = {
@@ -74,16 +74,16 @@ describe('active', () => {
     });
 
     it('should exit, warn and add a data-error attribute if no path or name is found', () => {
-      expect.assertions(3);
+      expect.assertions(2);
 
-      active(mockNode, {});
+      render(Active, { router });
+      const target = screen.getByTestId('span-error');
 
-      expect(spyRouter).toHaveBeenCalledWith();
       expect(spyLoger).toHaveBeenCalledWith('No path or name found. Make sure you are using the active action with the proper parameters.', {
-        node: mockNode,
+        node: target,
         options: {},
       });
-      expect(mockNode.setAttribute).toHaveBeenCalledWith('data-error', 'No path or name found.');
+      expect(target.getAttribute('data-error')).toBe('No path or name found.');
     });
   });
 
@@ -91,7 +91,7 @@ describe('active', () => {
     describe('data-active', () => {
       const nodes = ['anchor-path', 'anchor-name', 'span-path', 'span-name', 'param-path', 'param-name'];
 
-      it.each(nodes)('should set/unset the data-active attribute on `%s` if the path matches/un-matches', async node => {
+      it.each(nodes)('should set/unset the data-active attribute on `%s` if the path matches/un-matches', async (node) => {
         expect.assertions(3);
 
         render(Active, { router });

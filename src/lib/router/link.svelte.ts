@@ -54,14 +54,14 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
 
   const navigate = $derived.by<LinkNavigateFunction | undefined>(() => {
     try {
-      return getLinkNavigateFunction(_options);
+      const fn = getLinkNavigateFunction(_options);
+      node.removeAttribute('data-error');
+      return fn;
     } catch (error) {
       Logger.warn('Router not found. Make sure you are using the link(s) action within a Router context.', { node, options, error });
       node.setAttribute('data-error', 'Router not found.');
     }
   });
-  if (!navigate) return { update };
-  node.removeAttribute('data-error');
 
   const navigateHandler = async (event: MouseEvent | KeyboardEvent) => navigate?.(event, node);
 
