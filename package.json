@@ -120,7 +120,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
-    "@dvcol/eslint-config": "^1.1.0",
+    "@dvcol/eslint-config": "^1.2.0",
     "@dvcol/neo-svelte": "^0.1.12",
     "@dvcol/stylelint-plugin-presets": "^2.1.2",
     "@sveltejs/adapter-auto": "^6.0.0",

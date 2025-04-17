@@ -25,8 +25,8 @@ importers:
         specifier: ^19.8.0
         version: 19.8.0
       '@dvcol/eslint-config':
-        specifier: ^1.1.0
-        version: 1.1.0(@prettier/plugin-xml@3.4.1(prettier@3.5.3))(@typescript-eslint/utils@8.30.1(eslint@9.24.0(jiti@2.4.2))(typescript@5.8.3))(@vue/compiler-sfc@3.5.13)(eslint-plugin-format@1.0.1(eslint@9.24.0(jiti@2.4.2)))(eslint-plugin-svelte@3.5.1(eslint@9.24.0(jiti@2.4.2))(svelte@5.27.0))(eslint@9.24.0(jiti@2.4.2))(prettier@3.5.3)(svelte-eslint-parser@1.1.2(svelte@5.27.0))(typescript@5.8.3)(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.14.1)(jiti@2.4.2)(jsdom@26.1.0)(sass@1.86.3)(sugarss@2.0.0)(yaml@2.7.1))
+        specifier: ^1.2.0
+        version: 1.2.0(@prettier/plugin-xml@3.4.1(prettier@3.5.3))(@typescript-eslint/utils@8.30.1(eslint@9.24.0(jiti@2.4.2))(typescript@5.8.3))(@vue/compiler-sfc@3.5.13)(eslint-plugin-format@1.0.1(eslint@9.24.0(jiti@2.4.2)))(eslint-plugin-svelte@3.5.1(eslint@9.24.0(jiti@2.4.2))(svelte@5.27.0))(eslint@9.24.0(jiti@2.4.2))(prettier@3.5.3)(svelte-eslint-parser@1.1.2(svelte@5.27.0))(typescript@5.8.3)(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.14.1)(jiti@2.4.2)(jsdom@26.1.0)(sass@1.86.3)(sugarss@2.0.0)(yaml@2.7.1))
       '@dvcol/neo-svelte':
         specifier: ^0.1.12
         version: 0.1.12(svelte@5.27.0)
@@ -422,8 +422,8 @@ packages:
     resolution: {integrity: sha512-QwfA1xm+UbtyMrPEpPa1o2IA7yJcOAlGLD2Ulthk48pHTBbLUDd+ZwxMhhRf0g8z1fNjag3a6nWQsBRFK5M7NA==}
     engines: {node: '>=20', pnpm: '>= 8'}
 
-  '@dvcol/eslint-config@1.1.0':
-    resolution: {integrity: sha512-3AqEQIP3z0GowpTCpKJeX0VEcRNihUsXy9jH+2So27v1VzOE+cLwILhf++1TL9IZiwr3obUJiFN1Jx0ablBPmg==}
+  '@dvcol/eslint-config@1.2.0':
+    resolution: {integrity: sha512-YWlEE2C0cm7M6NA/oNi1KThji4NRKX5aeywCLdSr7XRPGir1P6cfLOU4fcYzHdQFfistZrmADvpF0HvHNU7Yhw==}
     engines: {node: '>=20', pnpm: '>= 8'}
     peerDependencies:
       '@prettier/plugin-xml': '>= 3.4.0'
@@ -5613,7 +5613,7 @@ snapshots:
       pretty-bytes: 6.1.1
       uuid: 11.0.5
 
-  '@dvcol/eslint-config@1.1.0(@prettier/plugin-xml@3.4.1(prettier@3.5.3))(@typescript-eslint/utils@8.30.1(eslint@9.24.0(jiti@2.4.2))(typescript@5.8.3))(@vue/compiler-sfc@3.5.13)(eslint-plugin-format@1.0.1(eslint@9.24.0(jiti@2.4.2)))(eslint-plugin-svelte@3.5.1(eslint@9.24.0(jiti@2.4.2))(svelte@5.27.0))(eslint@9.24.0(jiti@2.4.2))(prettier@3.5.3)(svelte-eslint-parser@1.1.2(svelte@5.27.0))(typescript@5.8.3)(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.14.1)(jiti@2.4.2)(jsdom@26.1.0)(sass@1.86.3)(sugarss@2.0.0)(yaml@2.7.1))':
+  '@dvcol/eslint-config@1.2.0(@prettier/plugin-xml@3.4.1(prettier@3.5.3))(@typescript-eslint/utils@8.30.1(eslint@9.24.0(jiti@2.4.2))(typescript@5.8.3))(@vue/compiler-sfc@3.5.13)(eslint-plugin-format@1.0.1(eslint@9.24.0(jiti@2.4.2)))(eslint-plugin-svelte@3.5.1(eslint@9.24.0(jiti@2.4.2))(svelte@5.27.0))(eslint@9.24.0(jiti@2.4.2))(prettier@3.5.3)(svelte-eslint-parser@1.1.2(svelte@5.27.0))(typescript@5.8.3)(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.14.1)(jiti@2.4.2)(jsdom@26.1.0)(sass@1.86.3)(sugarss@2.0.0)(yaml@2.7.1))':
     dependencies:
       '@antfu/eslint-config': 4.12.0(@prettier/plugin-xml@3.4.1(prettier@3.5.3))(@typescript-eslint/utils@8.30.1(eslint@9.24.0(jiti@2.4.2))(typescript@5.8.3))(@vue/compiler-sfc@3.5.13)(eslint-plugin-format@1.0.1(eslint@9.24.0(jiti@2.4.2)))(eslint-plugin-svelte@3.5.1(eslint@9.24.0(jiti@2.4.2))(svelte@5.27.0))(eslint@9.24.0(jiti@2.4.2))(svelte-eslint-parser@1.1.2(svelte@5.27.0))(typescript@5.8.3)(vitest@3.1.1(@types/debug@4.1.12)(@types/node@22.14.1)(jiti@2.4.2)(jsdom@26.1.0)(sass@1.86.3)(sugarss@2.0.0)(yaml@2.7.1))
       '@prettier/plugin-xml': 3.4.1(prettier@3.5.3)
@@ -6315,7 +6315,7 @@ snapshots:
       debug: 4.4.0
       fast-glob: 3.3.3
       is-glob: 4.0.3
-      minimatch: 9.0.4
+      minimatch: 9.0.5
       semver: 7.7.1
       ts-api-utils: 2.1.0(typescript@5.8.3)
       typescript: 5.8.3
@@ -7354,7 +7354,7 @@ snapshots:
       eslint-import-resolver-node: 0.3.9
       get-tsconfig: 4.10.0
       is-glob: 4.0.3
-      minimatch: 9.0.4
+      minimatch: 9.0.5
       semver: 7.7.1
       stable-hash: 0.0.5
       tslib: 2.8.1

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { NeoButton, NeoCard, NeoCheckbox, NeoInput, NeoSelect, NeoTextarea } from '@dvcol/neo-svelte';
-
   import type { RouterOptions } from '~/models/router.model.js';
+
+  import { NeoButton, NeoCard, NeoCheckbox, NeoInput, NeoSelect, NeoTextarea } from '@dvcol/neo-svelte';
 
   let {
     options = $bindable({
@@ -16,10 +16,10 @@
       nameAsTitle: false,
       followGuardRedirects: true,
       caseSensitive: false,
-      beforeEach: navigation => {
+      beforeEach: (navigation) => {
         console.info('Option before each', navigation);
       },
-      onStart: navigation => {
+      onStart: (navigation) => {
         console.info('Option on start', navigation);
       },
       onEnd: (navigation, resolved) => {

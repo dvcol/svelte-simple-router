@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { NeoButton, NeoCard, NeoInput } from '@dvcol/neo-svelte';
-
   import type { Route, RouteName } from '~/models/route.model.js';
+
+  import { NeoButton, NeoCard, NeoInput } from '@dvcol/neo-svelte';
 
   import { NavigationCancelledError } from '~/models/error.model.js';
   import { active } from '~/router/active.svelte.js';
@@ -44,9 +44,9 @@
 
   const handleError = (err: Error | unknown) => {
     if (err instanceof NavigationCancelledError) {
-      console.warn('[PathSelector]', `Failed to sync, navigation cancelled`, err);
+      console.warn('[PathSelector]', 'Failed to sync, navigation cancelled', err);
     } else {
-      console.error('[PathSelector]', `Failed to sync`, err);
+      console.error('[PathSelector]', 'Failed to sync', err);
     }
   };
 

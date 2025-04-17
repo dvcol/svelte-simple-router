@@ -1,19 +1,18 @@
 <script lang="ts">
+  import type { RouterOptions } from '~/models/router.model.js';
+
   import { NeoThemeProvider } from '@dvcol/neo-svelte/providers';
   import { toLazyComponent } from '@dvcol/svelte-utils/component';
+
+  import { LogLevel } from '~/utils/logger.utils.js';
 
   import ErrorComponent from './components/Error.svelte';
   import GoodbyeComponent from './components/Goodbye.svelte';
   import HelloComponent from './components/Hello.svelte';
   import Links from './components/Links.svelte';
   import Loading from './components/Loading.svelte';
-
   import DefaultRouter from './routers/DefaultRouter.svelte';
   import NestedRouters from './routers/NestedRouters.svelte';
-
-  import type { RouterOptions } from '~/models/router.model.js';
-
-  import { LogLevel } from '~/utils/logger.utils.js';
 
   const RouteName = {
     Hello: 'Hello',
@@ -117,7 +116,7 @@
       name: RouteName.Loading,
       path: '/loading',
       component: () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
           setTimeout(() => resolve({ default: HelloComponent }), 5000);
         }),
       props: {
@@ -129,7 +128,7 @@
       path: '/loading-custom',
       loading: Loading,
       component: () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
           setTimeout(() => resolve({ default: HelloComponent }), 5000);
         }),
       props: {
@@ -150,9 +149,9 @@
         age: 18,
       },
       props: {
-        title: 'custom title',
-        subtitle: 'custom subtitle',
-        onMoutHook: () => {
+        'title': 'custom title',
+        'subtitle': 'custom subtitle',
+        'onMoutHook': () => {
           console.info('on mount');
         },
         'transition:fade': { delay: 250, duration: 300 },
@@ -231,7 +230,7 @@
       path: '/slow',
       component: HelloComponent,
       beforeEnter: () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
           setTimeout(() => resolve(), 5000);
         }),
       props: {
@@ -244,11 +243,11 @@
       loading: Loading,
       error: ErrorComponent,
       component: () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
           setTimeout(() => resolve({ default: HelloComponent }), 3000);
         }),
       beforeEnter: () =>
-        new Promise(resolve => {
+        new Promise((resolve) => {
           setTimeout(() => resolve(), 2000);
         }),
     },

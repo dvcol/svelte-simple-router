@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
+
   import type { PartialRoute, Route } from '~/models/route.model.js';
 
   import RouteView from '~/components/RouteView.svelte';

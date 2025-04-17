@@ -1,23 +1,21 @@
 <script lang="ts">
+  import type { RouterOptions } from '~/models/router.model.js';
+
   import { NeoButton } from '@dvcol/neo-svelte';
   import { toLazyComponent } from '@dvcol/svelte-utils/component';
   import { tick } from 'svelte';
 
-  import RouteView from '../../src/lib/components/RouteView.svelte';
-  import DynamicRouteView from '../components/DynamicRouteView.svelte';
-
-  import GoodByeComponent from '../components/Goodbye.svelte';
-
-  import OptionSelector from './OptionSelector.svelte';
-  import PathSelector from './PathSelector.svelte';
-
-  import type { RouterOptions } from '~/models/router.model.js';
-
-  import RouterContext from '~/components/RouterContext.svelte';
-  import RouterView from '~/components/RouterView.svelte';
   import RouteDebugger from '~/components/debug/RouteDebugger.svelte';
   import RouterDebugger from '~/components/debug/RouterDebugger.svelte';
+  import RouterContext from '~/components/RouterContext.svelte';
+  import RouterView from '~/components/RouterView.svelte';
   import { defaultOptions } from '~/models/router.model.js';
+
+  import RouteView from '../../src/lib/components/RouteView.svelte';
+  import DynamicRouteView from '../components/DynamicRouteView.svelte';
+  import GoodByeComponent from '../components/Goodbye.svelte';
+  import OptionSelector from './OptionSelector.svelte';
+  import PathSelector from './PathSelector.svelte';
 
   const LazyHelloComponent = toLazyComponent(() => import('../components/Hello.svelte'));
 
@@ -28,10 +26,10 @@
     listen: 'history',
     base: '/svelte-simple-router',
     hash: true,
-    beforeEach: navigation => {
+    beforeEach: (navigation) => {
       console.info('Option before each', navigation);
     },
-    onStart: navigation => {
+    onStart: (navigation) => {
       console.info('Option on start', navigation);
     },
     onEnd: (navigation, resolved) => {

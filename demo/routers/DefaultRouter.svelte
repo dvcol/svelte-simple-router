@@ -1,20 +1,19 @@
 <script lang="ts">
+  import type { IRouter, RouterOptions } from '~/models/router.model.js';
+
   import { NeoButton, NeoCard, NeoCheckbox } from '@dvcol/neo-svelte';
   import { tick } from 'svelte';
 
-  import DynamicRouteView from '../components/DynamicRouteView.svelte';
-
-  import OptionSelector from './OptionSelector.svelte';
-  import PathSelector from './PathSelector.svelte';
-
-  import type { IRouter, RouterOptions } from '~/models/router.model.js';
-
-  import RouterView from '~/components/RouterView.svelte';
   import RouteDebugger from '~/components/debug/RouteDebugger.svelte';
   import RouterDebugger from '~/components/debug/RouterDebugger.svelte';
   import ViewDebugger from '~/components/debug/ViewDebugger.svelte';
+  import RouterView from '~/components/RouterView.svelte';
   import { defaultOptions } from '~/models/router.model.js';
   import { transition } from '~/utils/transition.utils.js';
+
+  import DynamicRouteView from '../components/DynamicRouteView.svelte';
+  import OptionSelector from './OptionSelector.svelte';
+  import PathSelector from './PathSelector.svelte';
 
   const opts: Partial<RouterOptions> = $props();
 
