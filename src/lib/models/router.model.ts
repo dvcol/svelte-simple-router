@@ -91,7 +91,7 @@ export type RouterState<Name extends RouteName = RouteName> = HistoryState & {
   [RouterScrollConstant]?: RouterScrollPosition;
 };
 
-export type IHistory<Name extends RouteName = RouteName, T extends RouterState<Name> = RouterState<Name>> = History & {
+export type IHistory<Name extends RouteName = RouteName, T extends RouterState<Name> = RouterState<Name>> = Omit<History, 'state' | 'pushState' | 'replaceState'> & {
   state: T;
   pushState: (state: T, title: string, url?: string | null) => void;
   replaceState: (state: T, title: string, url?: string | null) => void;
@@ -345,6 +345,16 @@ export interface IRouter<Name extends RouteName = RouteName> {
   readonly options: RouterOptionsSnapshot<Name>;
 
   /**
+   * Whether the router is initialized and ready to use.
+   */
+  readonly ready: boolean;
+
+  /**
+   * Whether the router is currently syncing with the current location.
+   */
+  readonly syncing?: Promise<ResolvedRouterLocationSnapshot<Name>>;
+
+  /**
    * Checks if a route with a given name exists
    *
    * @param name - Name of the route to check
@@ -508,7 +518,17 @@ export interface IRouter<Name extends RouteName = RouteName> {
   go: (delta: number) => Promise<ResolvedRouterLocationSnapshot<Name>>;
 
   /**
+   * Initialize the router hooks and listeners.
+   */
+  init: () => Promise<this>;
+
+  /**
+   * Listen to navigation events and update the router state.
+   */
+  listen: () => this;
+
+  /**
    * Teardown function to clean up the router instance.
    */
-  destroy: () => void;
+  destroy: () => this;
 }

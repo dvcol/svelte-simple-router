@@ -1,29 +1,27 @@
-import { wait } from '@dvcol/common-utils/common/promise';
+import { wait } from "@dvcol/common-utils/common/promise";
 
-import { cleanup, render, screen } from '@testing-library/svelte';
+import type { RenderResult } from "@testing-library/svelte";
+import { cleanup, render, screen } from "@testing-library/svelte";
 
-import { tick } from 'svelte';
+import { tick } from "svelte";
 
-import { afterEach, assert, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { MockInstance } from "vitest";
+import { afterEach, assert, beforeEach, describe, expect, it, vi } from "vitest";
 
-import RouteView from './RouteView.test.svelte';
+import RouteView from "./RouteView.test.svelte";
 
-import RouterContext from './RouterContext.test.svelte';
-import RouterView from './RouterView.test.svelte';
-import RouterViewNested from './RouterViewNested.test.svelte';
+import RouterContext from "./RouterContext.test.svelte";
+import RouterView from "./RouterView.test.svelte";
+import RouterViewNested from "./RouterViewNested.test.svelte";
 
-import LoadingComponent from './stub/LoadingComponent.test.svelte';
-import { LifeCycle } from './stub/mocks.js';
-import { namedPartialRoute, partialRoute, routes } from './stub/routes.js';
+import LoadingComponent from "./stub/LoadingComponent.test.svelte";
+import { LifeCycle } from "./stub/mocks.js";
+import { namedPartialRoute, partialRoute, routes } from "./stub/routes.js";
 
-import type { RenderResult } from '@testing-library/svelte';
-
-import type { MockInstance } from 'vitest';
-
-import RouteTransition from '~/components/RouteTransition.svelte';
-import { NavigationEvent, ViewChangeEvent } from '~/router/event.svelte.js';
-import { Router } from '~/router/router.svelte.js';
-import { transition } from '~/utils/transition.utils.js';
+import RouteTransition from "~/components/RouteTransition.svelte";
+import { NavigationEvent, ViewChangeEvent } from "~/router/event.svelte.js";
+import { Router } from "~/router/router.svelte.js";
+import { transition } from "~/utils/transition.utils.js";
 
 describe('routerView', () => {
   let router: Router;
@@ -38,7 +36,7 @@ describe('routerView', () => {
 
   beforeEach(async () => {
     router = new Router({ routes, hash: true, listen: false });
-    await wait();
+    await router.init();
     addRoute = vi.spyOn(router, 'addRoute');
     removeRoute = vi.spyOn(router, 'removeRoute');
     vi.clearAllMocks();

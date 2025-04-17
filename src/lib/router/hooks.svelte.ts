@@ -189,8 +189,9 @@ export function onViewError<Name extends RouteName = any>(callback: LoadingError
 /**
  * Add a listener that is executed when an error occurs during view loading or router navigation.
  * @param callback
- * @param router - optional router instance to use.
- * @param view - optional view instance to use.
+ * @param options - options to override the default router and view instances.
+ * @param options.router - optional router instance to use.
+ * @param options.view - optional view instance to use.
  * @throws {MissingRouterContextError} when no router is available.
  * @throws {MissingViewContextError} when no view is available.
  */

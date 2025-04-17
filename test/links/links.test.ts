@@ -1,13 +1,13 @@
-import { render, screen } from '@testing-library/svelte';
-import { userEvent } from '@testing-library/user-event';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { render, screen } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import Links from './Links.test.svelte';
+import Links from "./Links.test.svelte";
 
-import type { RouterNavigationOptions } from '../../src/lib';
-import type { Route, RouteNavigation } from '~/models/route.model.js';
+import type { RouterNavigationOptions } from "../../src/lib";
+import type { Route, RouteNavigation } from "~/models/route.model.js";
 
-import { Router } from '~/router/router.svelte.js';
+import { Router } from "~/router/router.svelte.js";
 
 describe('link', () => {
   const HomeRoute: Route = {
@@ -26,7 +26,8 @@ describe('link', () => {
   const spyPush = vi.spyOn(router, 'push').mockReturnValue(undefined);
   const spyReplace = vi.spyOn(router, 'replace').mockReturnValue(undefined);
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await router.init();
     vi.clearAllMocks();
   });
 

@@ -1,17 +1,16 @@
-import { render } from '@testing-library/svelte';
-import * as SvelteModule from 'svelte';
+import { render } from "@testing-library/svelte";
+import * as SvelteModule from "svelte";
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import type { MockInstance } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import HooksComponent from '../components/stub/HooksComponent.test.svelte';
+import HooksComponent from "../components/stub/HooksComponent.test.svelte";
 
-import type { MockInstance } from 'vitest';
-
-import { MissingRouterContextError, MissingViewContextError } from '~/models/error.model.js';
-import * as ContextModule from '~/router/context.svelte.js';
-import { hasRouter, hasView, useNavigate, useRoute, useRouter, useView } from '~/router/hooks.svelte.js';
-import { Router } from '~/router/router.svelte.js';
-import { View } from '~/router/view.svelte.js';
+import { MissingRouterContextError, MissingViewContextError } from "~/models/error.model.js";
+import * as ContextModule from "~/router/context.svelte.js";
+import { hasRouter, hasView, useNavigate, useRoute, useRouter, useView } from "~/router/hooks.svelte.js";
+import { Router } from "~/router/router.svelte.js";
+import { View } from "~/router/view.svelte.js";
 
 describe('hooks', () => {
   let router: Router;
@@ -43,8 +42,9 @@ describe('hooks', () => {
     onError: MockInstance<View['onError']>;
   };
 
-  const initRouteAndView = () => {
+  const initRouteAndView =async () => {
     router = new Router();
+    await router.init();
     spyGetRouter = vi.spyOn(ContextModule, 'getRouter').mockReturnValue(router);
 
     routerSpy = {
@@ -73,7 +73,7 @@ describe('hooks', () => {
     spyHasContext = vi.spyOn(SvelteModule, 'hasContext').mockReturnValue(true);
   };
 
-  beforeEach(() => initRouteAndView());
+  beforeEach(initRouteAndView);
 
   describe('useRouter', () => {
     it('should return the router', () => {

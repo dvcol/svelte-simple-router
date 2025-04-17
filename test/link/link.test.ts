@@ -1,18 +1,18 @@
-import { render, screen } from '@testing-library/svelte';
-import { userEvent } from '@testing-library/user-event';
+import { render, screen } from "@testing-library/svelte";
+import { userEvent } from "@testing-library/user-event";
 
-import { tick } from 'svelte';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { tick } from "svelte";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import Link from './Link.test.svelte';
+import Link from "./Link.test.svelte";
 
-import type { RouterNavigationOptions } from '../../src/lib';
-import type { Route, RouteNavigation } from '~/models/route.model.js';
+import type { RouterNavigationOptions } from "../../src/lib";
+import type { Route, RouteNavigation } from "~/models/route.model.js";
 
-import { active } from '~/router/active.svelte.js';
-import * as GetRouterModule from '~/router/context.svelte.js';
-import { Router } from '~/router/router.svelte.js';
-import { Logger } from '~/utils/logger.utils.js';
+import { active } from "~/router/active.svelte.js";
+import * as GetRouterModule from "~/router/context.svelte.js";
+import { Router } from "~/router/router.svelte.js";
+import { Logger } from "~/utils/logger.utils.js";
 
 describe('link', () => {
   const HomeRoute: Route = {
@@ -32,7 +32,8 @@ describe('link', () => {
   const spyReplace = vi.spyOn(router, 'replace').mockReturnValue(undefined);
   const spyResolve = vi.spyOn(router, 'resolve').mockReturnValue(undefined);
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await router.init();
     vi.clearAllMocks();
   });
 

@@ -1,23 +1,21 @@
 /// <reference types="navigation-api-types" />
 
-import { wait } from '@dvcol/common-utils/common/promise';
+import { wait } from "@dvcol/common-utils/common/promise";
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import type { MockInstance } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { MockInstance } from 'vitest';
+import type { NavigationNotFoundError, NavigationResolveError } from "~/models/error.model.js";
+import { ErrorTypes, NavigationAbortedError, NavigationCancelledError } from "~/models/error.model.js";
 
-import type { NavigationNotFoundError, NavigationResolveError } from '~/models/error.model.js';
+import type { Route, RouteParams, RouteQuery } from "~/models/route.model.js";
 
-import type { Route, RouteParams, RouteQuery } from '~/models/route.model.js';
+import type { RouterOptions } from "~/models/router.model.js";
+import { RouterScrollConstant, RouterStateConstant } from "~/models/router.model.js";
+import { NavigationEvent } from "~/router/event.svelte.js";
 
-import type { RouterOptions } from '~/models/router.model.js';
-
-import { ErrorTypes, NavigationAbortedError, NavigationCancelledError } from '~/models/error.model.js';
-import { RouterScrollConstant, RouterStateConstant } from '~/models/router.model.js';
-import { NavigationEvent } from '~/router/event.svelte.js';
-
-import { Router } from '~/router/router.svelte.js';
-import { Logger } from '~/utils/index.js';
+import { Router } from "~/router/router.svelte.js";
+import { Logger } from "~/utils/index.js";
 
 describe('router', () => {
   const HomeRoute: Route = {
@@ -164,9 +162,7 @@ describe('router', () => {
   const getRouter = async (options: RouterOptions = { routes }, clearInit = false) => {
     const _router: Router = new Router(options);
     // Flush the microtask queue to ensure the router is initialized
-    await wait();
-    // Wait for the router to be ready
-    await _router.syncing;
+    await _router.init();
     resolve = vi.spyOn(_router, 'resolve');
     sync = vi.spyOn(_router, 'sync');
     push = vi.spyOn(_router, 'push');
@@ -1411,7 +1407,6 @@ describe('router', () => {
         router = await getRouter({ routes, listen: 'history' });
         expect(sync).not.toHaveBeenCalled();
 
-        console.info('First dispatch');
         window.dispatchEvent(new PopStateEvent('popstate'));
         await wait();
         await router.syncing;
@@ -1420,7 +1415,6 @@ describe('router', () => {
         expect(sync).not.toHaveBeenCalled();
         expect(router.route).toBeUndefined();
 
-        console.info('Second dispatch');
         window.history.pushState(null, '', PathRoute.path);
         window.dispatchEvent(new PopStateEvent('popstate'));
         await wait();

@@ -1,14 +1,14 @@
-import { render, screen } from '@testing-library/svelte';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { render, screen } from "@testing-library/svelte";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import Active from './Active.test.svelte';
+import Active from "./Active.test.svelte";
 
-import type { Route } from '~/models/route.model.js';
+import type { Route } from "~/models/route.model.js";
 
-import { active } from '~/router/active.svelte.js';
-import * as GetRouterModule from '~/router/context.svelte.js';
-import { Router } from '~/router/router.svelte.js';
-import { Logger } from '~/utils/logger.utils.js';
+import { active } from "~/router/active.svelte.js";
+import * as GetRouterModule from "~/router/context.svelte.js";
+import { Router } from "~/router/router.svelte.js";
+import { Logger } from "~/utils/logger.utils.js";
 
 describe('active', () => {
   const HomeRoute: Route = {
@@ -29,7 +29,8 @@ describe('active', () => {
     routes: [HomeRoute, OtherRoute],
   });
 
-  beforeEach(() => {
+  beforeEach(async () => {
+    await router.init();
     vi.clearAllMocks();
   });
 

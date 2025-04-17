@@ -2,8 +2,6 @@
   import type { RouterContextProps } from '~/models/component.model.js';
   import type { IRouter } from '~/models/router.model.js';
 
-  import { onDestroy } from 'svelte';
-
   import { getRouter, setRouter } from '~/router/context.svelte.js';
   import { Router } from '~/router/router.svelte.js';
   import { Logger, LoggerKey } from '~/utils/logger.utils.js';
@@ -28,10 +26,11 @@
   const innerRouter: IRouter | undefined = outerRouter ? undefined : createInnerRouter(router);
   const resolvedRouter: IRouter = (outerRouter ?? innerRouter)!;
 
-  onDestroy(() => {
-    if (!innerRouter) return;
-    innerRouter.destroy();
-    Logger.debug(`[${LoggerKey} Context]`, 'Router Context destroyed', innerRouter);
+  $effect.pre(() => {
+    if (!innerRouter || innerRouter.ready) return;
+    innerRouter.init();
+
+    return () => innerRouter?.destroy();
   });
 </script>
 
