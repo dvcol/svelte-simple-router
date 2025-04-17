@@ -1,22 +1,16 @@
+import type { NavigationFailureType } from '~/models/error.model.js';
+import type { Route } from '~/models/route.model.js';
+import type { ResolvedRouterLocationSnapshot, RouterLocation, RouterState, RouterStateLocation } from '~/models/router.model.js';
+
 import { describe, expect, it } from 'vitest';
 
-import type { Route } from '~/models/route.model.js';
-
-import { NavigationAbortedError, type NavigationFailureType } from '~/models/error.model.js';
+import { NavigationAbortedError } from '~/models/error.model.js';
 import { cloneRoute, isRouteEqual } from '~/models/route.model.js';
-
-import {
-  isLocationEqual,
-  type ResolvedRouterLocationSnapshot,
-  type RouterLocation,
-  RouterScrollConstant,
-  type RouterState,
-  RouterStateConstant,
-} from '~/models/router.model.js';
+import { isLocationEqual, RouterScrollConstant, RouterStateConstant } from '~/models/router.model.js';
 import { isRouteNavigation, preventNavigation, resolveNewHref, routeToHistoryState } from '~/utils/navigation.utils.js';
 
 describe('routeToHistoryState', () => {
-  const resolved: Partial<ResolvedRouterLocationSnapshot> = {
+  const resolved = {
     route: {
       name: 'user',
       path: '/path/user/:id',
@@ -26,11 +20,13 @@ describe('routeToHistoryState', () => {
     location: {
       name: 'user',
       path: '/path/user/1234',
-      href: new URL('http://localhost:3000/base/path/user/1234?query=string'),
+      href: 'http://localhost:3000/base/path/user/1234?query=string',
       query: { query: 'string' },
       params: { id: '1234' },
     },
-  };
+    origin: 'http://localhost:3000',
+    wildcards: {},
+  } satisfies ResolvedRouterLocationSnapshot;
 
   const expected: RouterState = {
     [RouterStateConstant]: {
@@ -62,7 +58,7 @@ describe('routeToHistoryState', () => {
     const { state, title } = routeToHistoryState(resolved, { metaAsState: true });
     expect(state).toMatchObject({
       ...expected,
-      [RouterStateConstant]: { ...expected[RouterStateConstant], meta: JSON.parse(JSON.stringify(resolved.route.meta)) },
+      [RouterStateConstant]: { ...expected[RouterStateConstant], meta: JSON.parse(JSON.stringify(resolved.route.meta)) as RouterStateLocation },
     });
     expect(title).toBe(resolved.route.title);
   });
@@ -424,8 +420,8 @@ describe('route', () => {
     meta: { key: 'value' },
     query: { query: 'string' },
     params: { id: '1234' },
-    component: () => import('~/components/RouteComponent.svelte'),
-    error: () => import('~/components/RouteTransition.svelte'),
+    component: async () => import('~/components/RouteComponent.svelte'),
+    error: async () => import('~/components/RouteTransition.svelte'),
   };
   describe('cloneRoute', () => {
     it('should clone a route', () => {
@@ -491,7 +487,7 @@ describe('route', () => {
       expect.assertions(2);
       const other: Route = {
         ...cloneRoute(route),
-        component: () => import('~/components/RouterView.svelte'),
+        component: async () => import('~/components/RouterView.svelte'),
       };
 
       expect(isRouteEqual(route, other)).toBeFalsy();
@@ -502,7 +498,7 @@ describe('route', () => {
       expect.assertions(2);
       const other: Route = {
         ...cloneRoute(route),
-        loading: () => import('~/components/RouterContext.svelte'),
+        loading: async () => import('~/components/RouterContext.svelte'),
       };
 
       expect(isRouteEqual(route, other)).toBeFalsy();
@@ -530,7 +526,7 @@ describe('route', () => {
       href: new URL('http://localhost:3000/base/path/user/1234/segment/end?query=string'),
       query: { query: 'string' },
       params: { id: '1234' },
-      wildcards: { '2': 'segment/end' },
+      wildcards: { 2: 'segment/end' },
     };
 
     it('should return true if the locations are the same', () => {
@@ -548,7 +544,7 @@ describe('route', () => {
         href: new URL('http://localhost:3000/base/path/user/1234/segment/end?query=string'),
         query: { query: 'string' },
         params: { id: '1234' },
-        wildcards: { '2': 'segment/end' },
+        wildcards: { 2: 'segment/end' },
       };
 
       expect(isLocationEqual(location, other)).toBeTruthy();

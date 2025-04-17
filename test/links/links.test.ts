@@ -1,13 +1,14 @@
-import { render, screen } from "@testing-library/svelte";
-import { userEvent } from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { Route, RouteNavigation } from '~/models/route.model.js';
 
-import Links from "./Links.test.svelte";
+import type { RouterNavigationOptions } from '../../src/lib';
 
-import type { RouterNavigationOptions } from "../../src/lib";
-import type { Route, RouteNavigation } from "~/models/route.model.js";
+import { render, screen } from '@testing-library/svelte';
+import { userEvent } from '@testing-library/user-event';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { Router } from "~/router/router.svelte.js";
+import { Router } from '~/router/router.svelte.js';
+
+import Links from './Links.test.svelte';
 
 describe('link', () => {
   const HomeRoute: Route = {
@@ -32,7 +33,12 @@ describe('link', () => {
   });
 
   describe('click', () => {
-    type NodeParams = { node: string; payload?: RouteNavigation; options?: RouterNavigationOptions; replace?: boolean };
+    interface NodeParams {
+      node: string;
+      payload?: RouteNavigation;
+      options?: RouterNavigationOptions;
+      replace?: boolean;
+    }
     const activeNodes: NodeParams[] = [
       // Default
       { node: 'anchor-path', payload: { path: HomeRoute.path } },

@@ -1,16 +1,18 @@
-import { render } from "@testing-library/svelte";
-import * as SvelteModule from "svelte";
+import type { MockInstance } from 'vitest';
 
-import type { MockInstance } from "vitest";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { RouteName, RouteNavigation } from '~/models/route.model.js';
 
-import HooksComponent from "../components/stub/HooksComponent.test.svelte";
+import { render } from '@testing-library/svelte';
+import * as SvelteModule from 'svelte';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { MissingRouterContextError, MissingViewContextError } from "~/models/error.model.js";
-import * as ContextModule from "~/router/context.svelte.js";
-import { hasRouter, hasView, useNavigate, useRoute, useRouter, useView } from "~/router/hooks.svelte.js";
-import { Router } from "~/router/router.svelte.js";
-import { View } from "~/router/view.svelte.js";
+import { MissingRouterContextError, MissingViewContextError } from '~/models/error.model.js';
+import * as ContextModule from '~/router/context.svelte.js';
+import { hasRouter, hasView, useNavigate, useRoute, useRouter, useView } from '~/router/hooks.svelte.js';
+import { Router } from '~/router/router.svelte.js';
+import { View } from '~/router/view.svelte.js';
+
+import HooksComponent from '../components/stub/HooksComponent.test.svelte';
 
 describe('hooks', () => {
   let router: Router;
@@ -42,7 +44,7 @@ describe('hooks', () => {
     onError: MockInstance<View['onError']>;
   };
 
-  const initRouteAndView =async () => {
+  const initRouteAndView = async () => {
     router = new Router();
     await router.init();
     spyGetRouter = vi.spyOn(ContextModule, 'getRouter').mockReturnValue(router);
@@ -131,32 +133,32 @@ describe('hooks', () => {
   });
 
   describe('useNavigate', () => {
-    const route = { name: 'home', path: '/' };
+    const route: RouteNavigation<RouteName> = { name: 'home', path: '/' };
 
-    it('should return the navigate functions', () => {
+    it('should return the navigate functions', async () => {
       expect.assertions(10);
 
       const { resolve, push, replace, back, forward, go } = useNavigate();
 
-      resolve(route);
+      await resolve(route);
       expect(routerSpy.resolve).toHaveBeenCalledTimes(1);
       expect(routerSpy.resolve).toHaveBeenCalledWith(route);
 
-      push(route);
+      await push(route);
       expect(routerSpy.push).toHaveBeenCalledTimes(1);
       expect(routerSpy.push).toHaveBeenCalledWith(route);
 
-      replace(route);
+      await replace(route);
       expect(routerSpy.replace).toHaveBeenCalledTimes(1);
       expect(routerSpy.replace).toHaveBeenCalledWith(route);
 
-      back();
+      await back();
       expect(routerSpy.back).toHaveBeenCalledTimes(1);
 
-      forward();
+      await forward();
       expect(routerSpy.forward).toHaveBeenCalledTimes(1);
 
-      go(1);
+      await go(1);
       expect(routerSpy.go).toHaveBeenCalledTimes(1);
       expect(routerSpy.go).toHaveBeenCalledWith(1);
     });

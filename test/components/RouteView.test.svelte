@@ -1,9 +1,9 @@
 <script lang="ts">
   import type { RouterViewProps, RouteViewProps } from '~/models/component.model';
 
-  import RouteView from '~/components/RouteView.svelte';
   import RouterContext from '~/components/RouterContext.svelte';
   import RouterView from '~/components/RouterView.svelte';
+  import RouteView from '~/components/RouteView.svelte';
 
   const {
     options,

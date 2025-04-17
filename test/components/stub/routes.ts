@@ -1,26 +1,25 @@
-import { wait } from '@dvcol/common-utils/common/promise';
+import type { PartialRoute, Route } from '~/models/route.model.js';
 
+import { wait } from '@dvcol/common-utils/common/promise';
 import { toLazyComponent } from '@dvcol/svelte-utils/component';
 
 import ErrorComponent from './ErrorComponent.test.svelte';
 import HelloComponent from './HelloComponent.test.svelte';
 import LoadingComponent from './LoadingComponent.test.svelte';
 
-import type { PartialRoute, Route } from '~/models/route.model.js';
-
 export const routes: Route[] = [
   { name: 'hello', path: '/hello', component: HelloComponent, props: { title: 'Hello' }, meta: { key: 'Hello' } },
   {
     name: 'goodbye',
     path: '/goodbye',
-    component: () => import('./GoodbyeComponent.test.svelte'),
+    component: async () => import('./GoodbyeComponent.test.svelte'),
     props: { title: 'Goodbye' },
     meta: { key: 'Goodbye' },
   },
   {
     name: 'error',
     path: '/error',
-    component: () => Promise.reject(new Error('Loading error')),
+    component: async () => Promise.reject(new Error('Loading error')),
     error: ErrorComponent,
     props: { title: 'Error' },
     meta: { key: 'Error' },
@@ -49,7 +48,7 @@ export const routes: Route[] = [
   {
     name: 'default-error',
     path: '/default-error',
-    component: () => Promise.reject(new Error('Default Error')),
+    component: async () => Promise.reject(new Error('Default Error')),
     props: { title: 'Default Error' },
     meta: { key: 'Default Error' },
   },
@@ -58,7 +57,7 @@ export const routes: Route[] = [
     path: '/nested',
     components: {
       default: HelloComponent,
-      nested: toLazyComponent(() => import('./GoodbyeComponent.test.svelte')),
+      nested: toLazyComponent(async () => import('./GoodbyeComponent.test.svelte')),
     },
     properties: {
       default: { title: 'Nested Hello' },
@@ -84,7 +83,7 @@ export const routes: Route[] = [
 export const partialRoute: PartialRoute = {
   name: 'RouteView',
   path: '/route-view',
-  component: () => import('./HelloComponent.test.svelte'),
+  component: async () => import('./HelloComponent.test.svelte'),
   error: ErrorComponent,
   loading: LoadingComponent,
   props: { title: 'Route View' },
@@ -96,7 +95,7 @@ export const namedPartialRoute: PartialRoute = {
   path: '/named-route-view',
   components: {
     default: HelloComponent,
-    nested: toLazyComponent(() => import('./GoodbyeComponent.test.svelte')),
+    nested: toLazyComponent(async () => import('./GoodbyeComponent.test.svelte')),
   },
   properties: {
     default: { title: 'Named Route View Hello' },

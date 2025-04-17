@@ -1,21 +1,19 @@
 /// <reference types="navigation-api-types" />
 
-import { wait } from "@dvcol/common-utils/common/promise";
+import type { MockInstance } from 'vitest';
 
-import type { MockInstance } from "vitest";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import type { NavigationNotFoundError, NavigationResolveError } from '~/models/error.model.js';
+import type { Route, RouteParams, RouteQuery } from '~/models/route.model.js';
+import type { RouterOptions } from '~/models/router.model.js';
 
-import type { NavigationNotFoundError, NavigationResolveError } from "~/models/error.model.js";
-import { ErrorTypes, NavigationAbortedError, NavigationCancelledError } from "~/models/error.model.js";
+import { wait } from '@dvcol/common-utils/common/promise';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { Route, RouteParams, RouteQuery } from "~/models/route.model.js";
-
-import type { RouterOptions } from "~/models/router.model.js";
-import { RouterScrollConstant, RouterStateConstant } from "~/models/router.model.js";
-import { NavigationEvent } from "~/router/event.svelte.js";
-
-import { Router } from "~/router/router.svelte.js";
-import { Logger } from "~/utils/index.js";
+import { ErrorTypes, NavigationAbortedError, NavigationCancelledError } from '~/models/error.model.js';
+import { RouterScrollConstant, RouterStateConstant } from '~/models/router.model.js';
+import { NavigationEvent } from '~/router/event.svelte.js';
+import { Router } from '~/router/router.svelte.js';
+import { Logger } from '~/utils/index.js';
 
 describe('router', () => {
   const HomeRoute: Route = {
@@ -132,7 +130,7 @@ describe('router', () => {
   const ResolveErrorPromiseRoute: Route = {
     name: 'resolve-error-promise',
     path: '/resolve-error-promise',
-    beforeResolve: () => Promise.resolve(promiseError),
+    beforeResolve: async () => Promise.resolve(promiseError),
   };
 
   const routes: Route[] = [
@@ -196,7 +194,7 @@ describe('router', () => {
     it('should create a new router with the provided routes', async () => {
       expect.assertions(routes.length * 4);
       router = await getRouter();
-      routes.forEach(route => {
+      routes.forEach((route) => {
         expect(router.routes.filter((r: Route) => r.name === route.name && r.path === route.path)).toHaveLength(1);
         expect(router.hasRoute(route)).toBeTruthy();
         expect(router.hasRouteName(route.name)).toBeTruthy();
@@ -308,7 +306,7 @@ describe('router', () => {
     it('should throw a RouterNameConflictError if a route with the same name already exists', () => {
       expect.assertions(1);
 
-      expect(() => router.addRoute(OtherRoute)).toThrow(`A route with the name "${OtherRoute.name}" already exists`);
+      expect(() => router.addRoute(OtherRoute)).toThrow(`A route with the name "${OtherRoute.name?.toString()}" already exists`);
     });
 
     it('should throw a RouterPathConflictError if a route with the same path already exists', () => {
@@ -373,14 +371,14 @@ describe('router', () => {
     it('should throw a RouterNamePathMismatchError if the path provided and registered do not match', () => {
       expect.assertions(1);
       expect(() => router.removeRoute({ ...OtherRoute, path: '/other-path' })).toThrow(
-        `Route path "/other-path" with name "${OtherRoute.name}" does not match registered path "${OtherRoute.path}"`,
+        `Route path "/other-path" with name "${OtherRoute.name?.toString()}" does not match registered path "${OtherRoute.path}"`,
       );
     });
 
     it('should throw a RouterNamePathMismatchError if the name provided and registered do not match', () => {
       expect.assertions(1);
       expect(() => router.removeRoute({ ...OtherRoute, name: 'other-name' })).toThrow(
-        `Route path "${OtherRoute.path}" with name "other-name" does not match registered name "${OtherRoute.name}"`,
+        `Route path "${OtherRoute.path}" with name "other-name" does not match registered name "${OtherRoute.name?.toString()}"`,
       );
     });
   });
@@ -796,11 +794,11 @@ describe('router', () => {
       it('should fail with a NavigationNotFoundError if a relative path reference could not be resolved', async () => {
         expect.assertions(2);
 
-        let error: NavigationNotFoundError;
+        let error: NavigationNotFoundError | undefined;
         try {
           await router.resolve({ path: './not-found' }, { failOnNotFound: true, from: null });
         } catch (e) {
-          error = e;
+          error = e as NavigationNotFoundError;
         } finally {
           expect(error.message).toBe('Relative path provided but no current location could be found');
           expect(error.type).toBe(ErrorTypes.NAVIGATION_NOT_FOUND);
@@ -810,11 +808,11 @@ describe('router', () => {
       it('should fail with a ParsingRelativePathError if a relative path could not be resolved', async () => {
         expect.assertions(2);
 
-        let error: ParsingRelativePathError;
+        let error: Error | undefined;
         try {
           await router.resolve({ path: '../../not-found' }, { failOnNotFound: true, from: { path: '/' } });
         } catch (e) {
-          error = e;
+          error = e as Error;
         } finally {
           expect(error.message).toBe('Error parsing relative path "../../not-found" from parent path "/"');
           expect(error.type).toBe('PARSING_RELATIVE_PATH_ERROR');
@@ -824,11 +822,11 @@ describe('router', () => {
       it('should fail with a NavigationNotFoundError if no route can be resolved and failOnNotFound is true', async () => {
         expect.assertions(2);
 
-        let error: NavigationNotFoundError;
+        let error: NavigationNotFoundError | undefined;
         try {
           await router.resolve({ path: '/not-found' }, { failOnNotFound: true });
         } catch (e) {
-          error = e;
+          error = e as NavigationNotFoundError;
         } finally {
           expect(error.message).toBe('Navigation failed: NAVIGATION_NOT_FOUND');
           expect(error.type).toBe(ErrorTypes.NAVIGATION_NOT_FOUND);
@@ -1085,7 +1083,7 @@ describe('router', () => {
         expect(spy).toHaveBeenCalledWith({ ...state, ...getState(PathRoute) }, '', `${window.location.origin}${PathRoute.path}`);
       });
 
-      it(`should navigate when the method is called`, async () => {
+      it('should navigate when the method is called', async () => {
         expect.assertions(4);
 
         expect(router.route).toBeUndefined();
@@ -1102,10 +1100,18 @@ describe('router', () => {
 
         const [promise] = await Promise.allSettled([router[method](SlowRoute), router[method](PathRoute)]);
 
+        interface Rejected {
+          status: 'rejected';
+          reason: {
+            message: string;
+            type: string;
+          };
+        }
+
         expect('reason' in promise).toBeTruthy();
         expect(promise.status).toBe('rejected');
-        expect((promise as PromiseRejectedResult).reason.message).toBe('Navigation failed: NAVIGATION_CANCELLED');
-        expect((promise as PromiseRejectedResult).reason.type).toBe(ErrorTypes.NAVIGATION_CANCELLED);
+        expect((promise as Rejected).reason.message).toBe('Navigation failed: NAVIGATION_CANCELLED');
+        expect((promise as Rejected).reason.type).toBe(ErrorTypes.NAVIGATION_CANCELLED);
         expect(router.route.name).toBe(PathRoute.name);
 
         expect(spy).toHaveBeenCalledTimes(1);
@@ -1115,11 +1121,11 @@ describe('router', () => {
       it('should throw a NavigationAbortedError if the navigation is aborted by a navigation guard', async () => {
         expect.assertions(5);
 
-        let error: NavigationAbortedError;
+        let error: NavigationAbortedError | undefined;
         try {
           await router[method](AbortedRoute);
         } catch (e) {
-          error = e;
+          error = e as NavigationAbortedError;
         } finally {
           expect(error).toBeDefined();
           expect(error.message).toBe('Navigation failed: NAVIGATION_ABORTED');
@@ -1355,7 +1361,7 @@ describe('router', () => {
         expect(window.location.hash).toBe('');
         expect(router.route).toBeUndefined();
 
-        window.history.pushState(null, '', `/base`);
+        window.history.pushState(null, '', '/base');
         window.location.hash = `#${PathRoute.path}`;
         expect(router.route).toBeUndefined();
 
@@ -1395,7 +1401,7 @@ describe('router', () => {
         expect(addWindowEventListener).toHaveBeenCalledWith('popstate', expect.any(Function));
 
         expect(removeWindowEventListener).not.toHaveBeenCalled();
-        await router.destroy();
+        router.destroy();
 
         expect(removeWindowEventListener).toHaveBeenCalledTimes(1);
         expect(removeWindowEventListener).toHaveBeenCalledWith('popstate', expect.any(Function));
@@ -1455,7 +1461,7 @@ describe('router', () => {
         expect(addNavigationEventListener).toHaveBeenCalledWith('currententrychange', expect.any(Function));
 
         expect(removeNavigationEventListener).not.toHaveBeenCalled();
-        await router.destroy();
+        router.destroy();
 
         expect(removeNavigationEventListener).toHaveBeenCalledTimes(1);
         expect(removeNavigationEventListener).toHaveBeenCalledWith('currententrychange', expect.any(Function));
@@ -1472,7 +1478,7 @@ describe('router', () => {
 
         expect(addNavigationEventListener).not.toHaveBeenCalled();
 
-        await router.destroy();
+        router.destroy();
 
         expect(removeWindowEventListener).toHaveBeenCalledTimes(1);
         expect(removeWindowEventListener).toHaveBeenCalledWith('popstate', expect.any(Function));
@@ -1659,7 +1665,7 @@ describe('router', () => {
         expect.assertions(5);
 
         const event = new NavigationEvent(PathRoute, HomeRoute);
-        expect(() => event.cancel()).toThrow(expect.any(NavigationCancelledError));
+        expect(() => event.cancel()).toThrow(expect.any(NavigationCancelledError) as NavigationCancelledError);
 
         expect(event.active).toBeFalsy();
         expect(event.cancelled).toBeTruthy();
@@ -1671,7 +1677,7 @@ describe('router', () => {
         expect.assertions(4);
 
         const event = new NavigationEvent(PathRoute, HomeRoute);
-        expect(() => event.cancel()).toThrow(expect.any(NavigationCancelledError));
+        expect(() => event.cancel()).toThrow(expect.any(NavigationCancelledError) as NavigationCancelledError);
         expect(log).not.toHaveBeenCalled();
 
         event.cancel();
@@ -1685,7 +1691,7 @@ describe('router', () => {
         expect.assertions(5);
 
         const event = new NavigationEvent(PathRoute, HomeRoute);
-        expect(() => event.fail()).toThrow(expect.any(NavigationAbortedError));
+        expect(() => event.fail()).toThrow(expect.any(NavigationAbortedError) as NavigationAbortedError);
 
         expect(event.active).toBeFalsy();
         expect(event.failed).toBeTruthy();
@@ -1696,7 +1702,7 @@ describe('router', () => {
         expect.assertions(4);
 
         const event = new NavigationEvent(PathRoute, HomeRoute);
-        expect(() => event.fail()).toThrow(expect.any(NavigationAbortedError));
+        expect(() => event.fail()).toThrow(expect.any(NavigationAbortedError) as NavigationAbortedError);
         expect(log).not.toHaveBeenCalled();
 
         event.fail();
@@ -1727,7 +1733,7 @@ describe('router', () => {
         expect.assertions(4);
 
         const event = new NavigationEvent(PathRoute, HomeRoute);
-        expect(() => event.fail()).toThrow(expect.any(NavigationAbortedError));
+        expect(() => event.fail()).toThrow(expect.any(NavigationAbortedError) as NavigationAbortedError);
         await expect(event.result).rejects.toThrow('failed');
 
         expect(resolverSpy).not.toHaveBeenCalled();

@@ -1,7 +1,7 @@
 import '@testing-library/jest-dom/vitest';
 
 // See https://github.com/jsdom/jsdom/issues/2527
-if (!global.PointerEvent) {
+if (!globalThis.PointerEvent) {
   class PointerEvent extends MouseEvent {
     public height?: number;
     public isPrimary?: boolean;
@@ -27,5 +27,5 @@ if (!global.PointerEvent) {
       this.isPrimary = params.isPrimary;
     }
   }
-  global.PointerEvent = PointerEvent as any;
+  globalThis.PointerEvent = PointerEvent as typeof globalThis.PointerEvent;
 }

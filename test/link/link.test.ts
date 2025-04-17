@@ -1,18 +1,18 @@
-import { render, screen } from "@testing-library/svelte";
-import { userEvent } from "@testing-library/user-event";
+import type { Route, RouteNavigation } from '~/models/route.model.js';
 
-import { tick } from "svelte";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { RouterNavigationOptions } from '../../src/lib';
 
-import Link from "./Link.test.svelte";
+import { render, screen } from '@testing-library/svelte';
+import { userEvent } from '@testing-library/user-event';
+import { tick } from 'svelte';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import type { RouterNavigationOptions } from "../../src/lib";
-import type { Route, RouteNavigation } from "~/models/route.model.js";
+import { active } from '~/router/active.svelte.js';
+import * as GetRouterModule from '~/router/context.svelte.js';
+import { Router } from '~/router/router.svelte.js';
+import { Logger } from '~/utils/logger.utils.js';
 
-import { active } from "~/router/active.svelte.js";
-import * as GetRouterModule from "~/router/context.svelte.js";
-import { Router } from "~/router/router.svelte.js";
-import { Logger } from "~/utils/logger.utils.js";
+import Link from './Link.test.svelte';
 
 describe('link', () => {
   const HomeRoute: Route = {
@@ -59,6 +59,7 @@ describe('link', () => {
         node: mockNode,
         options: {},
       });
+      // this:void
       expect(mockNode.setAttribute).toHaveBeenCalledWith('data-error', 'Router not found.');
     });
   });
@@ -95,7 +96,12 @@ describe('link', () => {
   });
 
   describe('click', () => {
-    type NodeParams = { node: string; payload?: RouteNavigation; options?: RouterNavigationOptions; replace?: boolean };
+    interface NodeParams {
+      node: string;
+      payload?: RouteNavigation;
+      options?: RouterNavigationOptions;
+      replace?: boolean;
+    }
     const nodes: NodeParams[] = [
       { node: 'anchor-path', payload: { path: HomeRoute.path } },
       { node: 'anchor-name', payload: { name: HomeRoute.name } },
@@ -276,9 +282,9 @@ describe('link', () => {
 
     expect(target.getAttribute('data-error')).toBe('Failed to parse JSON attribute "params"');
     expect(spyLoger).toHaveBeenCalledWith('Failed to parse JSON attribute "params" on <a> element', {
-      element: expect.any(HTMLElement),
+      element: expect.any(HTMLElement) as HTMLElement,
       name: 'params',
-      error: expect.any(Error),
+      error: expect.any(Error) as Error,
     });
   });
 
@@ -356,7 +362,7 @@ describe('link', () => {
 
       const target = screen.getByTestId('resolve-false');
       await user.hover(target);
-      await target.focus();
+      target.focus();
 
       expect(spyResolve).not.toHaveBeenCalled();
     });

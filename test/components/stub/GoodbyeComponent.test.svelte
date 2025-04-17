@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onDestroy, onMount } from 'svelte';
 
-  import { LifeCycle } from './mocks.js';
-
   import { useRouter } from '~/router/hooks.svelte.js';
+
+  import { LifeCycle } from './mocks.js';
 
   const {
     title,

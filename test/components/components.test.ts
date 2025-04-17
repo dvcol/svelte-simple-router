@@ -1,27 +1,24 @@
-import { wait } from "@dvcol/common-utils/common/promise";
+import type { ComponentOrLazy } from '@dvcol/svelte-utils/component';
+import type { RenderResult } from '@testing-library/svelte';
+import type { MockInstance } from 'vitest';
 
-import type { RenderResult } from "@testing-library/svelte";
-import { cleanup, render, screen } from "@testing-library/svelte";
+import { wait } from '@dvcol/common-utils/common/promise';
+import { cleanup, render, screen } from '@testing-library/svelte';
+import { tick } from 'svelte';
+import { afterEach, assert, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { tick } from "svelte";
+import RouteTransition from '~/components/RouteTransition.svelte';
+import { NavigationEvent, ViewChangeEvent } from '~/router/event.svelte.js';
+import { Router } from '~/router/router.svelte.js';
+import { transition } from '~/utils/transition.utils.js';
 
-import type { MockInstance } from "vitest";
-import { afterEach, assert, beforeEach, describe, expect, it, vi } from "vitest";
-
-import RouteView from "./RouteView.test.svelte";
-
-import RouterContext from "./RouterContext.test.svelte";
-import RouterView from "./RouterView.test.svelte";
-import RouterViewNested from "./RouterViewNested.test.svelte";
-
-import LoadingComponent from "./stub/LoadingComponent.test.svelte";
-import { LifeCycle } from "./stub/mocks.js";
-import { namedPartialRoute, partialRoute, routes } from "./stub/routes.js";
-
-import RouteTransition from "~/components/RouteTransition.svelte";
-import { NavigationEvent, ViewChangeEvent } from "~/router/event.svelte.js";
-import { Router } from "~/router/router.svelte.js";
-import { transition } from "~/utils/transition.utils.js";
+import RouterContext from './RouterContext.test.svelte';
+import RouterView from './RouterView.test.svelte';
+import RouterViewNested from './RouterViewNested.test.svelte';
+import RouteView from './RouteView.test.svelte';
+import LoadingComponent from './stub/LoadingComponent.test.svelte';
+import { LifeCycle } from './stub/mocks.js';
+import { namedPartialRoute, partialRoute, routes } from './stub/routes.js';
 
 describe('routerView', () => {
   let router: Router;
@@ -29,17 +26,17 @@ describe('routerView', () => {
   let addRoute: MockInstance<typeof router.addRoute>;
   let removeRoute: MockInstance<typeof router.removeRoute>;
 
-  afterEach(async () => {
-    cleanup();
-    window.history.pushState({}, '', '/');
-  });
-
   beforeEach(async () => {
     router = new Router({ routes, hash: true, listen: false });
     await router.init();
     addRoute = vi.spyOn(router, 'addRoute');
     removeRoute = vi.spyOn(router, 'removeRoute');
     vi.clearAllMocks();
+  });
+
+  afterEach(async () => {
+    cleanup();
+    window.history.pushState({}, '', '/');
   });
 
   const assertComponent = (inputs: { id: string; title: string; meta: string }) => {
@@ -559,7 +556,7 @@ describe('routerView', () => {
     it('should render the route error component', async () => {
       expect.assertions(3);
 
-      render(RouteView, { router, route: { ...partialRoute, component: () => Promise.reject(new Error('Loading error')) } });
+      render(RouteView, { router, route: { ...partialRoute, component: () => Promise.reject(new Error('Loading error')) as unknown as ComponentOrLazy } });
       await router.push({ path: partialRoute.path });
       await tick();
 
@@ -574,7 +571,7 @@ describe('routerView', () => {
     it('should render the route error snippet', async () => {
       expect.assertions(3);
 
-      render(RouteView, { router, route: { ...partialRoute, error: undefined, component: () => Promise.reject(new Error('Loading error')) } });
+      render(RouteView, { router, route: { ...partialRoute, error: undefined, component: () => Promise.reject(new Error('Loading error')) as unknown as ComponentOrLazy } });
       await router.push({ path: partialRoute.path });
       await tick();
 
