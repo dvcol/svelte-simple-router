@@ -1,9 +1,31 @@
 import { describe, expect, it } from 'vitest';
 
 import { MatcherInvalidPathError, ParsingMissingRequiredParamError } from '~/models/error.model.js';
-import { Matcher, replaceTemplateParams, templateToParams, templateToRegex } from '~/models/matcher.model.js';
+import { Matcher, replaceTemplateParams, replaceTitleParams, templateToParams, templateToRegex } from '~/models/matcher.model.js';
 
 describe('matcher', () => {
+  describe('replaceTitleParams', () => {
+    it('should replace title params with the provided params', () => {
+      expect.assertions(1);
+
+      const title = ':notification:? User Route - (:suffix) :optional:?';
+      const params = { notification: '(10)', suffix: 12 };
+      const path = '(10) User Route - (12)';
+
+      expect(replaceTitleParams(title, params)).toBe(path);
+    });
+
+    it('should replace title params with the optionals params', () => {
+      expect.assertions(1);
+
+      const title = ':notification:? User Route - (:suffix) :optional:?';
+      const params = { optional: 'My Path', suffix: 12 };
+      const path = 'User Route - (12) My Path';
+
+      expect(replaceTitleParams(title, params)).toBe(path);
+    });
+  });
+
   describe('replaceTemplateParams', () => {
     it('should replace template params with the provided params', () => {
       expect.assertions(1);
@@ -48,9 +70,9 @@ describe('matcher', () => {
   describe('templateToRegex', () => {
     it('should convert a template to a regex', async () => {
       expect.assertions(1);
-      const template = '/base/path/*/:{number}:id:?/path/:{string}:name:?/:lastName/end';
-      const regex = /^\/base\/path\/([^/]+)\/?(\d+)?\/path\/?(\w+)?\/([^/]+)\/end/;
-      const strictRegex = /^\/base\/path\/([^/]+)\/?(\d+)?\/path\/?(\w+)?\/([^/]+)\/end$/;
+      const template = '/base/path/*/nb/:{number}:id:?/path/:{string}:name:?/:lastName/end';
+      const regex = /^\/base\/path\/([^/]+)\/nb\/?(\d+)?\/path\/?(\w+)?\/([^/]+)\/end/;
+      const strictRegex = /^\/base\/path\/([^/]+)\/nb\/?(\d+)?\/path\/?(\w+)?\/([^/]+)\/end$/;
       expect(templateToRegex(template)).toStrictEqual({ regex, strictRegex });
     });
 
@@ -663,7 +685,7 @@ describe('matcher', () => {
         const matcher = new Matcher(template);
         const path = '/base/path/something/12/path/john/doe/end';
         const params = { id: '12', name: 'john', lastName: 'doe' };
-        const wildcards = { '1': 'something' };
+        const wildcards = { 1: 'something' };
         expect(matcher.extract(path)).toStrictEqual({ params, wildcards });
       });
 
@@ -735,7 +757,7 @@ describe('matcher', () => {
         const matcher = new Matcher('/base/path/*/segment/*/end');
         const path = '/base/path/something/segment/else/end';
         const params = {};
-        const wildcards = { '1': 'something', '2': 'else' };
+        const wildcards = { 1: 'something', 2: 'else' };
         expect(matcher.extract(path)).toStrictEqual({ params, wildcards });
       });
 
@@ -744,7 +766,7 @@ describe('matcher', () => {
         const matcher = new Matcher('/base/path/*/segment/:id/*');
         const path = '/base/path/something/segment/12/segment/end';
         const params = { id: '12' };
-        const wildcards = { '1': 'something', '3': 'segment/end' };
+        const wildcards = { 1: 'something', 3: 'segment/end' };
         expect(matcher.extract(path)).toStrictEqual({ params, wildcards });
       });
 
@@ -753,7 +775,7 @@ describe('matcher', () => {
         const matcher = new Matcher('/base/path/*/segment/:{number}:id:?/*');
         const path = '/base/path/something/segment/path/sub-path/end';
         const params = { id: undefined };
-        const wildcards = { '1': 'something', '3': 'path/sub-path/end' };
+        const wildcards = { 1: 'something', 3: 'path/sub-path/end' };
         expect(matcher.extract(path)).toStrictEqual({ params, wildcards });
       });
 

@@ -13,15 +13,14 @@ import { isShallowEqual, shallowClone } from '@dvcol/common-utils/common/object'
  * functions as values. It also ignores Symbols as keys.
  *
  */
-export type HistoryStateValue = string | number | boolean | null | undefined | HistoryState | HistoryState[];
+export type HistoryStateValue<Key extends string | number = string | number> = string | number | boolean | null | undefined | HistoryState<Key> | HistoryState<Key>[];
 
 /**
  * Allowed HTML history.state
  */
-export interface HistoryState {
-  [x: number]: HistoryStateValue;
-  [x: string]: HistoryStateValue;
-}
+export type HistoryState<Key extends string | number = string | number> = {
+  [x in Key]: HistoryStateValue<Key>;
+};
 
 export type RouteParamValue = string | number | boolean;
 export type RouteQuery = Record<string, RouteParamValue>;

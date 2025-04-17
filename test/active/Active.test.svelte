@@ -8,6 +8,8 @@
 </script>
 
 <RouterView {router}>
+  <span data-testid="span-error" use:active>error</span>
+
   <a data-testid="anchor-path" href="/home" use:active>path</a>
   <a data-testid="anchor-name" href="/other" data-name="home" use:active>name</a>
 

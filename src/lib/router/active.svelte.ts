@@ -124,7 +124,7 @@ export const active: Action<HTMLElement, ActiveActionOptions | undefined> = (nod
 
   const match = $derived(matchName || matchPath);
 
-  const originalStyle = $derived(Object.fromEntries(Object.keys(_options.style || {}).map(key => [key, node.style[key as keyof CSSStyleDeclaration]])));
+  const originalStyle = Object.fromEntries(Object.keys(options.style || {}).map(key => [key, node.style[key as keyof CSSStyleDeclaration]]));
 
   $effect(() => {
     if (match) {

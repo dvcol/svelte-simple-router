@@ -810,7 +810,8 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     if (this.#base && !path.startsWith(this.#base)) {
       this.#location = undefined;
       this.#route = undefined;
-      return Logger.debug(this.#log, 'Not on base path, ignoring sync', { path, base: this.#base });
+      Logger.debug(this.#log, 'Not on base path, ignoring sync', { path, base: this.#base });
+      return this.snapshot;
     }
     if (this.#hash) path = this.#browser.hash.slice(1);
     else if (this.#base) path = path.slice(this.#base.length);

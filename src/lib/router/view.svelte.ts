@@ -1,14 +1,13 @@
+import type { LoadingErrorListener, ViewChangeListener } from '~/models/navigation.model.js';
+import type { RouteName } from '~/models/route.model.js';
+import type { IDefaultView, IView } from '~/models/view.model.js';
+import type { ViewChangeEvent } from '~/router/event.svelte.js';
+
 import { randomHex } from '@dvcol/common-utils';
 import { SvelteSet } from 'svelte/reactivity';
 
-import type { LoadingErrorListener, ViewChangeListener } from '~/models/navigation.model.js';
-import type { ViewChangeEvent } from '~/router/event.svelte.js';
-
 import { ViewChangeStatusError } from '~/models/error.model.js';
-
-import { type RouteName } from '~/models/route.model.js';
-import { DefaultView, type IDefaultView, type IView } from '~/models/view.model.js';
-
+import { DefaultView } from '~/models/view.model.js';
 import { Logger, LoggerColor, LoggerKey } from '~/utils/logger.utils.js';
 
 export class View<Name extends RouteName = RouteName> implements IView<Name> {
@@ -156,34 +155,37 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
    * Start the view loading process.
    * @param event
    */
-  start(event: ViewChangeEvent<Name>) {
+  start(event: ViewChangeEvent<Name>): Promise<void[]> | undefined {
     this.#loading = event;
     Logger.debug(this.#log, 'View resolving...', event);
-    return Promise.all([...this.#onChangeListeners].map(listener => listener(event)));
+    if (!this.#onChangeListeners.size) return;
+    return Promise.all([...this.#onChangeListeners].map(async listener => listener(event)));
   }
 
   /**
    * Mark the view as loading.
    * @param event
    */
-  load(event = this.#loading) {
+  load(event = this.#loading): Promise<void[]> | undefined {
     if (!event) throw new ViewChangeStatusError();
     event.load();
     Logger.debug(this.#log, 'View loading...', event);
-    return Promise.all([...this.#onViewChangeListeners].map(listener => listener(event)));
+    if (!this.#onViewChangeListeners.size) return;
+    return Promise.all([...this.#onViewChangeListeners].map(async listener => listener(event)));
   }
 
   /**
    * Mark the view as loaded.
    * @param event
    */
-  complete(event = this.#loading) {
+  complete(event = this.#loading): Promise<void[]> | undefined {
     if (!event) throw new ViewChangeStatusError();
     this.#error = undefined;
     this.#loading = undefined;
     event.complete();
     Logger.info(...Logger.colorize(LoggerColor.Success, this.#log, 'View loaded'), event);
-    return Promise.all([...this.#onLoadedListeners].map(listener => listener(event)));
+    if (!this.#onLoadedListeners.size) return;
+    return Promise.all([...this.#onLoadedListeners].map(async listener => listener(event)));
   }
 
   /**
@@ -191,12 +193,13 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
    * @param error
    * @param event
    */
-  fail(error: Error | unknown, event = this.#loading) {
+  fail(error: Error | unknown, event = this.#loading): Promise<void[]> | undefined {
     if (!event) throw new ViewChangeStatusError();
     this.#error = error;
     this.#loading = undefined;
     event.fail(error);
     Logger.error(this.#log, 'View failed to load', { error, event });
-    return Promise.all([...this.#onErrorListeners].map(listener => listener(error, event)));
+    if (!this.#onErrorListeners.size) return;
+    return Promise.all([...this.#onErrorListeners].map(async listener => listener(error, event)));
   }
 }

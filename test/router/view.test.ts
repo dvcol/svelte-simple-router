@@ -1,7 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { ViewChangeStatusError } from '~/models/error.model.js';
-
 import { DefaultView } from '~/models/view.model.js';
 import { ViewChangeEvent } from '~/router/event.svelte.js';
 import { View } from '~/router/view.svelte.js';
@@ -122,7 +121,7 @@ describe('view', () => {
         view.onLoading(listener);
 
         expect(listener).not.toHaveBeenCalled();
-        expect(() => view.load()).toThrow(ViewChangeStatusError);
+        expect((): undefined => view.load()).toThrow(ViewChangeStatusError);
 
         expect(view.loading).toBeFalsy();
         expect(view.error).toBeUndefined();
@@ -172,7 +171,7 @@ describe('view', () => {
         view.onLoaded(listener);
 
         expect(listener).not.toHaveBeenCalled();
-        expect(() => view.complete()).toThrow(ViewChangeStatusError);
+        expect((): undefined => view.complete()).toThrow(ViewChangeStatusError);
 
         expect(view.loading).toBeFalsy();
         expect(view.error).toBeUndefined();
@@ -224,7 +223,7 @@ describe('view', () => {
         view.onError(listener);
 
         expect(listener).not.toHaveBeenCalled();
-        expect(() => view.fail(error)).toThrow(ViewChangeStatusError);
+        expect((): undefined => view.fail(error)).toThrow(ViewChangeStatusError);
 
         expect(view.loading).toBeFalsy();
         expect(view.error).toBeUndefined();

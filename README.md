@@ -1,4 +1,3 @@
-
 <h1 align="center">Welcome to <i>Svelte Simple Router</i></h1>
 <h3 align="center">A simple and flexible SPA router for svelte 5</h3>
 
@@ -23,7 +22,7 @@
 
 Svelte Simple Router is a native Single Page Application (SPA) router for Svelte 5, designed for seamless client-side navigation while leveraging Svelte's reactivity and transitions.
 
-It supports both History API and hash routing, offering flexible URL management with  robust path matching, query parameter handling, and dynamic interpolation. Packed with features like nested views, route guards, lazy loading, dynamic routing, and full integration with Svelte’s Transition API and the View Transitions API, it enables smooth and interactive navigation experiences.
+It supports both History API and hash routing, offering flexible URL management with robust path matching, query parameter handling, and dynamic interpolation. Packed with features like nested views, route guards, lazy loading, dynamic routing, and full integration with Svelte’s Transition API and the View Transitions API, it enables smooth and interactive navigation experiences.
 
 Built to be easy to use yet powerful, Svelte Simple Router is the perfect solution for developers looking to add routing to their Svelte applications without unnecessary complexity.
 
@@ -49,12 +48,11 @@ You can find a complete example in the [demo app](https://github.com/dvcol/svelt
 
 ```svelte
 <script lang="ts">
-  import { RouterView } from '@dvcol/svelte-simple-router/components';
-
   import type { Route, RouterOptions } from '@dvcol/svelte-simple-router/models';
-  
-  import HelloComponent from '~/components/hello/HelloComponent.svelte';
+
+  import { RouterView } from '@dvcol/svelte-simple-router/components';
   import GoodbyeComponent from '~/components/goodbye/GoodbyeComponent.svelte';
+  import HelloComponent from '~/components/hello/HelloComponent.svelte';
 
   const RouteName = {
     Hello: 'hello',
@@ -76,12 +74,12 @@ You can find a complete example in the [demo app](https://github.com/dvcol/svelt
     {
       name: RouteName.Hello,
       path: `/${RouteName.Hello}`,
-      component: HelloComponent
+      component: HelloComponent,
     },
     {
       name: RouteName.Goodbye,
       path: `/${RouteName.Goodbye}`,
-      component: GoodbyeComponent
+      component: GoodbyeComponent,
     },
     {
       name: RouteName.Any,
@@ -95,7 +93,7 @@ You can find a complete example in the [demo app](https://github.com/dvcol/svelt
   const options: RouterOptions<RouteNames> = {
     routes,
   } as const;
-  
+
 </script>
 
 <RouterView {options} />
@@ -134,13 +132,11 @@ It can be used to share a router instance between `RouterView` components withou
 ```svelte
 <script lang="ts">
   import { RouterContext } from '@dvcol/svelte-simple-router/components';
-  import { RouterView } from '@dvcol/svelte-simple-router/components';
 </script>
 
 <RouterContext>
   <!--  children  -->
 </RouterContext>
-
 ```
 
 ### Debuggers
@@ -153,8 +149,8 @@ It requires to be placed inside a `RouterView` or `RouterContext` component.
 
 ```svelte
 <script lang="ts">
-  import { RouterDebugger, RouteDebugger } from '@dvcol/svelte-simple-router/components/debug';
   import { RouterView } from '@dvcol/svelte-simple-router/components';
+  import { RouteDebugger, RouterDebugger } from '@dvcol/svelte-simple-router/components/debug';
 </script>
 
 <RouterView>
@@ -175,13 +171,11 @@ Note: Sibling `RouterView` or `RouterContext` components will instantiate a new 
 
 ```svelte
 <script lang="ts">
-  import { RouterView } from '@dvcol/svelte-simple-router/components';
-  import { RouterContext } from '@dvcol/svelte-simple-router/components';
-
   import type { Route, RouterOptions } from '@dvcol/svelte-simple-router/models';
-  
-  import ParentComponent from '~/components/hello/ParentComponent.svelte';
+
+  import { RouterContext, RouterView } from '@dvcol/svelte-simple-router/components';
   import ChildComponent from '~/components/goodbye/ChildComponent.svelte';
+  import ParentComponent from '~/components/hello/ParentComponent.svelte';
 
   const RouteName = {
     Parent: 'parent',
@@ -194,7 +188,7 @@ Note: Sibling `RouterView` or `RouterContext` components will instantiate a new 
     {
       name: RouteName.Parent,
       path: `/${RouteName.Parent}`,
-      component: ParentComponent
+      component: ParentComponent,
     },
     {
       name: RouteName.Nested,
@@ -202,7 +196,7 @@ Note: Sibling `RouterView` or `RouterContext` components will instantiate a new 
       components: {
         default: ParentComponent,
         nested: ChildComponent,
-      }
+      },
     },
   ] as const;
 
@@ -216,7 +210,7 @@ Note: Sibling `RouterView` or `RouterContext` components will instantiate a new 
   <RouterView>
     <!--  will render ParentComponent  -->
   </RouterView>
-  
+
   <RouterView name="nested">
     <!--  will only render ChildComponent on /parent/child, and nothing on /parent -->
   </RouterView>
@@ -239,7 +233,7 @@ Note: By default the first enter transition is ignored, you can change this beha
 <script lang="ts">
   import { RouterView } from '@dvcol/svelte-simple-router/components';
   import { transition } from '@dvcol/svelte-simple-router/utils';
-  
+
   ...
 </script>
 
@@ -257,7 +251,7 @@ Then, you can use one or a combination of lifecycle hooks like `onChange` or `on
 ```svelte
 <script lang="ts">
   import { onChange, onError, onLoaded } from '@dvcol/svelte-simple-router/router';
-  
+
   let resolve: () => void;
 
   const starTransition = () => {
@@ -289,6 +283,7 @@ Then, you can use one or a combination of lifecycle hooks like `onChange` or `on
 The `link action` intercepts click events on dom elements and triggers a router navigation instead.
 
 The link action will prevent the default behavior and use the router only if the following conditions are met:
+
 - The element is within a router context
 - The event is a left click or enter key
 - The event does not have a modifier key
@@ -296,6 +291,7 @@ The link action will prevent the default behavior and use the router only if the
 - The target is not a new tab or window (for anchor elements)
 
 Additionally:
+
 - The action merge data-attributes with the options passed as argument.
 - Passed options have precedence over data-attributes.
 - If attribute expects a JSON object, it will be parsed.
@@ -323,6 +319,7 @@ Note: The action requires the router context to be present in the component tree
 The `links action` intercepts click events on dom elements and upwardly navigate the dom tree until it reaches a link element and triggers a router navigation instead.
 
 The links action will recognize a parent node as a router link if it satisfies any of the following conditions:
+
 - The element is an anchor element
 - The element has a `data-router-link` attribute
 - The element satisfies the `apply` selector function passed as argument
@@ -330,6 +327,7 @@ The links action will recognize a parent node as a router link if it satisfies a
 When a node is recognized as a router link, the action will behave as the `link` action (all restrictions apply).
 
 Additionally:
+
 - The action requires either valid href or data-attributes to navigate.
 - Once the action reaches the host element or the `boundary` element (or selector function), it will stop evaluating the dom tree.
 
@@ -343,7 +341,7 @@ Note: Unlike use:link, use:links does not normalize link attributes (role, tabin
 
 <div use:links>
   <div>
-      <a href="/path/:param?query=value">simple link</a>
+    <a href="/path/:param?query=value">simple link</a>
   </div>
   <div data-router-link data-name="Hello">
     <span>simple span</span>
@@ -356,6 +354,7 @@ Note: Unlike use:link, use:links does not normalize link attributes (role, tabin
 The `active action` adds an active state (class, style or attribute) to an element when the route matches.
 
 Additionally:
+
 - If attached to an anchor element, it will attempt to match the href attribute.
 - If path or name options are provided, they will take precedence over the element attributes.
 - Name always takes precedence over path.
@@ -378,143 +377,153 @@ Note: The action requires the router context to be present in the component tree
 
 #### Hooks
 
-* `hasRouter` & `useRouter` - Returns the router instance
+- `hasRouter` & `useRouter` - Returns the router instance
 
 Must be used within a `RouterView` or `RouterContext`.
 
 ```svelte
 <script lang="ts">
   import { useRouter } from '@dvcol/svelte-simple-router/router';
-  
-  const router = useRouter()
+
+  const router = useRouter();
 </script>
 ```
-* `hasView` & `useView` - Returns the view instance
+
+- `hasView` & `useView` - Returns the view instance
 
 Must be used within a `RouterView`.
 
 ```svelte
 <script lang="ts">
   import { useView } from '@dvcol/svelte-simple-router/router';
-  
-  const view = useView()
+
+  const view = useView();
 </script>
 ```
-* `useRoute` - Returns the current `route`, `location` and the `routing`state
+
+- `useRoute` - Returns the current `route`, `location` and the `routing`state
 
 Must be used within a `RouterView` or `RouterContext`.
 
 ```svelte
 <script lang="ts">
   import { useRoute } from '@dvcol/svelte-simple-router/router';
-  
-  const { route, location, routing } =  $derived(useRoute())
-  
-  const reactiveRoute = $derived(route)
-  const reactiveLocation = $derived(location)
-  const reactiveRoutingState = $derived(routing)
-  
+
+  const { route, location, routing } = $derived(useRoute());
+
+  const reactiveRoute = $derived(route);
+  const reactiveLocation = $derived(location);
+  const reactiveRoutingState = $derived(routing);
+
   const pathParams = $derived(location.params);
   const queryParams = $derived(location.query);
 </script>
 ```
-* `useNavigate` - Returns utility function to start navigation logic.
+
+- `useNavigate` - Returns utility function to start navigation logic.
 
 Must be used within a `RouterView` or `RouterContext`.
 
 ```svelte
 <script lang="ts">
   import { useNavigate } from '@dvcol/svelte-simple-router/router';
-  
-  const { resolve, push, replace, back, forward, go } = useNavigate()
+
+  const { resolve, push, replace, back, forward, go } = useNavigate();
 </script>
 ```
-* `beforeEach` - Returns a onMount hook that register (and auto-clean) a listener that triggers before each navigation event
+
+- `beforeEach` - Returns a onMount hook that register (and auto-clean) a listener that triggers before each navigation event
 
 Must be used within a `RouterView` or `RouterContext`.
 
 ```svelte
 <script lang="ts">
   import { beforeEach } from '@dvcol/svelte-simple-router/router';
-  
+
   beforeEach((event) => {
     console.info('before navigation', event);
-  })
+  });
 </script>
 ```
-* `onStart` - Returns a onMount hook that register (and auto-clean) a listener that triggers at the start of each navigation event
+
+- `onStart` - Returns a onMount hook that register (and auto-clean) a listener that triggers at the start of each navigation event
 
 Must be used within a `RouterView` or `RouterContext`.
 
 ```svelte
 <script lang="ts">
   import { onStart } from '@dvcol/svelte-simple-router/router';
-  
+
   onStart((event) => {
     console.info('start of navigation', event);
-  })
+  });
 </script>
 ```
-* `onEnd` - Returns a onMount hook that register (and auto-clean) a listener that triggers at the end of each navigation event
+
+- `onEnd` - Returns a onMount hook that register (and auto-clean) a listener that triggers at the end of each navigation event
 
 Must be used within a `RouterView` or `RouterContext`.
 
 ```svelte
 <script lang="ts">
   import { onEnd } from '@dvcol/svelte-simple-router/router';
-  
+
   onEnd((event) => {
     console.info('end of navigation', event);
-  })
+  });
 </script>
 ```
-* `onChange` - Returns a onMount hook that register (and auto-clean) a listener that triggers at the start of a view change.
+
+- `onChange` - Returns a onMount hook that register (and auto-clean) a listener that triggers at the start of a view change.
 
 Must be used within a `RouterView`.
 
 ```svelte
 <script lang="ts">
   import { onChange } from '@dvcol/svelte-simple-router/router';
-  
+
   onChange((event) => {
     console.info('start of view change', event);
-  })
+  });
 </script>
 ```
-* `onLoading` - Returns a onMount hook that register (and auto-clean) a listener that triggers when a view start loading an async component.
+
+- `onLoading` - Returns a onMount hook that register (and auto-clean) a listener that triggers when a view start loading an async component.
 
 Must be used within a `RouterView`.
 
 ```svelte
 <script lang="ts">
   import { onLoading } from '@dvcol/svelte-simple-router/router';
-  
+
   onLoading((event) => {
     console.info('loading view', event);
-  })
+  });
 </script>
 ```
-* `onLoaded` - Returns a onMount hook that register (and auto-clean) a listener that triggers when a view finish loading a component.
+
+- `onLoaded` - Returns a onMount hook that register (and auto-clean) a listener that triggers when a view finish loading a component.
 
 Must be used within a `RouterView`.
 
 ```svelte
 <script lang="ts">
   import { onLoaded } from '@dvcol/svelte-simple-router/router';
-  
+
   onLoaded((event) => {
     console.info('view loaded', event);
-  })
+  });
 </script>
 ```
-* `onError` - Returns a onMount hook that register (and auto-clean) a listener that triggers when an error occurs during navigation or view change.
+
+- `onError` - Returns a onMount hook that register (and auto-clean) a listener that triggers when an error occurs during navigation or view change.
 
 Must be used within a `RouterView`.
 
 ```svelte
 <script lang="ts">
-  import { onError, NavigationEvent, ViewChangeEvent } from '@dvcol/svelte-simple-router/router';
-  
+  import { NavigationEvent, onError, ViewChangeEvent } from '@dvcol/svelte-simple-router/router';
+
   onError((err, event) => {
     if (event instanceof NavigationEvent) {
       console.error('Navigation Error', { err, event });
@@ -526,27 +535,29 @@ Must be used within a `RouterView`.
   });
 </script>
 ```
-* `onViewError` - Returns a onMount hook that register (and auto-clean) a listener that triggers when an error occurs during view change.
+
+- `onViewError` - Returns a onMount hook that register (and auto-clean) a listener that triggers when an error occurs during view change.
 
 Must be used within a `RouterView`.
 
 ```svelte
 <script lang="ts">
   import { onViewError } from '@dvcol/svelte-simple-router/router';
-  
+
   onViewError((err, event) => {
     console.error('View change error', { err, event });
   });
 </script>
 ```
-* `onRouterError` - Returns a onMount hook that register (and auto-clean) a listener that triggers when an error occurs during navigation.
+
+- `onRouterError` - Returns a onMount hook that register (and auto-clean) a listener that triggers when an error occurs during navigation.
 
 Must be used within a `RouterView` or `RouterContext`.
 
 ```svelte
 <script lang="ts">
   import { onRouterError } from '@dvcol/svelte-simple-router/router';
-  
+
   onRouterError((err, event) => {
     console.error('Navigation error', { err, event });
   });
@@ -560,20 +571,17 @@ For more complexe usage, you can grab the router instance from the context and c
 See the [router model](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L482-L501) for more information.
 
 ```svelte
-
 <script lang="ts">
-  import { RouterContext } from '@dvcol/svelte-simple-router/components';
-  import { RouterView } from '@dvcol/svelte-simple-router/components';
   import { useRouter } from '@dvcol/svelte-simple-router/router';
-  
+
   const router = useRouter();
-  
+
   const onPush = () => {
-    router.push({ path: "/route-path" });
+    router.push({ path: '/route-path' });
   };
-  
+
   const onReplace = () => {
-    router.replace({ name: "route-name" });
+    router.replace({ name: 'route-name' });
   };
 </script>
 ```
@@ -581,6 +589,7 @@ See the [router model](https://github.com/dvcol/svelte-simple-router/blob/1ca370
 #### Outside component tree
 
 If you need to access the router instance outside of a component, you can instantiate a router instance and pass it to the `RouterContext` or `RouterView` component.
+
 ```ts
 import { Router } from '@dvcol/svelte-simple-router/router';
 
@@ -590,7 +599,7 @@ export const router = new Router();
 ```svelte
 <script lang="ts">
   import { RouterView } from '@dvcol/svelte-simple-router/components';
-  
+
   import { router } from './router';
 </script>
 
@@ -598,6 +607,7 @@ export const router = new Router();
 ```
 
 Router navigation support several [options](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/route.model.ts#L28-L60):
+
 - `name` or `path` to navigate to a named or path route.
 - `params` to pass route parameters.
 - `query` to pass query parameters.
@@ -607,6 +617,7 @@ Router navigation support several [options](https://github.com/dvcol/svelte-simp
 - `stripTrailingHash` to remove the trailing hash from the url (only in hash mode).
 
 You can also override the router's navigation [options](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L199-L248):
+
 - `base` to set the base path for the router.
 - `hash` to enable hash routing.
 - `strict` to enable strictly match routes (i.e. /path will not match /path/child).
@@ -637,53 +648,52 @@ RouteView supports the same error and loading snippets as the RouterView compone
 In addition, named children can be passed as snippets to the component and will be injected into the `components` object.
 If a snippet with the same `name` as the `RouterView` is found, the children will be injected into the `components` object under the `default` key instead.
 
-**Note**: 
+**Note**:
 Inputs are not reactive, so you will need to un-mout and remount the component to trigger a route update.
 It is recommended to use the router instance directly if you need to frequently update routes.
 
-```svelte  
+```svelte
 <script lang="ts">
-  import { RouterView, RouterContext, RouteView} from '@dvcol/svelte-simple-router/components';
-  import { toLazyComponent } from '@dvcol/svelte-simple-router/utils';
-
   import type { PartialRoute } from '@dvcol/svelte-simple-router/models';
-  
-  import ParentComponent from '~/components/hello/ParentComponent.svelte';
+
+  import { RouterContext, RouterView, RouteView } from '@dvcol/svelte-simple-router/components';
+  import { toLazyComponent } from '@dvcol/svelte-simple-router/utils';
   import ChildComponent from '~/components/goodbye/ChildComponent.svelte';
-  
+  import ParentComponent from '~/components/hello/ParentComponent.svelte';
+
   const LazyComponent = toLazyComponent(() => import('./LazyComponent.svelte'));
 
   const parent: PartialRoute = {
     name: 'parent',
     path: '/parent',
   };
-  
+
   const child: PartialRoute = {
     name: 'child',
     path: '/parent/child',
   };
-  
+
 </script>
 
 <RouterContext {options}>
   <RouterView>
     <RouteView route={parent}>
-        <!-- Will render the children in this 'default' RouterView -->
-        <ParentComponent />
-        
-        <!-- Will render this snippet in the 'nested' RouterView -->
-        {#snippet nested()}
-            <ChildComponent />
-        {/snippet}
+      <!-- Will render the children in this 'default' RouterView -->
+      <ParentComponent />
+
+      <!-- Will render this snippet in the 'nested' RouterView -->
+      {#snippet nested()}
+        <ChildComponent />
+      {/snippet}
     </RouteView>
   </RouterView>
-  
+
   <RouterView name="nested">
     <RouteView route={parent}>
-        <!-- Will render the children in this 'nested' RouterView, and nothing in the default when  on '/parent/child' -->
-        <ChildComponent />
+      <!-- Will render the children in this 'nested' RouterView, and nothing in the default when  on '/parent/child' -->
+      <ChildComponent />
     </RouteView>
-    
+
     <!-- Inline example -->
     <RouteView route={{ path: '/other' }} children={ParentComponent} nested={LazyComponent} />
   </RouterView>
@@ -707,6 +717,7 @@ If a guard returns `false`, and object of instance `Error` or `throws`, the navi
 If a guard returns an object with a `path` or `name` property, the navigation will be redirected to the provided route, if any is found and `followGuardRedirects` is enabled.
 
 The `router` ([dynamically](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L422-L447) or through [options](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L307-L317)) and `RouterView` also support several event listeners:
+
 - `onStart` - executed when the navigation is triggered but before the route is resolved (fires on start and redirects).
 - `onEnd` - executed when the navigation is triggered and the route is resolved (fires on successful and failed navigation, but not on cancelled/redirected).
 - `onError` - executed when the navigation is triggered but an error occurs.
@@ -735,37 +746,37 @@ While the component is being resolved, the `loading` component will be rendered 
 Similarly, if an error occurs during the component resolution, the `error` component will be rendered if any, the `error` snippet if any, or nothing.
 
 The router will try to infer if a component is a lazy import by checking it's name (to detect component arrow functions) and it's constructor name (to detect async arrow functions), but for more complex cases, you can use the `toLazyComponent` wrapper.
-Nested lazy components require the wrapper to be used or the function to be manually named `component`. 
+Nested lazy components require the wrapper to be used or the function to be manually named `component`.
 
 ```svelte
 <script lang="ts">
-    import { RouterView } from '@dvcol/svelte-simple-router/components';
-    import { toLazyComponent } from '@dvcol/svelte-simple-router/utils';
-    
-    import type { Route, RouterOptions } from '@dvcol/svelte-simple-router/models';
-    
-    const routes: Readonly<Route[]> = [
-        {
-            name: 'lazy',
-            path: '/lazy',
-            component: () => import('./LazyComponent.svelte'),
-            loading: () => import('./LoadingComponent.svelte'),
-            error: () => import('./ErrorComponent.svelte'),
-        },
-        {
-            name: 'lazy-snippet',
-            path: '/lazy-snippet',
-            component: () => import('./LazyComponent.svelte')
-        },
-        {
-            name: 'lazy-nested',
-            path: '/lazy-nested',
-            components: {
-                default: async () => import('./LazyComponent.svelte'),
-                nested: toLazyComponent(() => import('./NestedComponent.svelte')),
-            }
-        }
-    ] as const;
+  import type { Route } from '@dvcol/svelte-simple-router/models';
+
+  import { RouterView } from '@dvcol/svelte-simple-router/components';
+  import { toLazyComponent } from '@dvcol/svelte-simple-router/utils';
+
+  const routes: Readonly<Route[]> = [
+    {
+      name: 'lazy',
+      path: '/lazy',
+      component: () => import('./LazyComponent.svelte'),
+      loading: () => import('./LoadingComponent.svelte'),
+      error: () => import('./ErrorComponent.svelte'),
+    },
+    {
+      name: 'lazy-snippet',
+      path: '/lazy-snippet',
+      component: () => import('./LazyComponent.svelte'),
+    },
+    {
+      name: 'lazy-nested',
+      path: '/lazy-nested',
+      components: {
+        default: async () => import('./LazyComponent.svelte'),
+        nested: toLazyComponent(() => import('./NestedComponent.svelte')),
+      },
+    },
+  ] as const;
 </script>
 
 <RouterView {routes}>
@@ -783,6 +794,7 @@ Note that loading indicator only trigger once the route has been resolved and no
 If you want to show a loading indicator on initial navigation, you can use the `routing` snippet instead.
 
 This means navigation will be a three-step process:
+
 - The `routing` snippet will be rendered.
 - Then the `loading` component will be rendered.
 - Then the route component or error component will be rendered.
@@ -843,6 +855,7 @@ Will match `/path/any/12` and `/path/other/12/path/end`.
 ### Router
 
 In addition to default navigation options (see [programmatic navigation](#programmatic-navigation)), the router instance supports several [options](https://github.com/dvcol/svelte-simple-router/blob/1ca370af1d892f8291d2464145c6a582eeee7438/src/lib/models/router.model.ts#L256-L318):
+
 - `history` to set the history instance the router will use (defaults to global.history).
 - `location` to set the location instance the router will use (defaults to global.location).
 - `listen` to listen to `popstate` or `navigation` events and trigger synchronization.
@@ -852,7 +865,7 @@ In addition to default navigation options (see [programmatic navigation](#progra
 
 ## Author
 
-* Github: [@dvcol](https://github.com/dvcol)
+- Github: [@dvcol](https://github.com/dvcol)
 
 ## Show your support
 
@@ -866,5 +879,6 @@ Give a ⭐️ if this project helped you!
 
 This project is [MIT](https://github.com/dvcol/svelte-simple-router/blob/master/LICENSE) licensed.
 
-***
+---
+
 _This README was generated with ❤️ by [readme-md-generator](https://github.com/kefranabg/readme-md-generator)_

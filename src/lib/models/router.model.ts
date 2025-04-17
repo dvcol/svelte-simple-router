@@ -86,10 +86,10 @@ export interface RouterStateLocation<Name extends RouteName = RouteName> {
   query?: RouterLocation<Name>['query'];
   params?: RouterLocation<Name>['params'];
 }
-export type RouterState<Name extends RouteName = RouteName> = HistoryState & {
+export type RouterState<Name extends RouteName = RouteName> = {
   [RouterStateConstant]?: RouterStateLocation<Name>;
   [RouterScrollConstant]?: RouterScrollPosition;
-};
+} & Partial<HistoryState>;
 
 export type IHistory<Name extends RouteName = RouteName, T extends RouterState<Name> = RouterState<Name>> = Omit<History, 'state' | 'pushState' | 'replaceState'> & {
   state: T;

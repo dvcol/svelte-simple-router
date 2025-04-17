@@ -40,7 +40,7 @@ export function routeToHistoryState<Name extends RouteName = RouteName>({ route,
       ...state,
       [RouterStateConstant]: routerState,
       [RouterScrollConstant]: scrollState,
-    },
+    } as RouterState<Name>,
     title: title?.length ? replaceTitleParams(title, params) : title,
   };
 }

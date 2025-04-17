@@ -40,7 +40,7 @@ const templateWildcardOrParamPrefixRegex = /^\/:?/g;
 
 const titleParamRegexPrefix = /:\{number|string\}:/g;
 const titleParamReplacePrefix = ':';
-const titleParamRegex = /:([\w:?{}])+/g;
+const titleParamRegex = /:[\w:?{}]+/g;
 
 function replacer(match: string, params: RouteParams, slice = 2) {
   let paramName = match.slice(slice);

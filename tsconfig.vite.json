@@ -1,7 +1,15 @@
 {
   "extends": ["@tsconfig/node22/tsconfig.json", "./tsconfig.json"],
   "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.vite.tsbuildinfo",
-  "exclude": [],
+  "compilerOptions": {
+    "composite": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["node", "vitest"],
+    "strict": true,
+    "noEmit": true,
+    "skipLibCheck": true
+  },
   "include": [
     "**/*.ts",
     "**/*.svelte",
@@ -14,13 +22,5 @@
     "README*md/*.svelte",
     "package.json"
   ],
-  "compilerOptions": {
-    "composite": true,
-    "skipLibCheck": true,
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "noEmit": true,
-    "types": ["node", "vitest"]
-  }
+  "exclude": []
 }
