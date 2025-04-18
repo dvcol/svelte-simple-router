@@ -5,7 +5,7 @@ inputs:
   node_version:
     description: Pnpm version to use
     required: true
-    default: 22.x
+    default: 23.x
   pnpm_version:
     description: Node version to use
     required: false

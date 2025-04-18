@@ -62,6 +62,13 @@ jobs:
       - name: 🧱 Install
         uses: ./.github/actions/install
 
+      - name: 🧱 Versions
+        run: |
+          # =================  🔍 Versions  =================
+          pnpm exec eslint --version
+          pnpm exec prettier --version
+          pnpm exec stylelint --version
+
       - name: 🔍 Check
         run: |
           # =================  🔍 Check  =================
