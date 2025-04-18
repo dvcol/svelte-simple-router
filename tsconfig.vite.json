@@ -1,5 +1,5 @@
 {
-  "extends": ["@tsconfig/node22/tsconfig.json", "./tsconfig.json"],
+  "extends": ["@tsconfig/node22/tsconfig.json", "./tsconfig.build.json"],
   "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.vite.tsbuildinfo",
   "compilerOptions": {
     "composite": true,

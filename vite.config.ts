@@ -22,7 +22,7 @@ if (isDev) {
     }),
     checker({
       typescript: {
-        tsconfigPath: 'tsconfig.json',
+        tsconfigPath: 'tsconfig.build.json',
       },
     }),
   );

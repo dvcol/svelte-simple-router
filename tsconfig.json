@@ -1,17 +1,5 @@
 {
-  "extends": "./.svelte-kit/tsconfig.json",
-  "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
-    "resolveJsonModule": true,
-    "allowJs": true,
-    "checkJs": true,
-    "strict": true,
-    "sourceMap": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
-  },
+  "extends": ["./.svelte-kit/tsconfig.json", "./tsconfig.build.json"],
   "references": [
     { "path": "./tsconfig.vite.json" },
     { "path": "./tsconfig.demo.json" }
