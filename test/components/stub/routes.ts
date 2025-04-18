@@ -19,7 +19,9 @@ export const routes: Route[] = [
   {
     name: 'error',
     path: '/error',
-    component: async () => Promise.reject(new Error('Loading error')),
+    component: async () => {
+      throw new Error('Loading error');
+    },
     error: ErrorComponent,
     props: { title: 'Error' },
     meta: { key: 'Error' },
@@ -48,7 +50,9 @@ export const routes: Route[] = [
   {
     name: 'default-error',
     path: '/default-error',
-    component: async () => Promise.reject(new Error('Default Error')),
+    component: async () => {
+      throw new Error('Default Error');
+    },
     props: { title: 'Default Error' },
     meta: { key: 'Default Error' },
   },
