@@ -99,7 +99,7 @@
     "check:watch": "run-p check:type:watch check:svelte:watch",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "style": "stylelint **/*.{svelte,css,scss,less,html} --go '{\"gitignore\":true}'",
+    "style": "stylelint '**/*.{svelte,css,scss,less,html}' --go '{\"gitignore\":true}'",
     "style:fix": "pnpm run style --fix",
     "test:unit": "vitest --run --coverage",
     "test:watch": "vitest",
@@ -120,7 +120,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.8.0",
     "@commitlint/config-conventional": "^19.8.0",
-    "@dvcol/eslint-config": "^1.2.0",
+    "@dvcol/eslint-config": "^1.3.0",
     "@dvcol/neo-svelte": "^0.1.12",
     "@dvcol/stylelint-plugin-presets": "^2.1.2",
     "@prettier/plugin-xml": "^3.4.1",
