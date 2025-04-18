@@ -1,12 +1,5 @@
-<svg version="1.0"
-     xmlns="http://www.w3.org/2000/svg"
-     viewBox="0 0 155 80"
-     color-interpolation-filters="sRGB"
-     width="512"
-     height="512"
-     >
+<svg version="1.0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 155 80" color-interpolation-filters="sRGB" width="512" height="512">
+  <path d="M37.23 0H0v74.45h37.23a37.23 37.23 0 0 0 0-74.45z" fill="#4377bb" />
 
-    <path d="M37.23 0H0v74.45h37.23a37.23 37.23 0 0 0 0-74.45z" fill="#4377bb"/>
-
-    <path transform="translate(80, 0)" fill="#cfe2f3" d="M74.45 0L37.23 74.45 0 0h74.45z"/>
+  <path transform="translate(80, 0)" fill="#cfe2f3" d="M74.45 0L37.23 74.45 0 0h74.45z" />
 </svg>

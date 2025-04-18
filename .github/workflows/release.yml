@@ -75,7 +75,7 @@ jobs:
       - name: 🏷️ Generate Release changelog
         run: |
           # =================  🏷️ Changelog  =================
-          
+
           pnpm run release:changelog
 
       - name: 📦 Push Release to github
