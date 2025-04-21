@@ -70,7 +70,7 @@
           </tr>
         </thead>
         <tbody>
-          {#each configs as [key, value]}
+          {#each configs as [key, value] (key)}
             <tr title={title[key]}>
               <td>{toTitleCase(key)}</td>
               <td>

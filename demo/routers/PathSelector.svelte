@@ -88,7 +88,7 @@
         </tr>
       </thead>
       <tbody>
-        {#each routes as { name, path, redirect, meta }}
+        {#each routes as { name, path, redirect, meta } (name ?? path)}
           <tr use:link={{ name, path, ...navOptions }} use:active={{ name, path, class: 'active', exact: true }}>
             <td>{name}</td>
             <td>{path}</td>
