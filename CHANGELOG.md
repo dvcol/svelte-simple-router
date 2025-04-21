@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.0.1](https://github.com/dvcol/svelte-simple-router/compare/v1.11.2...v2.0.1) (2025-04-21)
+
+
+### Bug Fixes
+
+* **action:** fix reactivity ([a75626c](https://github.com/dvcol/svelte-simple-router/commit/a75626c18df04b3f14a1b5062e8068907d619448))
+* **action:** fix reactivity for some options ([e56998b](https://github.com/dvcol/svelte-simple-router/commit/e56998b3c75138748368358fadc41965dfda57a1))
+* **lint:** demo lint error ([c9864fd](https://github.com/dvcol/svelte-simple-router/commit/c9864fde70e89ec36a59d1b485568ce44aef460e))
+* **lint:** fix auto-fix error in tests ([7ac5308](https://github.com/dvcol/svelte-simple-router/commit/7ac530830e93f40c5ff3207daa38e7aa16361179))
+* **lint:** test lint errors ([ba66eb3](https://github.com/dvcol/svelte-simple-router/commit/ba66eb39566a5068d0abc56e91b5f689611fcbd5))
+* **typescript:** fix tsconfig setup ([f41b053](https://github.com/dvcol/svelte-simple-router/commit/f41b053f738ce9d29e592a0100281b8cf52825b0))
+
 ### [1.11.2](https://github.com/dvcol/svelte-simple-router/compare/v1.11.1...v1.11.2) (2025-03-06)
 
 
