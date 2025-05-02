@@ -25,10 +25,10 @@ export type HistoryState<Key extends string | number = string | number> = {
 type PrimitiveKey = string | number | symbol;
 export type RouteName = PrimitiveKey;
 export type RouteMeta<T = unknown> = Record<PrimitiveKey, T>;
-export type RouteParamValue = string | number | boolean;
+export type RouteParamValue = string | number | boolean | undefined | null;
 export type RouteQuery = Record<string, RouteParamValue>;
 export type RouteParams = Record<string, RouteParamValue>;
-export type RouteWildcards = Record<string, string>;
+export type RouteWildcards = Record<string, RouteParamValue>;
 
 export interface RouteNavigationOptions {
   /**

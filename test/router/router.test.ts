@@ -743,7 +743,7 @@ describe('router', () => {
         expect(route.name).toBe(ParamRoute.name);
         expect(route.path).toBe(path);
         expect(route.route.path).toBe(ParamRoute.path);
-        expect(route.params).toStrictEqual({ id: '2', firstName: 'Jane', lastName: 'Smith' });
+        expect(route.params).toStrictEqual({ id: 2, firstName: 'Jane', lastName: 'Smith' });
       });
 
       it('should resolve a route from a name with default parameters', async () => {
@@ -755,7 +755,7 @@ describe('router', () => {
         expect(route.name).toBe(ParamRoute.name);
         expect(route.path).toBe('/param/1/user/John/Doe');
         expect(route.route.path).toBe(ParamRoute.path);
-        expect(route.params).toStrictEqual({ id: '1', firstName: 'John', lastName: 'Doe' });
+        expect(route.params).toStrictEqual({ id: 1, firstName: 'John', lastName: 'Doe' });
       });
 
       it('should resolve a route from a location with query parameters', async () => {
@@ -792,7 +792,7 @@ describe('router', () => {
         expect(route.name).toBe(ParamQueryRoute.name);
         expect(route.path).toBe(path);
         expect(route.route.path).toBe(ParamQueryRoute.path);
-        expect(route.params).toStrictEqual({ id: '2', firstName: 'Jane', lastName: 'Smith' });
+        expect(route.params).toStrictEqual({ id: 2, firstName: 'Jane', lastName: 'Smith' });
         expect(route.query).toStrictEqual({ page: '2', limit: '5' });
       });
 

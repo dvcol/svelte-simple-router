@@ -1,4 +1,4 @@
-import type { Route, RouteName, RouteParams } from '~/models/route.model.js';
+import type { Route, RouteName, RouteParams, RouteParamValue } from '~/models/route.model.js';
 
 import { MatcherInvalidPathError, ParsingMissingRequiredParamError } from '~/models/error.model.js';
 
@@ -59,6 +59,20 @@ export function replaceTitleParams(title: string, params: RouteParams = {}) {
     .trim();
 }
 
+const nullRegex = /^\d+(?:\.\d+)?$/;
+const booleanRegex = /^(?:true|false)$/i;
+function decodeValue(value?: string): RouteParamValue {
+  if (value === undefined || value === null) return value;
+  if (nullRegex.test(value)) return Number(value);
+  if (booleanRegex.test(value)) return value.toLowerCase() === 'true';
+  return decodeURIComponent(value);
+}
+
+function encodeValue(value?: RouteParamValue): string {
+  if (value === undefined || value === null) return '';
+  return encodeURIComponent(String(value));
+}
+
 /**
  * Replaces template params with their values
  * @param template
@@ -69,12 +83,12 @@ export function replaceTemplateParams(template: string, params: RouteParams = {}
   return template?.replace(templateParamRegexPrefix, templateParamReplacePrefix).replace(templateParamRegex, (match) => {
     const { param, value, optional } = replacer(match, params);
 
-    if (value === undefined) {
+    if (value === undefined || value === null) {
       if (optional) return '';
       throw new ParsingMissingRequiredParamError({ template, missing: param, params });
     }
 
-    return `/${value}`;
+    return `/${encodeValue(value)}`;
   });
 }
 
@@ -86,8 +100,7 @@ export function replaceTemplateParams(template: string, params: RouteParams = {}
 export function templateToRegex(template: string) {
   let _template = template?.trim();
   if (!_template?.length) throw new MatcherInvalidPathError(template);
-  if (relativePathRegex.test(_template))
-    throw new MatcherInvalidPathError(template, `Path should be absolute, but "${_template}" seems to be relative.`);
+  if (relativePathRegex.test(_template)) throw new MatcherInvalidPathError(template, `Path should be absolute, but "${_template}" seems to be relative.`);
   if (!_template.startsWith('/')) _template = `/${_template}`;
 
   const strRegex = _template
@@ -124,8 +137,8 @@ export function templateToParams(template: string) {
 }
 
 export interface PathParamsResult {
-  params: Record<string, string>;
-  wildcards: Record<string, string>;
+  params: Record<string, string | number | boolean | undefined | null>;
+  wildcards: Record<string, string | number | boolean | undefined | null>;
 }
 export interface IMatcher {
   /**
@@ -182,8 +195,8 @@ export class Matcher<Name extends RouteName = RouteName> implements IMatcher {
       if (index === 0) return;
       if (index > this.#params.length) return;
       const paramName = this.#params[index - 1];
-      if (paramName === '*') result.wildcards[index] = match;
-      else result.params[paramName] = match;
+      if (paramName === '*') result.wildcards[index] = decodeValue(match);
+      else result.params[paramName] = decodeValue(match);
     });
     return result;
   }

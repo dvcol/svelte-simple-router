@@ -37,6 +37,16 @@ describe('matcher', () => {
       expect(replaceTemplateParams(template, params)).toBe(path);
     });
 
+    it('should replace template params with valid URI component', () => {
+      expect.assertions(1);
+
+      const template = '/base/path/:id/:lastName/end';
+      const params = { id: 12, lastName: "Hello World!@#$%^&*()_+[]{}|;:',.<>?/`~ =" };
+      const path = `/base/path/12/${encodeURIComponent(params.lastName)}/end`;
+
+      expect(replaceTemplateParams(template, params)).toBe(path);
+    });
+
     it('should strip the type from the template path then replace path params with the provided params', () => {
       expect.assertions(1);
 
@@ -684,7 +694,16 @@ describe('matcher', () => {
         expect.assertions(1);
         const matcher = new Matcher(template);
         const path = '/base/path/something/12/path/john/doe/end';
-        const params = { id: '12', name: 'john', lastName: 'doe' };
+        const params = { id: 12, name: 'john', lastName: 'doe' };
+        const wildcards = { 1: 'something' };
+        expect(matcher.extract(path)).toStrictEqual({ params, wildcards });
+      });
+
+      it('should extract params from a location with uri component params', () => {
+        expect.assertions(1);
+        const matcher = new Matcher(template);
+        const params = { id: 12, name: 'john', lastName: "Hello World!@#$%^&*()_+[]{}|;:',.<>?/`~ =" };
+        const path = `/base/path/something/12/path/john/${encodeURIComponent(params.lastName)}/end`;
         const wildcards = { 1: 'something' };
         expect(matcher.extract(path)).toStrictEqual({ params, wildcards });
       });
@@ -693,7 +712,7 @@ describe('matcher', () => {
         expect.assertions(1);
         const matcher = new Matcher('/base/path/:{number}:id/end');
         const path = '/base/path/12/end';
-        const params = { id: '12' };
+        const params = { id: 12 };
         const wildcards = {};
         expect(matcher.extract(path)).toStrictEqual({ params, wildcards });
       });
@@ -729,7 +748,7 @@ describe('matcher', () => {
         expect.assertions(1);
         const matcher = new Matcher('/base/path/:{number}:id/:{string}:name/end');
         const path = '/base/path/12/john/end';
-        const params = { id: '12', name: 'john' };
+        const params = { id: 12, name: 'john' };
         const wildcards = {};
         expect(matcher.extract(path)).toStrictEqual({ params, wildcards });
       });
@@ -738,7 +757,7 @@ describe('matcher', () => {
         expect.assertions(1);
         const matcher = new Matcher('/base/path/:id/:first:?/:name/end');
         const path = '/base/path/12/john/doe/end';
-        const params = { id: '12', first: 'john', name: 'doe' };
+        const params = { id: 12, first: 'john', name: 'doe' };
         const wildcards = {};
         expect(matcher.extract(path)).toStrictEqual({ params, wildcards });
       });
@@ -747,26 +766,26 @@ describe('matcher', () => {
         expect.assertions(1);
         const matcher = new Matcher('/base/path/:id/:first:?/:name/end');
         const path = '/base/path/12/doe/end';
-        const params = { id: '12', first: undefined, name: 'doe' };
+        const params = { id: 12, first: undefined, name: 'doe' };
         const wildcards = {};
         expect(matcher.extract(path)).toStrictEqual({ params, wildcards });
       });
 
       it('should extract params from a location with wildcards', () => {
         expect.assertions(1);
-        const matcher = new Matcher('/base/path/*/segment/*/end');
-        const path = '/base/path/something/segment/else/end';
-        const params = {};
-        const wildcards = { 1: 'something', 2: 'else' };
+        const matcher = new Matcher('/base/:boolean/path/*/segment/*/end');
+        const path = '/base/FALSE/path/something/segment/else/end';
+        const params = { boolean: false };
+        const wildcards = { 2: 'something', 3: 'else' };
         expect(matcher.extract(path)).toStrictEqual({ params, wildcards });
       });
 
       it('should extract params from a location with params and wildcards', () => {
         expect.assertions(1);
-        const matcher = new Matcher('/base/path/*/segment/:id/*');
-        const path = '/base/path/something/segment/12/segment/end';
-        const params = { id: '12' };
-        const wildcards = { 1: 'something', 3: 'segment/end' };
+        const matcher = new Matcher('/base/:boolean/path/*/segment/:id/*');
+        const path = '/base/true/path/something/segment/12/segment/end';
+        const params = { id: 12, boolean: true };
+        const wildcards = { 2: 'something', 4: 'segment/end' };
         expect(matcher.extract(path)).toStrictEqual({ params, wildcards });
       });
 

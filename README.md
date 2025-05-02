@@ -812,7 +812,7 @@ This means navigation will be a three-step process:
 - Parameters can be optional by adding a question mark.
 
 ```
-/path/:param?
+/path/:param:?
 ```
 
 Parameters can also have a type constraint by adding `:{string}` or `:{number}` before the parameter name.
@@ -820,7 +820,7 @@ Parameters can also have a type constraint by adding `:{string}` or `:{number}` 
 The router will only match the route if the parameter matches the type constraint.
 
 ```
-/path/:{string}:param?
+/path/:{string}:param:?
 ```
 
 Will match `/path/param` but not `/path/1`.
