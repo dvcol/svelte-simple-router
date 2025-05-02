@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.2.0](https://github.com/dvcol/svelte-simple-router/compare/v2.1.1...v2.2.0) (2025-05-02)
+
+
+### Features
+
+* **matcher:** encode query params & parse params when matching ([d659769](https://github.com/dvcol/svelte-simple-router/commit/d65976939b134815114b13c1531dedc206749bfa))
+
 ### [2.1.1](https://github.com/dvcol/svelte-simple-router/compare/v2.1.0...v2.1.1) (2025-05-02)
 
 
