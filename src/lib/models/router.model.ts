@@ -13,6 +13,7 @@ import type {
   ParsedRoute,
   ResolvedRoute,
   Route,
+  RouteMeta,
   RouteName,
   RouteNavigation,
   RouteNavigationOptions,
@@ -27,14 +28,47 @@ import { isShallowEqual } from '@dvcol/common-utils/common/object';
 import { isRouteEqual } from '~/models/route.model.js';
 
 export interface RouterLocation<Name extends RouteName = RouteName> {
+  /**
+   * Origin of the location.
+   */
   origin: string;
+  /**
+   * Base URL from which the app is served.
+   */
   base?: string;
+  /**
+   * Name of the resolved route record.
+   */
   name?: Name;
+  /**
+   * Resolved path with query and params.
+   */
   path: string;
+  /**
+   * Full matched path including parents and base.
+   */
   href: URL;
+  /**
+   * Query parameters of the location.
+   */
   query: RouteQuery;
+  /**
+   * Params of the location.
+   */
   params: RouteParams;
+  /**
+   * Wildcards parsed from the path.
+   */
   wildcards: RouteWildcards;
+  /**
+   * Arbitrary data attached to the record.
+   */
+  meta: RouteMeta;
+  /**
+   * The title template for the location.
+   * If you need the parsed title, please use the `title` property of the router.
+   */
+  title?: string;
 }
 
 export function isLocationEqual<Name extends RouteName = RouteName>(a?: RouterLocation<Name>, b?: RouterLocation<Name>): boolean {
@@ -53,6 +87,8 @@ export function toBasicRouterLocation<Name extends RouteName = RouteName>(loc?: 
     query: { ...loc.query },
     params: { ...loc.params },
     wildcards: { ...loc.wildcards },
+    meta: { ...loc.meta },
+    title: loc.title,
   };
 }
 

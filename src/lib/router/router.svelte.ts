@@ -605,6 +605,8 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       params,
       path,
       name,
+      meta,
+      title,
       stripQuery = this.options.stripQuery,
       stripHash = this.options.stripHash,
       stripTrailingHash = this.options.stripTrailingHash,
@@ -663,6 +665,8 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
       query: Object.fromEntries(search),
       params: { ...params, ..._params },
       wildcards: { ...wildcards },
+      meta: { ...route?.meta, ...meta },
+      title: title ?? route?.title,
     };
 
     const guard = await route?.beforeResolve?.(resolved);
@@ -857,7 +861,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
   ): Promise<ResolvedRouterLocationSnapshot<Name>> {
     const resolved = await this.resolve(to, options);
     const routed = await this.#navigate(resolved, options);
-    const { state, title } = routeToHistoryState(routed, { ...options, state: to.state });
+    const { state, title } = routeToHistoryState(routed, { ...options, state: to.state, title: to.title });
     try {
       this.#history[method](state, title ?? '', routed.location?.href);
       if (title) document.title = title;

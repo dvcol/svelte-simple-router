@@ -22,6 +22,9 @@ export type HistoryState<Key extends string | number = string | number> = {
   [x in Key]: HistoryStateValue<Key>;
 };
 
+type PrimitiveKey = string | number | symbol;
+export type RouteName = PrimitiveKey;
+export type RouteMeta<T = unknown> = Record<PrimitiveKey, T>;
 export type RouteParamValue = string | number | boolean;
 export type RouteQuery = Record<string, RouteParamValue>;
 export type RouteParams = Record<string, RouteParamValue>;
@@ -63,6 +66,23 @@ export type CommonRouteNavigation = RouteNavigationOptions & {
    * @see [MDN for more information](https://developer.mozilla.org/en-US/docs/Web/API/History/state)
    */
   state?: HistoryState;
+  /**
+   * Arbitrary data attached to the record.
+   */
+  meta?: RouteMeta;
+  /**
+   * Title of the route record. Used for the document title.
+   *
+   * Supports:
+   * - parameters `:param`.
+   * - optional parameters `:param:?`.
+   * - typed parameters `:{string}:param` or `:{number}:param`.
+   *
+   * Note: Parameters need to match the following regex: `/:(\w|[:?{}])+/g`.
+   *
+   * @example `:count:? My Title :route:?` with parameters `{ count: '(1) ', route: '- home' }` will render `(1) My Title - home`.
+   */
+  title?: string;
 };
 
 /**
@@ -79,8 +99,6 @@ export type RouteLocationNavigation = CommonRouteNavigation & {
   name?: never;
 };
 
-export type RouteName = string | number | symbol;
-
 export type RouteNameNavigation<Name extends RouteName = RouteName> = CommonRouteNavigation & {
   /**
    * Name of the route.
@@ -94,7 +112,7 @@ export type RouteNameNavigation<Name extends RouteName = RouteName> = CommonRout
 
 export type RouteNavigation<Name extends RouteName = RouteName> = RouteLocationNavigation | RouteNameNavigation<Name>;
 
-export type ComponentProps = Record<RouteName, unknown>;
+export type ComponentProps = Record<PrimitiveKey, unknown>;
 
 export interface RouteComponent {
   /**
@@ -250,7 +268,7 @@ export interface BaseRoute<Name extends RouteName = RouteName> {
   /**
    * Arbitrary data attached to the record.
    */
-  meta?: Record<RouteName, unknown>;
+  meta?: RouteMeta;
   /**
    * Default, query parameters to inject in the url when navigating to this route.
    * Note that query passed in navigation events will override these.
@@ -350,4 +368,12 @@ export interface ResolvedRoute<Name extends RouteName = RouteName> {
    * Wildcards parsed from the path.
    */
   wildcards: RouteWildcards;
+  /**
+   * Arbitrary data attached to the record.
+   */
+  meta: RouteMeta;
+  /**
+   * Document title for the route.
+   */
+  title?: string;
 }

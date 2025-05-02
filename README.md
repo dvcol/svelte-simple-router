@@ -612,6 +612,8 @@ Router navigation support several [options](https://github.com/dvcol/svelte-simp
 - `params` to pass route parameters.
 - `query` to pass query parameters.
 - `state` to pass an history state object.
+- `meta` to pass an arbitrary object to the route (will be merged with the route meta).
+- `title` to set the document title (will override the route title).
 - `stripQuery` to remove current query parameters from the url.
 - `stripHash` to remove the hash from the url (only in path mode).
 - `stripTrailingHash` to remove the trailing hash from the url (only in hash mode).

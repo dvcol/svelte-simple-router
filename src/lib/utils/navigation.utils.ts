@@ -10,11 +10,13 @@ import { replaceTitleParams } from '~/models/matcher.model.js';
 import { RouterScrollConstant, RouterStateConstant } from '~/models/router.model.js';
 
 export function routeToHistoryState<Name extends RouteName = RouteName>({ route, location }: Partial<ResolvedRouterLocationSnapshot<Name>>, {
+  title,
   metaAsState,
   nameAsTitle,
   state,
   scrollState = { x: globalThis?.scrollX, y: globalThis?.scrollY },
 }: {
+  title?: string;
   metaAsState?: boolean;
   nameAsTitle?: boolean;
   state?: HistoryState;
@@ -26,7 +28,7 @@ export function routeToHistoryState<Name extends RouteName = RouteName>({ route,
   const { href, query, params, name, path } = location ?? {};
   const _name = name ?? route?.name;
   const _path = path ?? route?.path;
-  const title: string | undefined = route?.title ?? (nameAsTitle ? _name?.toString() : undefined);
+  const _title: string | undefined = title ?? route?.title ?? (nameAsTitle ? _name?.toString() : undefined);
   const routerState: RouterStateLocation<Name> = {};
   if (metaAsState && route?.meta) routerState.meta = JSON.parse(JSON.stringify(route.meta)) as RouterStateLocation<Name>['meta'];
   if (name) routerState.name = _name;
@@ -41,7 +43,7 @@ export function routeToHistoryState<Name extends RouteName = RouteName>({ route,
       [RouterStateConstant]: routerState,
       [RouterScrollConstant]: scrollState,
     } as RouterState<Name>,
-    title: title?.length ? replaceTitleParams(title, params) : title,
+    title: _title?.length ? replaceTitleParams(_title, params) : _title,
   };
 }
 

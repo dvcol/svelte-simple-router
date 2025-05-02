@@ -103,6 +103,8 @@ export function getLinkNavigateFunction(options: LinkNavigateOptions = {}): Link
     addIfFound(navigation, 'query', options.query ?? parseJsonAttribute(node, 'query'));
     addIfFound(navigation, 'params', options.params ?? parseJsonAttribute(node, 'params'));
     addIfFound(navigation, 'state', options.state ?? parseJsonAttribute(node, 'state'));
+    addIfFound(navigation, 'meta', options.meta ?? parseJsonAttribute(node, 'meta'));
+    addIfFound(navigation, 'title', options.title ?? parseJsonAttribute(node, 'title'));
     addIfFound(navigation, 'stripQuery', options.stripQuery ?? parseBooleanAttribute(node, 'strip-query'));
     addIfFound(navigation, 'stripHash', options.stripHash ?? parseBooleanAttribute(node, 'strip-hash'));
     addIfFound(navigation, 'stripTrailingHash', options.stripTrailingHash ?? parseBooleanAttribute(node, 'strip-trailing-hash'));

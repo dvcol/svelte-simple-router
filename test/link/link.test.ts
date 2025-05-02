@@ -122,6 +122,8 @@ describe('link', () => {
           query: { search: 'value', filter: 42 },
           params: { id: 12, name: 'john' },
           state: { key: 'value' },
+          meta: { key: 'value', nested: { key: 'value' } },
+          title: 'override title',
           stripQuery: true,
           stripHash: true,
           stripTrailingHash: true,

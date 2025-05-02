@@ -4,7 +4,8 @@
   const router = useRouter();
   const route = $derived(router?.route);
   const location = $derived(router?.location);
-  const meta = $derived(route?.meta);
+  const meta = $derived(location?.meta);
+  const title = $derived(location?.title);
   const error = $derived<any>(router?.error);
 </script>
 
@@ -12,6 +13,7 @@
   <h3>Router - {router?.id}</h3>
   <br />
   <div>Location - {location?.path}</div>
+  <div>Title - {title}</div>
   <div>Params - {JSON.stringify(location?.params, undefined, 2)}</div>
   <div>Query - {JSON.stringify(location?.query, undefined, 2)}</div>
   <div>Wildcards - {JSON.stringify(location?.wildcards, undefined, 2)}</div>

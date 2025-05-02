@@ -47,6 +47,18 @@ describe('router', () => {
     children: [ChildRoute, OtherChildRoute],
   };
 
+  const MetaRoute: Route = {
+    name: 'meta',
+    path: '/meta',
+    meta: {
+      seed: 'Route meta',
+      nested: {
+        key: 'Nested key',
+        value: 'Nested value',
+      },
+    },
+  };
+
   const ParamRoute: Route = {
     name: 'param',
     path: '/param/:id/user/:firstName:?/:lastName',
@@ -138,6 +150,7 @@ describe('router', () => {
     PathRoute,
     OtherRoute,
     ParentRoute,
+    MetaRoute,
     ParamRoute,
     QueryRoute,
     ParamQueryRoute,
@@ -668,6 +681,58 @@ describe('router', () => {
         expect(route.route.path).toBe('/parent/child');
       });
 
+      it('should resolve a route from a location with title template', async () => {
+        expect.assertions(5);
+
+        const path = TitleRoute.path;
+        const route = await router.resolve({ path });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(TitleRoute.name);
+        expect(route.path).toBe(path);
+        expect(route.route?.path).toBe(TitleRoute.path);
+        expect(route.title).toStrictEqual(TitleRoute.title);
+      });
+
+      it('should resolve a route from a location with title override', async () => {
+        expect.assertions(5);
+
+        const path = TitleRoute.path;
+        const route = await router.resolve({ path, title: 'custom title template' });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(TitleRoute.name);
+        expect(route.path).toBe(path);
+        expect(route.route?.path).toBe(TitleRoute.path);
+        expect(route.title).toStrictEqual('custom title template');
+      });
+
+      it('should resolve a route from a location with meta object', async () => {
+        expect.assertions(5);
+
+        const path = MetaRoute.path;
+        const route = await router.resolve({ path });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(MetaRoute.name);
+        expect(route.path).toBe(path);
+        expect(route.route?.path).toBe(MetaRoute.path);
+        expect(route.meta).toStrictEqual(MetaRoute.meta);
+      });
+
+      it('should resolve a route from a location and merge meta object', async () => {
+        expect.assertions(5);
+
+        const path = MetaRoute.path;
+        const route = await router.resolve({ path, meta: { push: 'push value', nested: { key: 'new key', value: 'new key' } } });
+
+        expect(route).toBeDefined();
+        expect(route.name).toBe(MetaRoute.name);
+        expect(route.path).toBe(path);
+        expect(route.route?.path).toBe(MetaRoute.path);
+        expect(route.meta).toStrictEqual({ ...MetaRoute.meta, push: 'push value', nested: { key: 'new key', value: 'new key' } });
+      });
+
       it('should resolve a route from a location with param parameters', async () => {
         expect.assertions(5);
 
@@ -705,7 +770,7 @@ describe('router', () => {
         expect(route.query).toStrictEqual({ page: '2', limit: '5' });
       });
 
-      it('should resolve a route from a location with default query parameters', async () => {
+      it('should resolve a route from a name with default query parameters', async () => {
         expect.assertions(5);
 
         const route = await router.resolve({ name: QueryRoute.name });
