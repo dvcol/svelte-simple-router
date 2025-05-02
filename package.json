@@ -2,7 +2,7 @@
   "name": "@dvcol/svelte-simple-router",
   "type": "module",
   "version": "2.1.1",
-  "packageManager": "pnpm@10.8.1",
+  "packageManager": "pnpm@10.10.0",
   "description": "Simple svelte 5 client side router",
   "author": "dvcol",
   "license": "MIT",
