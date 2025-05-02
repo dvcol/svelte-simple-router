@@ -88,7 +88,6 @@
     if (transition?.updateOnPropsChange) _keys.push(_properties);
     if (routingSnippet) _keys.push(routing);
 
-    console.info('Transition key changed:', _keys);
     return _keys;
   });
   // Final unique identifier for the current route change

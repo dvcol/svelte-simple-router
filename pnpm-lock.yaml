@@ -32,7 +32,7 @@ importers:
         version: 1.1.1(svelte@5.27.0)
       '@dvcol/stylelint-plugin-presets':
         specifier: ^2.1.2
-        version: 2.1.2(postcss-html@0.36.0(postcss-syntax@0.36.2)(postcss@8.5.3))(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3)(prettier@3.5.3)(stylelint@16.18.0(typescript@5.8.3))
+        version: 2.1.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3)(prettier@3.5.3)(stylelint@16.18.0(typescript@5.8.3))
       '@prettier/plugin-xml':
         specifier: ^3.4.1
         version: 3.4.1(prettier@3.5.3)
@@ -97,8 +97,8 @@ importers:
         specifier: ^0.6.1
         version: 0.6.1
       npm-run-all2:
-        specifier: ^7.0.2
-        version: 7.0.2
+        specifier: ^8.0.1
+        version: 8.0.1
       postcss:
         specifier: ^8.5.3
         version: 8.5.3
@@ -1888,10 +1888,6 @@ packages:
       typescript:
         optional: true
 
-  cross-spawn@7.0.3:
-    resolution: {integrity: sha512-iRDPJKUPVEND7dHPO8rkbOnPpyDygcDFtWjpeWNCgy8WP2rXcxXL8TskReQl6OrB2G7+UJrags1q15Fudc7G6w==}
-    engines: {node: '>= 8'}
-
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
@@ -3527,6 +3523,10 @@ packages:
     resolution: {integrity: sha512-I9jwMn07Sy/IwOj3zVkVik2JTvgpaykDZEigL6Rx6N9LbMywwUSMtxET+7lVoDLLd3O3IXwJwvuuns8UB/HeAg==}
     engines: {node: '>=4'}
 
+  minimatch@10.0.1:
+    resolution: {integrity: sha512-ethXTt3SGGR+95gudmqJ1eNhRO7eGEGIgYA9vnPatK4/etz2MEVDno5GMCibdMTuBMyElzIlgxMna3K94XDIDQ==}
+    engines: {node: 20 || >=22}
+
   minimatch@3.1.2:
     resolution: {integrity: sha512-J7p63hRiAjw1NDEww1W7i37+ByIrOWO5XQQAzZ3VOcL0PNybwpfmV/N05zFAzwQ9USyEcX6t3UO+K5aqBQOIHw==}
 
@@ -3642,9 +3642,9 @@ packages:
     resolution: {integrity: sha512-TZKxPvItzai9kN9H/TkmCtx/ZN/hvr3vUycjlfmH0ootY9yFBzNOpiXAdIn1Iteqsvk4lQn6B5PTrt+n6h8k/w==}
     engines: {node: ^18.17.0 || >=20.5.0}
 
-  npm-run-all2@7.0.2:
-    resolution: {integrity: sha512-7tXR+r9hzRNOPNTvXegM+QzCuMjzUIIq66VDunL6j60O4RrExx32XUhlrS7UK4VcdGw5/Wxzb3kfNcFix9JKDA==}
-    engines: {node: ^18.17.0 || >=20.5.0, npm: '>= 9'}
+  npm-run-all2@8.0.1:
+    resolution: {integrity: sha512-jkhE0AsELQeCtScrcJ/7mSIdk+ZsnWjvKk3KwE96HZ6+OFVB74XhxQtHT1W6kdUfn92fRnBb29Mz82j9bV2XEQ==}
+    engines: {node: ^20.5.0 || >=22.0.0, npm: '>= 10'}
     hasBin: true
 
   npm-run-path@5.3.0:
@@ -5671,7 +5671,7 @@ snapshots:
       '@skeletonlabs/floating-ui-svelte': 0.3.9(svelte@5.27.0)
       svelte: 5.27.0
 
-  '@dvcol/stylelint-plugin-presets@2.1.2(postcss-html@0.36.0(postcss-syntax@0.36.2)(postcss@8.5.3))(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3)(prettier@3.5.3)(stylelint@16.18.0(typescript@5.8.3))':
+  '@dvcol/stylelint-plugin-presets@2.1.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3)(prettier@3.5.3)(stylelint@16.18.0(typescript@5.8.3))':
     dependencies:
       chalk: 5.3.0
       ora: 8.1.0
@@ -5679,11 +5679,11 @@ snapshots:
       requireindex: 1.2.0
       stylelint: 16.18.0(typescript@5.8.3)
       stylelint-config-css-modules: 4.4.0(stylelint@16.18.0(typescript@5.8.3))
-      stylelint-config-html: 1.1.0(postcss-html@0.36.0(postcss-syntax@0.36.2)(postcss@8.5.3))(stylelint@16.18.0(typescript@5.8.3))
+      stylelint-config-html: 1.1.0(postcss-html@0.36.0)(stylelint@16.18.0(typescript@5.8.3))
       stylelint-config-rational-order: 0.1.2
       stylelint-config-standard: 36.0.1(stylelint@16.18.0(typescript@5.8.3))
       stylelint-config-standard-scss: 13.1.0(postcss@8.5.3)(stylelint@16.18.0(typescript@5.8.3))
-      stylelint-config-standard-vue: 1.0.0(postcss-html@0.36.0(postcss-syntax@0.36.2)(postcss@8.5.3))(stylelint@16.18.0(typescript@5.8.3))
+      stylelint-config-standard-vue: 1.0.0(postcss-html@0.36.0)(stylelint@16.18.0(typescript@5.8.3))
       stylelint-declaration-block-no-ignored-properties: 2.8.0(stylelint@16.18.0(typescript@5.8.3))
       stylelint-group-selectors: 1.0.10(stylelint@16.18.0(typescript@5.8.3))
       stylelint-order: 6.0.4(stylelint@16.18.0(typescript@5.8.3))
@@ -7069,12 +7069,6 @@ snapshots:
     optionalDependencies:
       typescript: 5.8.3
 
-  cross-spawn@7.0.3:
-    dependencies:
-      path-key: 3.1.1
-      shebang-command: 2.0.0
-      which: 2.0.2
-
   cross-spawn@7.0.6:
     dependencies:
       path-key: 3.1.1
@@ -7645,7 +7639,7 @@ snapshots:
 
   execa@8.0.1:
     dependencies:
-      cross-spawn: 7.0.3
+      cross-spawn: 7.0.6
       get-stream: 8.0.1
       human-signals: 5.0.0
       is-stream: 3.0.0
@@ -7828,7 +7822,7 @@ snapshots:
 
   foreground-child@3.1.1:
     dependencies:
-      cross-spawn: 7.0.3
+      cross-spawn: 7.0.6
       signal-exit: 4.1.0
 
   format@0.2.2: {}
@@ -7914,7 +7908,7 @@ snapshots:
     dependencies:
       foreground-child: 3.1.1
       jackspeak: 3.4.3
-      minimatch: 9.0.4
+      minimatch: 9.0.5
       minipass: 7.1.2
       package-json-from-dist: 1.0.0
       path-scurry: 1.11.1
@@ -8951,6 +8945,10 @@ snapshots:
 
   min-indent@1.0.1: {}
 
+  minimatch@10.0.1:
+    dependencies:
+      brace-expansion: 2.0.1
+
   minimatch@3.1.2:
     dependencies:
       brace-expansion: 1.1.11
@@ -9070,12 +9068,12 @@ snapshots:
 
   npm-normalize-package-bin@4.0.0: {}
 
-  npm-run-all2@7.0.2:
+  npm-run-all2@8.0.1:
     dependencies:
       ansi-styles: 6.2.1
       cross-spawn: 7.0.6
       memorystream: 0.3.1
-      minimatch: 9.0.4
+      minimatch: 10.0.1
       pidtree: 0.6.0
       read-package-json-fast: 4.0.0
       shell-quote: 1.8.1
@@ -9323,7 +9321,7 @@ snapshots:
 
   posix-character-classes@0.1.1: {}
 
-  postcss-html@0.36.0(postcss-syntax@0.36.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3))(postcss@7.0.39):
+  postcss-html@0.36.0(postcss-syntax@0.36.2)(postcss@7.0.39):
     dependencies:
       htmlparser2: 3.10.1
       postcss: 7.0.39
@@ -9335,7 +9333,7 @@ snapshots:
       postcss: 8.5.3
       postcss-syntax: 0.36.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3)
 
-  postcss-jsx@0.36.4(postcss-syntax@0.36.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3))(postcss@7.0.39):
+  postcss-jsx@0.36.4(postcss-syntax@0.36.2)(postcss@7.0.39):
     dependencies:
       '@babel/core': 7.25.2
       postcss: 7.0.39
@@ -9354,7 +9352,7 @@ snapshots:
     optionalDependencies:
       postcss: 8.5.3
 
-  postcss-markdown@0.36.0(postcss-syntax@0.36.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3))(postcss@7.0.39):
+  postcss-markdown@0.36.0(postcss-syntax@0.36.2)(postcss@7.0.39):
     dependencies:
       postcss: 7.0.39
       postcss-syntax: 0.36.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3)
@@ -9423,14 +9421,14 @@ snapshots:
     dependencies:
       postcss: 8.5.3
 
-  postcss-syntax@0.36.2(postcss-html@0.36.0(postcss-syntax@0.36.2)(postcss@8.5.3))(postcss-jsx@0.36.4(postcss-syntax@0.36.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3))(postcss@7.0.39))(postcss-less@3.1.4)(postcss-markdown@0.36.0(postcss-syntax@0.36.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3))(postcss@7.0.39))(postcss-scss@2.1.1)(postcss@7.0.39):
+  postcss-syntax@0.36.2(postcss-html@0.36.0)(postcss-jsx@0.36.4)(postcss-less@3.1.4)(postcss-markdown@0.36.0)(postcss-scss@2.1.1)(postcss@7.0.39):
     dependencies:
       postcss: 7.0.39
     optionalDependencies:
       postcss-html: 0.36.0(postcss-syntax@0.36.2)(postcss@8.5.3)
-      postcss-jsx: 0.36.4(postcss-syntax@0.36.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3))(postcss@7.0.39)
+      postcss-jsx: 0.36.4(postcss-syntax@0.36.2)(postcss@7.0.39)
       postcss-less: 3.1.4
-      postcss-markdown: 0.36.0(postcss-syntax@0.36.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3))(postcss@7.0.39)
+      postcss-markdown: 0.36.0(postcss-syntax@0.36.2)(postcss@7.0.39)
       postcss-scss: 2.1.1
 
   postcss-syntax@0.36.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3):
@@ -9998,7 +9996,7 @@ snapshots:
     optionalDependencies:
       stylelint-scss: 6.5.1(stylelint@16.18.0(typescript@5.8.3))
 
-  stylelint-config-html@1.1.0(postcss-html@0.36.0(postcss-syntax@0.36.2)(postcss@8.5.3))(stylelint@16.18.0(typescript@5.8.3)):
+  stylelint-config-html@1.1.0(postcss-html@0.36.0)(stylelint@16.18.0(typescript@5.8.3)):
     dependencies:
       postcss-html: 0.36.0(postcss-syntax@0.36.2)(postcss@8.5.3)
       stylelint: 16.18.0(typescript@5.8.3)
@@ -10019,12 +10017,12 @@ snapshots:
     optionalDependencies:
       postcss: 8.5.3
 
-  stylelint-config-recommended-vue@1.5.0(postcss-html@0.36.0(postcss-syntax@0.36.2)(postcss@8.5.3))(stylelint@16.18.0(typescript@5.8.3)):
+  stylelint-config-recommended-vue@1.5.0(postcss-html@0.36.0)(stylelint@16.18.0(typescript@5.8.3)):
     dependencies:
       postcss-html: 0.36.0(postcss-syntax@0.36.2)(postcss@8.5.3)
       semver: 7.6.2
       stylelint: 16.18.0(typescript@5.8.3)
-      stylelint-config-html: 1.1.0(postcss-html@0.36.0(postcss-syntax@0.36.2)(postcss@8.5.3))(stylelint@16.18.0(typescript@5.8.3))
+      stylelint-config-html: 1.1.0(postcss-html@0.36.0)(stylelint@16.18.0(typescript@5.8.3))
       stylelint-config-recommended: 14.0.1(stylelint@16.18.0(typescript@5.8.3))
 
   stylelint-config-recommended@14.0.1(stylelint@16.18.0(typescript@5.8.3)):
@@ -10039,12 +10037,12 @@ snapshots:
     optionalDependencies:
       postcss: 8.5.3
 
-  stylelint-config-standard-vue@1.0.0(postcss-html@0.36.0(postcss-syntax@0.36.2)(postcss@8.5.3))(stylelint@16.18.0(typescript@5.8.3)):
+  stylelint-config-standard-vue@1.0.0(postcss-html@0.36.0)(stylelint@16.18.0(typescript@5.8.3)):
     dependencies:
       postcss-html: 0.36.0(postcss-syntax@0.36.2)(postcss@8.5.3)
       stylelint: 16.18.0(typescript@5.8.3)
-      stylelint-config-html: 1.1.0(postcss-html@0.36.0(postcss-syntax@0.36.2)(postcss@8.5.3))(stylelint@16.18.0(typescript@5.8.3))
-      stylelint-config-recommended-vue: 1.5.0(postcss-html@0.36.0(postcss-syntax@0.36.2)(postcss@8.5.3))(stylelint@16.18.0(typescript@5.8.3))
+      stylelint-config-html: 1.1.0(postcss-html@0.36.0)(stylelint@16.18.0(typescript@5.8.3))
+      stylelint-config-recommended-vue: 1.5.0(postcss-html@0.36.0)(stylelint@16.18.0(typescript@5.8.3))
       stylelint-config-standard: 36.0.1(stylelint@16.18.0(typescript@5.8.3))
 
   stylelint-config-standard@36.0.1(stylelint@16.18.0(typescript@5.8.3)):
@@ -10163,10 +10161,10 @@ snapshots:
       normalize-selector: 0.2.0
       pify: 4.0.1
       postcss: 7.0.39
-      postcss-html: 0.36.0(postcss-syntax@0.36.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3))(postcss@7.0.39)
-      postcss-jsx: 0.36.4(postcss-syntax@0.36.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3))(postcss@7.0.39)
+      postcss-html: 0.36.0(postcss-syntax@0.36.2)(postcss@7.0.39)
+      postcss-jsx: 0.36.4(postcss-syntax@0.36.2)(postcss@7.0.39)
       postcss-less: 3.1.4
-      postcss-markdown: 0.36.0(postcss-syntax@0.36.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3))(postcss@7.0.39)
+      postcss-markdown: 0.36.0(postcss-syntax@0.36.2)(postcss@7.0.39)
       postcss-media-query-parser: 0.2.3
       postcss-reporter: 6.0.1
       postcss-resolve-nested-selector: 0.1.6
@@ -10174,7 +10172,7 @@ snapshots:
       postcss-sass: 0.3.5
       postcss-scss: 2.1.1
       postcss-selector-parser: 3.1.2
-      postcss-syntax: 0.36.2(postcss-html@0.36.0(postcss-syntax@0.36.2)(postcss@8.5.3))(postcss-jsx@0.36.4(postcss-syntax@0.36.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3))(postcss@7.0.39))(postcss-less@3.1.4)(postcss-markdown@0.36.0(postcss-syntax@0.36.2(postcss-html@0.36.0)(postcss-scss@4.0.9(postcss@8.5.3))(postcss@8.5.3))(postcss@7.0.39))(postcss-scss@2.1.1)(postcss@7.0.39)
+      postcss-syntax: 0.36.2(postcss-html@0.36.0)(postcss-jsx@0.36.4)(postcss-less@3.1.4)(postcss-markdown@0.36.0)(postcss-scss@2.1.1)(postcss@7.0.39)
       postcss-value-parser: 3.3.1
       resolve-from: 4.0.0
       signal-exit: 3.0.7
