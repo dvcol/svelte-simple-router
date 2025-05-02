@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/dvcol/svelte-simple-router/compare/v2.0.1...v2.1.0) (2025-05-02)
+
+
+### Features
+
+* **navigation:** adds meta & title navigation override ([ddf3d53](https://github.com/dvcol/svelte-simple-router/commit/ddf3d537d722b428dcc80d654c697fee0d8703f3))
+
+
+### Bug Fixes
+
+* **lint:** bump deps & fix lint errors ([5e40ca5](https://github.com/dvcol/svelte-simple-router/commit/5e40ca5a047fff62766d320060066fce84500817))
+
 ### [2.0.1](https://github.com/dvcol/svelte-simple-router/compare/v1.11.2...v2.0.1) (2025-04-21)
 
 
