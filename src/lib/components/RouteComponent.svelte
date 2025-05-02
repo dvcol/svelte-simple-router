@@ -70,7 +70,7 @@
   let _properties: ComponentProps | undefined = $state();
 
   // If we should force a remount on route change
-  const force = $derived(transition?.updateOnRouteChange || router?.routing?.options?.force);
+  const force = $derived<boolean>(!!(transition?.updateOnRouteChange || router?.routing?.options?.force));
   // Final unique identifier for the current route change
   let resolvedID = $state();
 
@@ -83,7 +83,6 @@
       },
       onLoading: () => {
         if (change.uuid !== _uuid) return;
-        ResolvedComponent = loading;
         return untrack(() => view.load());
       },
       onLoaded: (_component?: AnyComponent | AnySnippet) => {
@@ -95,7 +94,6 @@
       },
       onError: (err: unknown) => {
         if (change.uuid !== _uuid) return;
-        ResolvedComponent = error;
         if (force) resolvedID = _uuid;
         return untrack(() => view.fail(err));
       },
@@ -107,42 +105,41 @@
     resolveComponent(component, listeners);
   });
 
+  const routedComponent = $derived.by(() => {
+    if (view.loading && loading) return loading;
+    else if (view.loading && loadingSnippet) return loadingSnippet;
+    else if (view.error && error) return error;
+    else if (view.error && errorSnippet) return errorSnippet;
+    else if (ResolvedComponent) return ResolvedComponent;
+  });
+
   // Trigger transition on route change or component update
   const transitionKey = $derived.by(() => {
-    const _keys: any[] = [ResolvedComponent];
+    const _keys: any[] = [routedComponent];
+
     if (transition?.updateOnPropsChange) _keys.push(_properties);
     if (routingSnippet) _keys.push(routing);
+
+    console.info('Transition key changed:', _keys);
     return _keys;
   });
 </script>
 
 {#snippet resolved(ComponentOrSnippet: ComponentOrSnippet)}
-  <!-- {#if ResolvedComponent} -->
-  {#if isSnippet(ComponentOrSnippet)}
-    {@render ComponentOrSnippet(view.error ?? (view.loading ? route : _properties))}
-  {:else}
-    <ComponentOrSnippet error={view.error} {..._properties} />
-  {/if}
-  <!-- {/if} -->
-{/snippet}
-
-{#snippet routed()}
-  {#if ResolvedComponent}
-    {#key resolvedID}
-      {@render resolved(ResolvedComponent)}
-    {/key}
-  {:else if view.loading}
-    {@render loadingSnippet?.(route)}
-  {:else if view.error}
-    {@render errorSnippet?.(view.error)}
-  {/if}
+  {#key resolvedID}
+    {#if isSnippet(ComponentOrSnippet)}
+      {@render ComponentOrSnippet(view.error ?? (view.loading ? route : _properties))}
+    {:else}
+      <ComponentOrSnippet error={view.error} {..._properties} />
+    {/if}
+  {/key}
 {/snippet}
 
 {#snippet result()}
   {#if routing && routingSnippet}
     {@render routingSnippet(router.routing)}
   {:else}
-    {@render routed()}
+    {@render resolved(routedComponent)}
   {/if}
 {/snippet}
 
