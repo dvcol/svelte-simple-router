@@ -48,10 +48,10 @@
     routingSnippet?: RouterViewProps['routing'];
   } = $props();
 
-  type ComponentOrSnippet = Component | Snippet<[unknown]>;
+  type ComponentOrSnippet = Component | Snippet<[any]>;
 
-  // Resolve route, loading or error component to be rendered
-  let ResolvedComponent = $state<ComponentOrSnippet>();
+  // If we should force a remount on route change
+  const force = $derived<boolean>(!!(transition?.updateOnRouteChange || router?.routing?.options?.force));
 
   // Generate a unique identifier for each loading state, to prevent cancelled navigations from updating the view
   const change: ViewChangeEvent = $derived(new ViewChangeEvent({ view: { id: view.id, name: view.name }, route }));
@@ -69,8 +69,28 @@
   // Delay properties update until component is resolved
   let _properties: ComponentProps | undefined = $state();
 
-  // If we should force a remount on route change
-  const force = $derived<boolean>(!!(transition?.updateOnRouteChange || router?.routing?.options?.force));
+  // Resolved route component when async loading & error handling is complete
+  let resolvedComponent = $state<ComponentOrSnippet>();
+
+  // Routed component to be rendered (loading, error, or resolved component)
+  const routedComponent = $derived.by<ComponentOrSnippet | undefined>(() => {
+    if (view.loading && loading) return loading;
+    else if (view.loading && loadingSnippet) return loadingSnippet;
+    else if (view.error && error) return error;
+    else if (view.error && errorSnippet) return errorSnippet;
+    else if (resolvedComponent) return resolvedComponent;
+  });
+
+  // Trigger transition on route change or component update
+  const transitionKey = $derived.by(() => {
+    const _keys: any[] = [routedComponent];
+
+    if (transition?.updateOnPropsChange) _keys.push(_properties);
+    if (routingSnippet) _keys.push(routing);
+
+    console.info('Transition key changed:', _keys);
+    return _keys;
+  });
   // Final unique identifier for the current route change
   let resolvedID = $state();
 
@@ -87,7 +107,7 @@
       },
       onLoaded: (_component?: AnyComponent | AnySnippet) => {
         if (change.uuid !== _uuid) return;
-        ResolvedComponent = _component;
+        resolvedComponent = _component;
         _properties = properties;
         if (force) resolvedID = _uuid;
         return untrack(() => view.complete());
@@ -104,25 +124,6 @@
   $effect(() => {
     resolveComponent(component, listeners);
   });
-
-  const routedComponent = $derived.by(() => {
-    if (view.loading && loading) return loading;
-    else if (view.loading && loadingSnippet) return loadingSnippet;
-    else if (view.error && error) return error;
-    else if (view.error && errorSnippet) return errorSnippet;
-    else if (ResolvedComponent) return ResolvedComponent;
-  });
-
-  // Trigger transition on route change or component update
-  const transitionKey = $derived.by(() => {
-    const _keys: any[] = [routedComponent];
-
-    if (transition?.updateOnPropsChange) _keys.push(_properties);
-    if (routingSnippet) _keys.push(routing);
-
-    console.info('Transition key changed:', _keys);
-    return _keys;
-  });
 </script>
 
 {#snippet resolved(ComponentOrSnippet: ComponentOrSnippet)}
@@ -138,7 +139,7 @@
 {#snippet result()}
   {#if routing && routingSnippet}
     {@render routingSnippet(router.routing)}
-  {:else}
+  {:else if routedComponent}
     {@render resolved(routedComponent)}
   {/if}
 {/snippet}
