@@ -27,6 +27,8 @@ export interface RouterContextProps<Name extends RouteName = any> {
   children?: Snippet<[IRouter<Name>]>;
 }
 
+export type TransitionDiscardFunction = (entry: MutationRecord, index: number, entries: MutationRecord[]) => boolean;
+
 export interface TransitionProps<
   T extends { in?: Record<string, any>; out?: Record<string, any> } = { in?: Record<string, any>; out?: Record<string, any> },
 > {
@@ -84,6 +86,15 @@ export interface TransitionProps<
     routing?: number;
     loading?: number;
   };
+  /**
+   * Whether to discard stale transitions when multiple transitions are triggered.
+   * This is useful when the transition is triggered multiple times in quick succession and intro/outro transitions have not yet completed.
+   *
+   * By default, only the first inert elements and the latest node are kept.
+   *
+   * @default true
+   */
+  discard?: boolean | TransitionDiscardFunction;
 }
 
 export interface RouteContainerProps<Name extends RouteName = any> {

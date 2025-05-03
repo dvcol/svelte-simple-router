@@ -102,12 +102,16 @@
     return _properties;
   });
 
+  const updateOnPropsChange = $derived(!!transition?.updateOnPropsChange);
+  const transitionProps = $derived([transition?.in, transition?.out, transition?.params]);
+
   // Trigger transition on route change or component update
   const transitionKey = $derived.by(() => {
-    const _keys: any[] = [routedComponent];
-    if (transition?.updateOnPropsChange) _keys.push(_properties);
+    const _keys: any[] = [routedComponent, ...transitionProps];
+    if (updateOnPropsChange) _keys.push(_properties);
     return _keys;
   });
+
   // Final unique identifier for the current route change
   let resolvedID = $state();
 

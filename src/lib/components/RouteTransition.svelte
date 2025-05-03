@@ -5,6 +5,7 @@
   import type { TransitionProps } from '~/models/component.model.js';
 
   import { toStyle } from '@dvcol/common-utils/common/class';
+  import { mutation } from '@dvcol/svelte-utils/mutation';
 
   const { children, key, id, transition }: { children: Snippet; id: string; key: any | any[]; transition: TransitionProps } = $props();
 
@@ -37,9 +38,20 @@
     if (typeof _name === 'boolean') _name = `sr-container-${id}`;
     return toStyle(`--container-transition-name: ${_name}`, _containerProps?.style);
   });
+
+  const ifElement = (node?: Node | null): HTMLElement | undefined => {
+    if (node instanceof HTMLElement) return node;
+  };
+
+  const _mutation = $derived((record: MutationRecord, index: number, entries: MutationRecord[]) => {
+    if (transition?.discard === false) return;
+    if (typeof transition?.discard === 'function' && !transition.discard(record, index, entries)) return;
+    if (!ifElement(record.previousSibling?.previousSibling)?.inert) return;
+    ifElement(record.previousSibling)?.remove();
+  });
 </script>
 
-<div data-transition-id="container" {..._containerProps} style={_style}>
+<div data-transition-id="container" {..._containerProps} style={_style} use:mutation={{ callback: _mutation, options: { childList: true } }}>
   {#if transition?.in || transition?.out}
     {#key key}
       <div data-transition-id="wrapper" in:_in={_inParams} out:_out={_outParams} {..._wrapperProps} style={toStyle(_wrapperProps?.style)}>
