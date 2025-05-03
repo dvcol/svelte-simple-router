@@ -75,6 +75,15 @@ export interface TransitionProps<
    * @see [view transition api](https://developer.mozilla.org/en-US/docs/Web/API/View_Transitions_API)
    */
   viewTransitionName?: boolean | string;
+  /**
+   * Optional delay before displaying routing and loading views.
+   *
+   * @default 0
+   */
+  delay?: number | {
+    routing?: number;
+    loading?: number;
+  };
 }
 
 export interface RouteContainerProps<Name extends RouteName = any> {

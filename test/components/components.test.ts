@@ -102,6 +102,9 @@ describe('routerView', () => {
         render(component, { router });
         await router.push({ path: '/loading' });
 
+        // Flush the microtask queue to ensure the loading component is rendered
+        await wait(0);
+
         const loading = screen.getByTestId('loading-component');
         expect(loading).toBeDefined();
 
@@ -120,6 +123,9 @@ describe('routerView', () => {
 
         render(component, { router });
         await router.push({ path: '/default-loading' });
+
+        // Flush the microtask queue to ensure the loading component is rendered
+        await wait(0);
 
         const loading = screen.getByTestId('default-loading');
         expect(loading).toBeDefined();
@@ -578,6 +584,8 @@ describe('routerView', () => {
       const errorComponent = screen.getByTestId('default-error');
       expect(errorComponent).toBeDefined();
 
+      console.info(errorComponent.innerHTML);
+
       const message = errorComponent.querySelector('p[data-testid="error-message"]');
       expect(message).toBeDefined();
       expect(message?.textContent).toBe('Loading error');
@@ -597,6 +605,9 @@ describe('routerView', () => {
         },
       });
       await router.push({ path: partialRoute.path });
+
+      // Flush the microtask queue to ensure the loading component is rendered
+      await wait(0);
 
       const loading = screen.getByTestId('loading-component');
       expect(loading).toBeDefined();
@@ -622,6 +633,9 @@ describe('routerView', () => {
         },
       });
       await router.push({ path: partialRoute.path });
+
+      // Flush the microtask queue to ensure the loading component is rendered
+      await wait(0);
 
       const loading = screen.getByTestId('default-loading');
       expect(loading).toBeDefined();

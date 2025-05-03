@@ -56,14 +56,26 @@
   // Generate a unique identifier for each loading state, to prevent cancelled navigations from updating the view
   const change: ViewChangeEvent = $derived(new ViewChangeEvent({ view: { id: view.id, name: view.name }, route }));
 
-  // Extract routing state
-  let routing: boolean | undefined = $state();
+  // Debounce routing state
+  let isRouting: boolean | undefined = $state();
   const setRouting = debounce((val: boolean) => {
-    routing = val;
-    return routing;
-  }, 0);
-  $effect(() => {
+    isRouting = val;
+    return isRouting;
+  }, typeof transition?.delay === 'number' ? transition?.delay : transition?.delay?.routing ?? 0);
+
+  $effect.pre(() => {
     setRouting(!!router?.routing?.active);
+  });
+
+  // Debounce loading state
+  let isLoading: boolean | undefined = $state();
+  const setLoading = debounce((val: boolean) => {
+    isLoading = val;
+    return isLoading;
+  }, typeof transition?.delay === 'number' ? transition?.delay : transition?.delay?.loading ?? 0);
+
+  $effect.pre(() => {
+    setLoading(!!view.loading);
   });
 
   // Delay properties update until component is resolved
@@ -74,9 +86,9 @@
 
   // Routed component to be rendered (loading, error, or resolved component)
   const routedComponent = $derived.by<IComponentOrSnippet | undefined>(() => {
-    if (routing && routingSnippet) return routingSnippet;
-    else if (view.loading && loading) return loading;
-    else if (view.loading && loadingSnippet) return loadingSnippet;
+    if (isRouting && routingSnippet) return routingSnippet;
+    else if (isLoading && loading) return loading;
+    else if (isLoading && loadingSnippet) return loadingSnippet;
     else if (view.error && error) return error;
     else if (view.error && errorSnippet) return errorSnippet;
     else if (resolvedComponent) return resolvedComponent;
@@ -84,15 +96,15 @@
 
   // Routed snippet properties
   const routedProps = $derived.by(() => {
-    if (routedComponent === errorSnippet) return view.error;
-    if (routedComponent === routingSnippet) return router.routing;
-    if (routedComponent === loadingSnippet) return route;
+    if (routingSnippet === routedComponent) return router.routing;
+    if ([loadingSnippet, loading].includes(routedComponent)) return route;
+    if ([errorSnippet, error].includes(routedComponent)) return view.error;
     return _properties;
   });
 
   // Trigger transition on route change or component update
   const transitionKey = $derived.by(() => {
-    const _keys = [routedComponent];
+    const _keys: any[] = [routedComponent];
     if (transition?.updateOnPropsChange) _keys.push(_properties);
     return _keys;
   });
@@ -108,6 +120,7 @@
       },
       onLoading: () => {
         if (change.uuid !== _uuid) return;
+        if (loading || loadingSnippet) resolvedComponent = undefined;
         return untrack(() => view.load());
       },
       onLoaded: (_component?: AnyComponent | AnySnippet) => {
@@ -120,6 +133,7 @@
       onError: (err: unknown) => {
         if (change.uuid !== _uuid) return;
         if (force) resolvedID = _uuid;
+        if (error || errorSnippet) resolvedComponent = undefined;
         return untrack(() => view.fail(err));
       },
     };
