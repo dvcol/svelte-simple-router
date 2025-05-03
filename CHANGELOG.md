@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.3.0](https://github.com/dvcol/svelte-simple-router/compare/v2.2.0...v2.3.0) (2025-05-03)
+
+
+### Features
+
+* **transition:** adds delay support to loading views ([8616596](https://github.com/dvcol/svelte-simple-router/commit/8616596dcc9b5e3e2e1df854eb2b603a0940af46))
+
+
+### Bug Fixes
+
+* **transition:** simplify key managment ([b16c6fc](https://github.com/dvcol/svelte-simple-router/commit/b16c6fc8b2ca88058bbda1a5752c6a38b22dff57))
+
 ## [2.2.0](https://github.com/dvcol/svelte-simple-router/compare/v2.1.1...v2.2.0) (2025-05-02)
 
 
