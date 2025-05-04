@@ -51,28 +51,28 @@ export class View<Name extends RouteName = RouteName> implements IView<Name> {
    * @reactive
    * @private
    */
-  #onChangeListeners: Set<ViewChangeListener<Name>> = $state(new SvelteSet());
+  #onChangeListeners: Set<ViewChangeListener<Name>> = new SvelteSet();
 
   /**
    * List of listeners that should be executed when a view start loading a component.
    * @reactive
    * @private
    */
-  #onViewChangeListeners: Set<ViewChangeListener<Name>> = $state(new SvelteSet());
+  #onViewChangeListeners: Set<ViewChangeListener<Name>> = new SvelteSet();
 
   /**
    * List of listeners that should be executed when a view load a component.
    * @reactive
    * @private
    */
-  #onLoadedListeners: Set<ViewChangeListener<Name>> = $state(new SvelteSet());
+  #onLoadedListeners: Set<ViewChangeListener<Name>> = new SvelteSet();
 
   /**
    * List of listeners that should be executed when an error occurs during view loading.
    * @reactive
    * @private
    */
-  #onErrorListeners: Set<LoadingErrorListener<Name>> = $state(new SvelteSet());
+  #onErrorListeners: Set<LoadingErrorListener<Name>> = new SvelteSet();
 
   /**
    * Unique identifier of the view instance.

@@ -67,7 +67,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @reactive
    * @private
    */
-  #routes: Map<string, ParsedRoute<Name>> = $state(new SvelteMap());
+  #routes: Map<string, ParsedRoute<Name>> = new SvelteMap<string, ParsedRoute<Name>>();
 
   /**
    * Sorted list of all the routes added to the router.
@@ -81,7 +81,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @reactive
    * @private
    */
-  #namedRoutes: Map<Name, string> = $state(new SvelteMap());
+  #namedRoutes: Map<Name, string> = new SvelteMap<Name, string>();
 
   /**
    * Current {@link RouterLocation}
@@ -116,28 +116,28 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @reactive
    * @private
    */
-  #beforeEachGuards: Set<NavigationGuard<Name>> = $state(new SvelteSet());
+  #beforeEachGuards: Set<NavigationGuard<Name>> = new SvelteSet();
 
   /**
    * List of navigation listeners that should be executed when the navigation is triggered but before the route is resolved.
    * @reactive
    * @private
    */
-  #onStartListeners: Set<NavigationListener<Name>> = $state(new SvelteSet());
+  #onStartListeners: Set<NavigationListener<Name>> = new SvelteSet();
 
   /**
    * List of navigation listeners that should be executed when the navigation is triggered and the route is resolved.
    * @reactive
    * @private
    */
-  #onEndListeners: Set<NavigationEndListener<Name>> = $state(new SvelteSet());
+  #onEndListeners: Set<NavigationEndListener<Name>> = new SvelteSet();
 
   /**
    * List of navigation listeners that should be executed when an error occurs during navigation.
    * @reactive
    * @private
    */
-  #onErrorListeners: Set<NavigationErrorListener<Name>> = $state(new SvelteSet());
+  #onErrorListeners: Set<NavigationErrorListener<Name>> = new SvelteSet();
 
   /**
    * If the router is listening to `popstate` (history API)  or `currententrychange` (navigation API)  events.
