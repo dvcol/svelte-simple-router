@@ -142,7 +142,7 @@
     "extract-changelog-release": "^1.0.2",
     "husky": "^9.1.7",
     "jsdom": "^26.1.0",
-    "lint-staged": "^15.5.1",
+    "lint-staged": "^16.0.0",
     "navigation-api-types": "^0.6.1",
     "npm-run-all2": "^8.0.1",
     "postcss": "^8.5.3",
