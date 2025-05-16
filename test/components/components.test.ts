@@ -55,6 +55,23 @@ describe('routerView', () => {
 
   describe('routing', () => {
     const common = (component: typeof RouteView | typeof RouterContext | typeof RouterViewNested) => {
+      it('should initialize external router on mount and destroy on unmounted', async () => {
+        expect.assertions(4);
+        const localRouter = new Router({ routes });
+        const spyInit = vi.spyOn(localRouter, 'init');
+        const spyDestroy = vi.spyOn(localRouter, 'destroy');
+
+        const result = render(component, { router: localRouter });
+
+        expect(spyInit).toHaveBeenCalledTimes(1);
+        expect(spyDestroy).not.toHaveBeenCalled();
+
+        result.unmount();
+
+        expect(spyDestroy).toHaveBeenCalledTimes(1);
+        expect(spyInit).toHaveBeenCalledTimes(1);
+      });
+
       it('should render no component', () => {
         expect.assertions(4);
         render(component, { router });
