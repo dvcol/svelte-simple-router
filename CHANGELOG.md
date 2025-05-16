@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.4.1](https://github.com/dvcol/svelte-simple-router/compare/v2.4.0...v2.4.1) (2025-05-16)
+
+
+### Bug Fixes
+
+* **router:** rework improper lifecycle in context ([54df3a3](https://github.com/dvcol/svelte-simple-router/commit/54df3a359b75ebf9e17abea64895d13eeb15f57e))
+* **svelte:** remove unnecessary wrapping ([47c27fc](https://github.com/dvcol/svelte-simple-router/commit/47c27fc5da65ed16f4988cb59e38ca66eaaa7ec3))
+
 ## [2.4.0](https://github.com/dvcol/svelte-simple-router/compare/v2.3.0...v2.4.0) (2025-05-03)
 
 
