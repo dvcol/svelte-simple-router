@@ -1,3 +1,4 @@
+import type { ExtractPathParams } from '@dvcol/common-utils/common/models';
 import type { AnyComponent, ComponentOrLazy } from '@dvcol/svelte-utils/component';
 import type { Snippet } from 'svelte';
 
@@ -233,7 +234,7 @@ export interface RouteRedirect<Name extends RouteName = RouteName> {
   errors?: never;
 }
 
-export interface BaseRoute<Name extends RouteName = RouteName> {
+export interface BaseRoute<Name extends RouteName = RouteName, Path extends string = string> {
   /**
    * Path of the record.
    *
@@ -247,7 +248,7 @@ export interface BaseRoute<Name extends RouteName = RouteName> {
    *
    * @example `/users/:id` matches `/users/1` as well as `/users/name`.
    */
-  path: string;
+  path: Path;
   /**
    * Name for the route record. Must be unique.
    */
@@ -278,7 +279,7 @@ export interface BaseRoute<Name extends RouteName = RouteName> {
    * Default, params to inject in the url when navigating to this route.
    * Note that params passed in navigation events will override these.
    */
-  params?: RouteParams;
+  params?: ExtractPathParams<Path>;
 }
 
 interface RouteLogic<Name extends RouteName = RouteName> {
@@ -311,11 +312,11 @@ interface RouteLogic<Name extends RouteName = RouteName> {
   beforeLeave?: NavigationGuard<Name>;
 }
 
-export type Route<Name extends RouteName = RouteName> = BaseRoute<Name> &
+export type Route<Name extends RouteName = RouteName, Path extends string = string> = BaseRoute<Name, Path> &
   RouteLogic<Name> &
   (RouteRedirect<Name> | RouteComponent | RouteComponents<Name>);
 
-export type PartialRoute<Name extends RouteName = RouteName> = BaseRoute<Name> &
+export type PartialRoute<Name extends RouteName = RouteName, Path extends string = string> = BaseRoute<Name, Path> &
   RouteLogic<Name> &
   Partial<RouteRedirect<Name> | RouteComponent | RouteComponents<Name>>;
 
@@ -325,7 +326,7 @@ export function cloneRoute<Name extends RouteName = RouteName>(route: Route<Name
 
 export const isRouteEqual = <Name extends RouteName = RouteName>(a?: Route<Name>, b?: Route<Name>): boolean => isShallowEqual(a, b, 2);
 
-export function toBaseRoute<Name extends RouteName = RouteName>(route?: Route<Name>): BaseRoute<Name> | undefined {
+export function toBaseRoute<Name extends RouteName = RouteName, Path extends string = string>(route?: Route<Name, Path>): BaseRoute<Name, Path> | undefined {
   if (!route) return route;
   return {
     path: route.path,
@@ -333,7 +334,7 @@ export function toBaseRoute<Name extends RouteName = RouteName>(route?: Route<Na
     title: route.title,
     meta: { ...route.meta },
     query: { ...route.query },
-    params: { ...route.params },
+    params: { ...route.params } as BaseRoute<Name, Path>['params'],
   };
 }
 
