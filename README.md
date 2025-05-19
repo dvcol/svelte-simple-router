@@ -298,6 +298,8 @@ Additionally:
 - If a name or path parameter are provided, they will be used to navigate and href will be ignored.
 - Name takes precedence over path.
 - If the host is not an anchor element, the role and tabindex attributes will be set.
+- If resolve: true is passed, the target route will be resolved and any lazy component will be loaded on hover/focus
+- If resolve: view-name is passed, only the target view will be resolved/loaded on hover/focus.
 
 Note: The action requires the router context to be present in the component tree.
 

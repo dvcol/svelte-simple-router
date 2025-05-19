@@ -1,15 +1,11 @@
 import type { Action } from 'svelte/action';
 
-import type { RouteName } from '~/models/index.js';
 import type { LinkNavigateFunction, LinkNavigateOptions } from '~/models/link.model.js';
 
-import { resolveComponent } from '@dvcol/svelte-utils/component';
-
-import { getLinkNavigateFunction, normalizeLinkAttributes } from '~/models/link.model.js';
-import { getView } from '~/router/context.svelte.js';
+import { getLinkNavigateFunction, getResolveFunction, normalizeLinkAttributes } from '~/models/link.model.js';
 import { Logger } from '~/utils/logger.utils.js';
 
-export type LinkActionOptions = LinkNavigateOptions & { resolve?: boolean | string };
+export type LinkActionOptions = LinkNavigateOptions;
 
 /**
  * A svelte action to add to an element to navigate to a new location using the router.
@@ -65,25 +61,10 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
 
   const navigateHandler = async (event: MouseEvent | KeyboardEvent) => navigate?.(event, node);
 
-  // Extract view from context
-  const view = getView<RouteName>();
-
   // Add resolve on hover option && view params
-  const resolveHandler = async (event: MouseEvent | KeyboardEvent | FocusEvent | PointerEvent) => {
-    const resolve = _options?.resolve;
-    if (!resolve || !navigate) return;
+  const resolve = $derived(getResolveFunction(navigate, _options));
 
-    const r = await navigate(event, node, 'resolve');
-    if (!r?.route) return;
-
-    // Extract view name
-    const name = (typeof resolve === 'string' ? resolve : view?.name) ?? 'default';
-
-    const components = [];
-    if (r.route.component) components.push(r.route.component);
-    if (r.route.components?.[name]) components.push(r.route.components[name]);
-    await Promise.all(components.map(async c => resolveComponent(c)));
-  };
+  const resolveHandler = async (event: FocusEvent | PointerEvent) => resolve(event, node);
 
   node.addEventListener('click', navigateHandler);
   node.addEventListener('keydown', navigateHandler);

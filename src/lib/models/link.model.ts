@@ -1,6 +1,8 @@
 import type { CommonRouteNavigation, ResolvedRoute, RouteName, RouteNavigation } from '~/models/route.model.js';
 import type { ResolvedRouterLocationSnapshot, RouterNavigationOptions } from '~/models/router.model.js';
 
+import { resolveComponent } from '@dvcol/svelte-utils/component';
+
 import { MissingRouterContextError, NavigationCancelledError } from '~/models/index.js';
 import { getRouter } from '~/router/context.svelte.js';
 import { Logger, LoggerKey } from '~/utils/logger.utils.js';
@@ -153,5 +155,49 @@ export function normalizeLinkAttributes(node: HTMLElement, options: LinkNavigate
   return { node, options };
 }
 
-export type LinkNavigateOptions<Name extends RouteName = RouteName> = CommonRouteNavigation &
-  RouterNavigationOptions & { replace?: boolean; name?: Name; path?: string; disabled?: boolean };
+export interface LinkNavigateOptions<Name extends RouteName = RouteName> extends CommonRouteNavigation,
+  RouterNavigationOptions {
+  /**
+   * Whether to resolve the link on hover or focus.
+   * If a string is provided, it will be used as the name of the view to resolve instead of the link's target.
+   */
+  resolve?: boolean | string;
+  /**
+   * Whether to replace the current history entry or push a new one.
+   */
+  replace?: boolean;
+  /**
+   * The name of the route to navigate to.
+   */
+  name?: Name;
+  /**
+   * The path of the route to navigate to.
+   */
+  path?: string;
+  /**
+   * Whether the link is disabled.
+   */
+  disabled?: boolean;
+};
+
+export function getResolveFunction(navigate?: LinkNavigateFunction, options?: { resolve?: boolean | string }) {
+  return async (event: FocusEvent | PointerEvent, node: HTMLElement) => {
+    const resolve = options?.resolve;
+    if (!resolve || !navigate) return;
+
+    const r = await navigate(event, node, 'resolve');
+    if (!r?.route) return;
+
+    // Extract view name
+    const name = (typeof resolve === 'string' ? resolve : undefined);
+
+    const components = [];
+    if (r.route.component) components.push(r.route.component);
+    if (name && r.route.components?.[name]) {
+      components.push(r.route.components[name]);
+    } else if (r.route.components) {
+      components.push(...Object.values(r.route.components));
+    }
+    await Promise.all(components.map(async c => resolveComponent(c)));
+  };
+}

@@ -2,13 +2,22 @@ import type { Action } from 'svelte/action';
 
 import type { LinkNavigateFunction, LinkNavigateOptions } from '~/models/link.model.js';
 
-import { getLinkNavigateFunction, parseBooleanAttribute } from '~/models/link.model.js';
+import { getLinkNavigateFunction, getResolveFunction, parseBooleanAttribute } from '~/models/link.model.js';
 import { Logger } from '~/utils/logger.utils.js';
 
 export type NodeConditionFn = (node: HTMLElement) => boolean;
 export interface LinksActionOptions {
+  /**
+   * Whether the target node should be considered a link.
+   */
   apply?: NodeConditionFn;
+  /**
+   * The element to act as a boundary for the upward link search.
+   */
   boundary?: HTMLElement | NodeConditionFn;
+  /**
+   * The navigate options to use for the navigation.
+   */
   navigate?: LinkNavigateOptions;
 }
 
@@ -95,7 +104,7 @@ export const links: Action<HTMLElement, LinksActionOptions | undefined> = (node:
     }
   });
 
-  const handler = async (event: MouseEvent | KeyboardEvent) => {
+  const navigateHandler = async (event: MouseEvent | KeyboardEvent) => {
     const { target } = event;
     if (!(target instanceof HTMLElement)) return;
     if (!navigate) return;
@@ -105,13 +114,30 @@ export const links: Action<HTMLElement, LinksActionOptions | undefined> = (node:
     return navigate(event, nodeLink);
   };
 
-  node.addEventListener('click', handler);
-  node.addEventListener('keydown', handler);
+  // Add resolve on hover option && view params
+  const resolve = $derived(getResolveFunction(navigate, _options.navigate));
+
+  const resolveHandler = async (event: FocusEvent | PointerEvent) => {
+    const { target } = event;
+    if (!(target instanceof HTMLElement)) return;
+    if (!resolve) return;
+
+    const nodeLink = findLinkNode(target, _options);
+    if (!nodeLink) return;
+    return resolve(event, nodeLink);
+  };
+
+  node.addEventListener('click', navigateHandler);
+  node.addEventListener('keydown', navigateHandler);
+  node.addEventListener('pointerover', resolveHandler);
+  node.addEventListener('focusin', resolveHandler);
   return {
     update,
     destroy() {
-      node.removeEventListener('click', handler);
-      node.removeEventListener('keydown', handler);
+      node.removeEventListener('click', navigateHandler);
+      node.removeEventListener('keydown', navigateHandler);
+      node.removeEventListener('pointerover', resolveHandler);
+      node.removeEventListener('focusin', resolveHandler);
     },
   };
 };

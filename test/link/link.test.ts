@@ -370,7 +370,7 @@ describe('link', () => {
     });
 
     it('should resolve route on hover', async () => {
-      expect.assertions(1);
+      expect.assertions(2);
 
       const user = userEvent.setup();
       render(Link, { router });
@@ -379,19 +379,21 @@ describe('link', () => {
       await user.hover(target);
 
       expect(spyResolve).toHaveBeenCalledTimes(1);
+      expect(spyResolve).toHaveBeenCalledWith({ path: '/home' }, {});
     });
 
     it('should resolve route on focus', async () => {
-      expect.assertions(1);
+      expect.assertions(2);
 
       render(Link, { router });
       screen.getByTestId('resolve-true')?.focus();
 
       expect(spyResolve).toHaveBeenCalledTimes(1);
+      expect(spyResolve).toHaveBeenCalledWith({ path: '/home' }, {});
     });
 
     it('should resolve route view on hover', async () => {
-      expect.assertions(1);
+      expect.assertions(2);
 
       const user = userEvent.setup();
       render(Link, { router });
@@ -400,15 +402,17 @@ describe('link', () => {
       await user.hover(target);
 
       expect(spyResolve).toHaveBeenCalledTimes(1);
+      expect(spyResolve).toHaveBeenCalledWith({ path: '/home' }, {});
     });
 
     it('should resolve route view on focus', async () => {
-      expect.assertions(1);
+      expect.assertions(2);
 
       render(Link, { router });
       screen.getByTestId('resolve-view')?.focus();
 
       expect(spyResolve).toHaveBeenCalledTimes(1);
+      expect(spyResolve).toHaveBeenCalledWith({ path: '/home' }, {});
     });
   });
 });

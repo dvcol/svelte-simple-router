@@ -51,14 +51,27 @@
     <div data-testid="boundary" use:links={{ boundary: (node: HTMLElement) => node.dataset.testid === 'boundary-nested' }}>
       <a data-testid="boundary-anchor-path" href="/home">path</a>
 
-      <span data-testid="boundary-span-path" data-router-link data-path="/home">path</span>
-      <span data-testid="boundary-span-name" data-router-link data-name="home">name</span>
+      <span role="link" tabindex="0" data-testid="boundary-span-path" data-router-link data-path="/home">path</span>
+      <span role="link" tabindex="0" data-testid="boundary-span-name" data-router-link data-name="home">name</span>
 
       <div data-testid="boundary-nested">
         <a data-testid="boundary-nested-anchor-path" href="/home">path</a>
-        <span data-testid="boundary-nested-span-path" data-router-link data-path="/home">path</span>
-        <span data-testid="boundary-nested-span-name" data-router-link data-name="home">name</span>
+        <span role="link" tabindex="0" data-testid="boundary-nested-span-path" data-router-link data-path="/home">path</span>
+        <span role="link" tabindex="0" data-testid="boundary-nested-span-name" data-router-link data-name="home">name</span>
       </div>
+    </div>
+  </div>
+
+  <div data-testid="resolve" use:links={{ navigate: { resolve: true } }}>
+    <a data-testid="resolve-anchor-path" href="/home">path</a>
+
+    <span role="link" tabindex="0" data-testid="resolve-span-path" data-router-link data-path="/home">path</span>
+    <span role="link" tabindex="0" data-testid="resolve-span-name" data-router-link data-name="home">name</span>
+
+    <div data-testid="nested">
+      <a data-testid="resolve-nested-anchor-path" href="/home">path</a>
+      <span role="link" tabindex="0" data-testid="resolve-nested-span-path" data-router-link data-path="/home">path</span>
+      <span role="link" tabindex="0" data-testid="resolve-nested-span-name" data-router-link data-name="home">name</span>
     </div>
   </div>
 

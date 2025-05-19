@@ -10,7 +10,7 @@ import { Router } from '~/router/router.svelte.js';
 
 import Links from './Links.test.svelte';
 
-describe('link', () => {
+describe('links', () => {
   const HomeRoute: Route = {
     name: 'home',
     path: '/home',
@@ -26,6 +26,7 @@ describe('link', () => {
 
   const spyPush = vi.spyOn(router, 'push').mockReturnValue(undefined);
   const spyReplace = vi.spyOn(router, 'replace').mockReturnValue(undefined);
+  const spyResolve = vi.spyOn(router, 'resolve').mockReturnValue(undefined);
 
   beforeEach(async () => {
     await router.init();
@@ -104,6 +105,66 @@ describe('link', () => {
 
       expect(spyPush).not.toHaveBeenCalled();
       expect(spyReplace).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('resolve', () => {
+    const resolveFalse: { node: string }[] = [
+      { node: 'anchor-path' },
+      { node: 'span-path' },
+      { node: 'span-name' },
+
+      // Outside
+      { node: 'nested-anchor-path' },
+      { node: 'nested-span-path' },
+      { node: 'nested-span-name' },
+    ];
+
+    it.each(resolveFalse)('should not resolve route on hover for `%s`', async ({ node }) => {
+      expect.assertions(1);
+
+      const user = userEvent.setup();
+      render(Links, { router });
+
+      const target = screen.getByTestId(node);
+      await user.hover(target);
+      target.focus();
+
+      expect(spyResolve).not.toHaveBeenCalled();
+    });
+
+    const resolveTrue: { node: string; payload: { name: string } | { path: string } }[] = [
+      { node: 'resolve-anchor-path', payload: { path: '/home' } },
+      { node: 'resolve-span-path', payload: { path: '/home' } },
+      { node: 'resolve-span-name', payload: { name: 'home' } },
+
+      // Outside
+      { node: 'resolve-nested-anchor-path', payload: { path: '/home' } },
+      { node: 'resolve-nested-span-path', payload: { path: '/home' } },
+      { node: 'resolve-nested-span-name', payload: { name: 'home' } },
+    ];
+
+    it.each(resolveTrue)('should resolve route on hover for `%s`', async ({ node, payload }) => {
+      expect.assertions(2);
+
+      const user = userEvent.setup();
+      render(Links, { router });
+
+      const target = screen.getByTestId(node);
+      await user.hover(target);
+
+      expect(spyResolve).toHaveBeenCalledTimes(1);
+      expect(spyResolve).toHaveBeenCalledWith(payload, {});
+    });
+
+    it.each(resolveTrue)('should resolve route on focus for `%s`', async ({ node, payload }) => {
+      expect.assertions(2);
+
+      render(Links, { router });
+      screen.getByTestId(node)?.focus();
+
+      expect(spyResolve).toHaveBeenCalledTimes(1);
+      expect(spyResolve).toHaveBeenCalledWith(payload, {});
     });
   });
 });
