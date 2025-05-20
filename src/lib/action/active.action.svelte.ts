@@ -1,9 +1,9 @@
 import type { Action } from 'svelte/action';
 
-import type { ActiveOptions } from '~/action/action.model.js';
+import type { ActiveOptions } from '~/models/action.model.js';
 import type { RouteName } from '~/models/route.model.js';
 
-import { activeStyles, doNameMatch, doPathMatch, ensurePathName, ensureRouter, getOriginalStyle, restoreStyles } from '~/action/action.model.js';
+import { activeStyles, doNameMatch, doPathMatch, ensurePathName, ensureRouter, getOriginalStyle, restoreStyles } from '~/models/action.model.js';
 import { Matcher } from '~/models/index.js';
 import { getRouter } from '~/router/context.svelte.js';
 

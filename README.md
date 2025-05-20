@@ -366,13 +366,29 @@ Note: The action requires the router context to be present in the component tree
 
 ```svelte
 <script lang="ts">
-  import { active } from '@dvcol/svelte-simple-router/router';
+  import { active } from '@dvcol/svelte-simple-router/action';
 </script>
 
 <a href="/path" use:active>simple link</a>
 <a href="/path" data-name="route-name" use:active>named link</a>
-<button :use:active="{ path: '/path' }">button link</button>
-<div :use:active="{ name: 'route-name' }">div link</div>
+<button use:active="{ path: '/path' }">button link</button>
+<div use:active="{ name: 'route-name' }">div link</div>
+```
+#### Active attachment
+
+The `active attachment` adds an active state (class, style or attribute) to an element when the route matches.
+
+Similar to the `active` action, see the [active action](#active-action) for more information.
+
+```svelte
+<script lang="ts">
+  import { useActive } from '@dvcol/svelte-simple-router/attachment';
+</script>
+
+<a href="/path" {@attach useActive()}>simple link</a>
+<a href="/path" data-name="route-name" {@attach useActive()}>named link</a>
+<button {@attach useActive({ path: '/path' })}>button link</button>
+<div {@attach useActive({ name: 'route-name' })}>div link</div>
 ```
 
 ### Programmatic navigation

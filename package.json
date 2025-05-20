@@ -50,6 +50,10 @@
       "types": "./dist/action/index.d.ts",
       "import": "./dist/action/index.js"
     },
+    "./attachment": {
+      "types": "./dist/attachment/index.d.ts",
+      "import": "./dist/attachment/index.js"
+    },
     "./components": {
       "types": "./dist/components/index.d.ts",
       "import": "./dist/components/index.js"
