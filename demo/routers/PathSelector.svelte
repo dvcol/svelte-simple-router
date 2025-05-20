@@ -3,11 +3,11 @@
 
   import { NeoButton, NeoCard, NeoInput } from '@dvcol/neo-svelte';
 
+  import { active } from '~/action/active.action.svelte.js';
+  import { link } from '~/action/link.action.svelte.js';
+  import { links } from '~/action/links.action.svelte.js';
   import { NavigationCancelledError } from '~/models/error.model.js';
-  import { active } from '~/router/active.svelte.js';
   import { useNavigate, useRouter } from '~/router/hooks.svelte.js';
-  import { link } from '~/router/link.svelte.js';
-  import { links } from '~/router/links.svelte.js';
 
   const {
     resolve = false,

@@ -1,8 +1,8 @@
 <script lang="ts">
   import type { IRouter } from '~/models/router.model.js';
 
+  import { active } from '~/action/active.action.svelte.js';
   import RouterView from '~/components/RouterView.svelte';
-  import { active } from '~/router/active.svelte';
 
   const { router }: { router: IRouter } = $props();
 </script>

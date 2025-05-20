@@ -7,7 +7,7 @@ import { userEvent } from '@testing-library/user-event';
 import { tick } from 'svelte';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { active } from '~/router/active.svelte.js';
+import { active } from '~/action/active.action.svelte.js';
 import * as GetRouterModule from '~/router/context.svelte.js';
 import { Router } from '~/router/router.svelte.js';
 import { Logger } from '~/utils/logger.utils.js';
@@ -56,8 +56,7 @@ describe('link', () => {
 
       expect(spyRouter).toHaveBeenCalledWith();
       expect(spyLoger).toHaveBeenCalledWith('Router not found. Make sure you are using the active action within a Router context.', {
-        node: mockNode,
-        options: {},
+        element: mockNode,
       });
       // this:void
       expect(mockNode.setAttribute).toHaveBeenCalledWith('data-error', 'Router not found.');

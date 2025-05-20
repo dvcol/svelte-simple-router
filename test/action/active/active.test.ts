@@ -3,7 +3,7 @@ import type { Route } from '~/models/route.model.js';
 import { render, screen } from '@testing-library/svelte';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { active } from '~/router/active.svelte.js';
+import { active } from '~/action/active.action.svelte.js';
 import * as GetRouterModule from '~/router/context.svelte.js';
 import { Router } from '~/router/router.svelte.js';
 import { Logger } from '~/utils/logger.utils.js';
@@ -67,8 +67,7 @@ describe('active', () => {
 
       expect(spyRouter).toHaveBeenCalledWith();
       expect(spyLoger).toHaveBeenCalledWith('Router not found. Make sure you are using the active action within a Router context.', {
-        node: mockNode,
-        options: {},
+        element: mockNode,
       });
       expect(mockNode.setAttribute).toHaveBeenCalledWith('data-error', 'Router not found.');
     });
@@ -80,8 +79,9 @@ describe('active', () => {
       const target = screen.getByTestId('span-error');
 
       expect(spyLoger).toHaveBeenCalledWith('No path or name found. Make sure you are using the active action with the proper parameters.', {
-        node: target,
-        options: {},
+        element: target,
+        path: null,
+        name: null,
       });
       expect(target.getAttribute('data-error')).toBe('No path or name found.');
     });
