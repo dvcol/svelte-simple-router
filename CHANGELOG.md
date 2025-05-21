@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.5.0](https://github.com/dvcol/svelte-simple-router/compare/v2.4.1...v2.5.0) (2025-05-21)
+
+
+### Features
+
+* **action:** refactor action to prep attachment ([8d67481](https://github.com/dvcol/svelte-simple-router/commit/8d674812466ca507d82499145f90004eb39819e6))
+* **attachment:** adds active attachment ([781333d](https://github.com/dvcol/svelte-simple-router/commit/781333d3cfac408f84952772f996cf1dd48edcdc))
+* **attachment:** adds links ([4030f85](https://github.com/dvcol/svelte-simple-router/commit/4030f8509e907c4613a7300d35f336c98be8a976))
+* **attachment:** rework link action and add link attachment ([fa9a39a](https://github.com/dvcol/svelte-simple-router/commit/fa9a39a8cec3e41862ee0e8dabca60b9e734fe5a))
+* **links:** adds resolve on hover support to links ([fd0f9ff](https://github.com/dvcol/svelte-simple-router/commit/fd0f9ffac7267e7054475dbb8d31d33152d50ee2))
+* **route:** allow stronger typing or route parameters ([f824140](https://github.com/dvcol/svelte-simple-router/commit/f8241403c2d6bdc0ab38eb0c87e87f04536605bc))
+* **router:** improve type inference for routing functions ([c31017b](https://github.com/dvcol/svelte-simple-router/commit/c31017b34a7a22e90afa0fb8d46eb9e214965512))
+
+
+### Bug Fixes
+
+* **attachment:** simplify attachment to prevent duplication ([5d5b521](https://github.com/dvcol/svelte-simple-router/commit/5d5b521b77aca2c42334e4517b8d6d7f1a0b5c3c))
+
 ### [2.4.1](https://github.com/dvcol/svelte-simple-router/compare/v2.4.0...v2.4.1) (2025-05-16)
 
 
