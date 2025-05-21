@@ -1,9 +1,8 @@
 import type { Attachment } from 'svelte/attachments';
 
-import type { LinkNavigateFunction, LinkNavigateOptions } from '~/models/link.model.js';
+import type { LinkNavigateOptions } from '~/models/link.model.js';
 
-import { ensureLinkRouter, getNavigateFunction, getResolveFunction, normalizeLinkAttributes } from '~/models/link.model.js';
-import { getRouter } from '~/router/context.svelte.js';
+import { link } from '~/action/link.action.svelte.js';
 
 /**
  * A svelte attachment to add to an element to navigate to a new location using the router.
@@ -38,27 +37,5 @@ import { getRouter } from '~/router/context.svelte.js';
  * ```
  */
 export function useLink(options: LinkNavigateOptions = {}): Attachment<HTMLElement> {
-  return (element) => {
-    const _options = $state(normalizeLinkAttributes(element, options));
-
-    const router = _options?.router || getRouter();
-    if (!ensureLinkRouter(element, router)) return;
-
-    const navigate = $derived<LinkNavigateFunction | undefined>(getNavigateFunction(router, options));
-    const navigateHandler = async (event: MouseEvent | KeyboardEvent) => navigate?.(event, element);
-
-    const resolve = $derived(getResolveFunction(navigate, _options));
-    const resolveHandler = async (event: FocusEvent | PointerEvent) => resolve(event, element);
-
-    element.addEventListener('click', navigateHandler);
-    element.addEventListener('keydown', navigateHandler);
-    element.addEventListener('pointerenter', resolveHandler);
-    element.addEventListener('focus', resolveHandler);
-    return () => {
-      element.removeEventListener('click', navigateHandler);
-      element.removeEventListener('keydown', navigateHandler);
-      element.removeEventListener('pointerenter', resolveHandler);
-      element.removeEventListener('focus', resolveHandler);
-    };
-  };
+  return element => link(element, options).destroy;
 }

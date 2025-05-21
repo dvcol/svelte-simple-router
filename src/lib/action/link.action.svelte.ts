@@ -39,10 +39,10 @@ import { getRouter } from '~/router/context.svelte.js';
  * ```
  */
 export function link(node: HTMLElement, options: LinkNavigateOptions | undefined = {}): ActionReturn<LinkNavigateOptions | undefined> {
-  const router = options?.router || getRouter();
+  const router = normalizeLinkAttributes(node, options)?.router || getRouter();
   if (!ensureLinkRouter(node, router)) return {};
 
-  let _options = $state(normalizeLinkAttributes(node, options));
+  let _options = $derived(options);
 
   const navigate = $derived<LinkNavigateFunction | undefined>(getNavigateFunction(router, options));
   const navigateHandler = async (event: MouseEvent | KeyboardEvent) => navigate?.(event, node);
@@ -56,7 +56,7 @@ export function link(node: HTMLElement, options: LinkNavigateOptions | undefined
   node.addEventListener('focus', resolveHandler);
   return {
     update(newOptions: LinkNavigateOptions | undefined = {}) {
-      _options = newOptions;
+      _options = normalizeLinkAttributes(node, newOptions);
     },
     destroy() {
       node.removeEventListener('click', navigateHandler);

@@ -43,17 +43,9 @@ export function active(node: HTMLElement, options: ActiveOptions | undefined = {
   const router = options?.router || getRouter();
   if (!ensureActionRouter(node, router)) return {};
 
-  let _options = $state(options);
-  let _path: string | null = $state(options?.path || node.getAttribute('data-path') || node.getAttribute('href'));
-  let _name: RouteName | null = $state(options?.name || node.getAttribute('data-name'));
-
-  const update = (newOptions: ActiveOptions | undefined = {}) => {
-    _options = newOptions;
-    _path = newOptions?.path || node.getAttribute('data-path') || node.getAttribute('href');
-    _name = newOptions?.name || node.getAttribute('data-name');
-
-    ensurePathName(node, { path: _path, name: _name });
-  };
+  let _options = $derived(options);
+  let _path: string | null = $derived(options?.path || node.getAttribute('data-path') || node.getAttribute('href'));
+  let _name: RouteName | null = $derived(options?.name || node.getAttribute('data-name'));
 
   const caseSensitive = $derived(_options?.caseSensitive ?? router.options?.caseSensitive);
   const matchName = $derived(doNameMatch(router.route, _name, { caseSensitive, exact: _options?.exact }));
@@ -74,5 +66,14 @@ export function active(node: HTMLElement, options: ActiveOptions | undefined = {
   $effect(() => {
     ensurePathName(node, { path: _path, name: _name });
   });
-  return { update };
+
+  return {
+    update(newOptions: ActiveOptions | undefined = {}) {
+      _options = newOptions;
+      _path = newOptions?.path || node.getAttribute('data-path') || node.getAttribute('href');
+      _name = newOptions?.name || node.getAttribute('data-name');
+
+      ensurePathName(node, { path: _path, name: _name });
+    },
+  };
 }

@@ -192,8 +192,10 @@ export interface LinkNavigateOptions<Name extends RouteName = RouteName, Path ex
   disabled?: boolean;
 };
 
-export function getResolveFunction(navigate?: LinkNavigateFunction, options?: { resolve?: boolean | string }) {
-  return async (event: FocusEvent | PointerEvent, node: HTMLElement) => {
+export type LinkResolveFunction = (event: FocusEvent | PointerEvent, node: HTMLElement) => Promise<void>;
+
+export function getResolveFunction(navigate?: LinkNavigateFunction, options?: { resolve?: boolean | string }): LinkResolveFunction {
+  return async (event, node) => {
     const resolve = options?.resolve;
     if (!resolve || !navigate) return;
 
