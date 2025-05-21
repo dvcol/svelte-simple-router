@@ -3,8 +3,8 @@ import type { Action } from 'svelte/action';
 import type { RouteName } from '~/models/index.js';
 import type { LinkNavigateFunction, LinkNavigateOptions } from '~/models/link.model.js';
 
-import { getLinkNavigateFunction, getResolveFunction, parseBooleanAttribute } from '~/models/link.model.js';
-import { Logger } from '~/utils/logger.utils.js';
+import { ensureLinkRouter, getNavigateFunction, getResolveFunction, parseBooleanAttribute } from '~/models/link.model.js';
+import { getRouter } from '~/router/context.svelte.js';
 
 export type NodeConditionFn = (node: HTMLElement) => boolean;
 export interface LinksActionOptions<Name extends RouteName = RouteName, Path extends string = string> {
@@ -89,21 +89,12 @@ function findLinkNode(node: HTMLElement, { apply, boundary, host }: InternalLink
  * ```
  */
 export const links: Action<HTMLElement, LinksActionOptions | undefined> = (node: HTMLElement, options: LinksActionOptions | undefined = {}) => {
-  let _options: InternalLinksActionOptions = $state({ ...options, host: node });
-  const update = (newOptions: LinksActionOptions | undefined = {}) => {
-    _options = { ...newOptions, host: node };
-  };
+  const router = options?.navigate?.router || getRouter();
+  if (!ensureLinkRouter(node, router)) return {};
 
-  const navigate = $derived.by<LinkNavigateFunction | undefined>(() => {
-    try {
-      const fn = getLinkNavigateFunction(_options.navigate);
-      node.removeAttribute('data-error');
-      return fn;
-    } catch (error) {
-      Logger.warn('Router not found. Make sure you are using the link(s) action within a Router context.', { node, options, error });
-      node.setAttribute('data-error', 'Router not found.');
-    }
-  });
+  let _options: InternalLinksActionOptions = $state({ ...options, host: node });
+
+  const navigate = $derived<LinkNavigateFunction | undefined>(getNavigateFunction(router, _options.navigate));
 
   const navigateHandler = async (event: MouseEvent | KeyboardEvent) => {
     const { target } = event;
@@ -133,7 +124,9 @@ export const links: Action<HTMLElement, LinksActionOptions | undefined> = (node:
   node.addEventListener('pointerover', resolveHandler);
   node.addEventListener('focusin', resolveHandler);
   return {
-    update,
+    update(newOptions: LinksActionOptions | undefined = {}) {
+      _options = { ...newOptions, host: node };
+    },
     destroy() {
       node.removeEventListener('click', navigateHandler);
       node.removeEventListener('keydown', navigateHandler);

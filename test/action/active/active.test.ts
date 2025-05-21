@@ -70,9 +70,9 @@ describe('active', () => {
         spyRouter.mockReturnValueOnce(undefined);
 
         if (title === 'action') {
-          active(mockNode, {});
+          active(mockNode);
         } else {
-          useActive({})(mockNode);
+          useActive()(mockNode);
         }
 
         expect(spyRouter).toHaveBeenCalledWith();

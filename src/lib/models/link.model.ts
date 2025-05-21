@@ -3,8 +3,7 @@ import type { IRouter, ResolvedRouterLocationSnapshot, RouterNavigationOptions }
 
 import { resolveComponent } from '@dvcol/svelte-utils/component';
 
-import { MissingRouterContextError, NavigationCancelledError } from '~/models/index.js';
-import { getRouter } from '~/router/context.svelte.js';
+import { NavigationCancelledError } from '~/models/index.js';
 import { Logger, LoggerKey } from '~/utils/logger.utils.js';
 
 function isAnchorTarget(target: EventTarget | null): target is HTMLAnchorElement {
@@ -74,14 +73,12 @@ export type LinkNavigateFunction = <Action extends 'replace' | 'push' | 'resolve
 
 /**
  * Get the router link navigation function for the given options.
- * @param options
+ * @param router - The router instance to use for matching.
+ * @param options - The options to use for the navigation.
  *
  * @throws {MissingRouterContextError} - If the router context is not found
  */
-export function getLinkNavigateFunction(options: LinkNavigateOptions = {}): LinkNavigateFunction {
-  const router = options?.router || getRouter();
-  if (!router) throw new MissingRouterContextError();
-
+export function getNavigateFunction(router: IRouter, options: LinkNavigateOptions = {}): LinkNavigateFunction {
   return async (event, node, action) => {
     // if the element is disabled, we return
     if (options?.disabled) return;
@@ -137,6 +134,16 @@ export function getLinkNavigateFunction(options: LinkNavigateOptions = {}): Link
   };
 }
 
+export function ensureLinkRouter(element: Element, router?: IRouter): router is IRouter {
+  if (router) {
+    element.removeAttribute('data-error');
+    return true;
+  }
+  Logger.warn('Router not found. Make sure you are using the link(s) action within a Router context.', { element });
+  element.setAttribute('data-error', 'Router not found.');
+  return false;
+}
+
 /**
  * Normalize the link attributes and options.
  * If the host is not an anchor element, the role and tabindex attributes will be set.
@@ -145,14 +152,14 @@ export function getLinkNavigateFunction(options: LinkNavigateOptions = {}): Link
  * @param node
  * @param options
  */
-export function normalizeLinkAttributes(node: HTMLElement, options: LinkNavigateOptions) {
+export function normalizeLinkAttributes(node: Element, options: LinkNavigateOptions) {
   if (!isAnchorTarget(node)) {
     if (!node.hasAttribute('role')) node.setAttribute('role', 'link');
     if (!node.hasAttribute('tabindex')) node.setAttribute('tabindex', '0');
   } else if (!node.hasAttribute('href') && options?.path) {
     node.setAttribute('href', options.path);
   }
-  return { node, options };
+  return options;
 }
 
 export interface LinkNavigateOptions<Name extends RouteName = RouteName, Path extends string = string> extends CommonRouteNavigation<Path>,

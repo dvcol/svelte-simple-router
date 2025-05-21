@@ -1,12 +1,9 @@
-import type { Action } from 'svelte/action';
+import type { ActionReturn } from 'svelte/action';
 
-import type { RouteName } from '~/models/index.js';
 import type { LinkNavigateFunction, LinkNavigateOptions } from '~/models/link.model.js';
 
-import { getLinkNavigateFunction, getResolveFunction, normalizeLinkAttributes } from '~/models/link.model.js';
-import { Logger } from '~/utils/logger.utils.js';
-
-export type LinkActionOptions<Name extends RouteName = RouteName, Path extends string = string> = LinkNavigateOptions<Name, Path>;
+import { ensureLinkRouter, getNavigateFunction, getResolveFunction, normalizeLinkAttributes } from '~/models/link.model.js';
+import { getRouter } from '~/router/context.svelte.js';
 
 /**
  * A svelte action to add to an element to navigate to a new location using the router.
@@ -26,7 +23,7 @@ export type LinkActionOptions<Name extends RouteName = RouteName, Path extends s
  * - Name takes precedence over path.
  * - If the host is not an anchor element, the role and tabindex attributes will be set.
  *
- * Note: The action requires the router context to be present in the component tree.
+ * Note: The action requires a router instance or the router context to be present in the component tree.
  *
  * @param node - The element to add the link action to
  * @param options - The options to use for the navigation
@@ -41,30 +38,16 @@ export type LinkActionOptions<Name extends RouteName = RouteName, Path extends s
  * <button href='/path/:param' use:link="{ params: { param: 'value' } }">button link</button>
  * ```
  */
-export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: HTMLElement, options: LinkActionOptions | undefined = {}) => {
-  normalizeLinkAttributes(node, options);
+export function link(node: HTMLElement, options: LinkNavigateOptions | undefined = {}): ActionReturn<LinkNavigateOptions | undefined> {
+  const router = options?.router || getRouter();
+  if (!ensureLinkRouter(node, router)) return {};
 
-  let _options = $state(options);
-  const update = (newOptions: LinkNavigateOptions | undefined = {}) => {
-    _options = newOptions;
-  };
+  let _options = $state(normalizeLinkAttributes(node, options));
 
-  const navigate = $derived.by<LinkNavigateFunction | undefined>(() => {
-    try {
-      const fn = getLinkNavigateFunction(_options);
-      node.removeAttribute('data-error');
-      return fn;
-    } catch (error) {
-      Logger.warn('Router not found. Make sure you are using the link(s) action within a Router context.', { node, options, error });
-      node.setAttribute('data-error', 'Router not found.');
-    }
-  });
-
+  const navigate = $derived<LinkNavigateFunction | undefined>(getNavigateFunction(router, options));
   const navigateHandler = async (event: MouseEvent | KeyboardEvent) => navigate?.(event, node);
 
-  // Add resolve on hover option && view params
   const resolve = $derived(getResolveFunction(navigate, _options));
-
   const resolveHandler = async (event: FocusEvent | PointerEvent) => resolve(event, node);
 
   node.addEventListener('click', navigateHandler);
@@ -72,7 +55,9 @@ export const link: Action<HTMLElement, LinkActionOptions | undefined> = (node: H
   node.addEventListener('pointerenter', resolveHandler);
   node.addEventListener('focus', resolveHandler);
   return {
-    update,
+    update(newOptions: LinkNavigateOptions | undefined = {}) {
+      _options = newOptions;
+    },
     destroy() {
       node.removeEventListener('click', navigateHandler);
       node.removeEventListener('keydown', navigateHandler);

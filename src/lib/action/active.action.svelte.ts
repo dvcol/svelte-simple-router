@@ -1,9 +1,17 @@
-import type { Action } from 'svelte/action';
+import type { ActionReturn } from 'svelte/action';
 
 import type { ActiveOptions } from '~/models/action.model.js';
 import type { RouteName } from '~/models/route.model.js';
 
-import { activeStyles, doNameMatch, doPathMatch, ensurePathName, ensureRouter, getOriginalStyle, restoreStyles } from '~/models/action.model.js';
+import {
+  activeStyles,
+  doNameMatch,
+  doPathMatch,
+  ensureActionRouter,
+  ensurePathName,
+  getOriginalStyle,
+  restoreStyles,
+} from '~/models/action.model.js';
 import { Matcher } from '~/models/index.js';
 import { getRouter } from '~/router/context.svelte.js';
 
@@ -16,7 +24,7 @@ import { getRouter } from '~/router/context.svelte.js';
  * - Name always takes precedence over path.
  * - When the route un-matches, the original style will be restored.
  *
- * Note: The action requires the router context to be present in the component tree.
+ * Note: The action requires a router instance or the router context to be present in the component tree.
  *
  * @param node - The element to add the active state to
  * @param options - The options to use for the active state
@@ -27,13 +35,13 @@ import { getRouter } from '~/router/context.svelte.js';
  * ```html
  * <a href="/path" use:active>simple link</a>
  * <a href="/path" data-name="route-name" use:active>named link</a>
- * <button :use:active="{ path: '/path' }">button link</button>
- * <div :use:active="{ name: 'route-name' }">div link</div>
+ * <button use:active="{ path: '/path' }">button link</button>
+ * <div use:active="{ name: 'route-name' }">div link</div>
  * ```
  */
-export const active: Action<HTMLElement, ActiveOptions | undefined> = (node: HTMLElement, options: ActiveOptions | undefined = {}) => {
+export function active(node: HTMLElement, options: ActiveOptions | undefined = {}): ActionReturn<ActiveOptions | undefined> {
   const router = options?.router || getRouter();
-  if (!ensureRouter(node, router)) return {};
+  if (!ensureActionRouter(node, router)) return {};
 
   let _options = $state(options);
   let _path: string | null = $state(options?.path || node.getAttribute('data-path') || node.getAttribute('href'));
@@ -67,4 +75,4 @@ export const active: Action<HTMLElement, ActiveOptions | undefined> = (node: HTM
     ensurePathName(node, { path: _path, name: _name });
   });
   return { update };
-};
+}

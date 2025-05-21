@@ -45,7 +45,7 @@ export interface ActiveOptions<Name extends RouteName = RouteName> {
   caseSensitive?: boolean;
 }
 
-export function ensureRouter(element: Element, router?: IRouter): router is IRouter {
+export function ensureActionRouter(element: Element, router?: IRouter): router is IRouter {
   if (router) return true;
   Logger.warn('Router not found. Make sure you are using the active action within a Router context.', { element });
   element.setAttribute('data-error', 'Router not found.');
@@ -87,21 +87,18 @@ export function doPathMatch(matcher?: Matcher, name?: RouteName | null, location
 
 type Styles = CSSStyleDeclaration[keyof CSSStyleDeclaration];
 
-export function getOriginalStyle(element: Element, style: Partial<CSSStyleDeclaration> = {}): Record<string, Styles> | undefined {
-  if (!(element instanceof HTMLElement)) return;
+export function getOriginalStyle(element: HTMLElement, style: Partial<CSSStyleDeclaration> = {}): Record<string, Styles> | undefined {
   return Object.fromEntries(Object.keys(style).map(key => [key, element.style[key as keyof CSSStyleDeclaration]]));
 }
 
-export function activeStyles(element: Element, options?: ActiveOptions) {
-  if (!(element instanceof HTMLElement)) return;
+export function activeStyles(element: HTMLElement, options?: ActiveOptions) {
   element.setAttribute('data-active', 'true');
   if (options?.class) element.classList.add(options.class);
   if (!options?.style) return;
   Object.assign(element.style, options.style);
 }
 
-export function restoreStyles(element: Element, original?: Record<string, Styles>, options?: ActiveOptions) {
-  if (!(element instanceof HTMLElement)) return;
+export function restoreStyles(element: HTMLElement, original?: Record<string, Styles>, options?: ActiveOptions) {
   element.removeAttribute('data-active');
   if (options?.class) element.classList.remove(options.class);
   if (!options?.style) return;
