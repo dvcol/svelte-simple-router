@@ -8,7 +8,8 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { Router } from '~/router/router.svelte.js';
 
-import Links from './Links.test.svelte';
+import LinksAction from './Links.action.test.svelte';
+import LinksAttachment from './Links.attachment.test.svelte';
 
 describe('links', () => {
   const HomeRoute: Route = {
@@ -33,138 +34,144 @@ describe('links', () => {
     vi.clearAllMocks();
   });
 
-  describe('click', () => {
-    interface NodeParams {
-      node: string;
-      payload?: RouteNavigation;
-      options?: RouterNavigationOptions;
-      replace?: boolean;
-    }
-    const activeNodes: NodeParams[] = [
-      // Default
-      { node: 'anchor-path', payload: { path: HomeRoute.path } },
-      { node: 'span-path', payload: { path: HomeRoute.path } },
-      { node: 'span-name', payload: { name: HomeRoute.name } },
-      { node: 'nested-anchor-path', payload: { path: HomeRoute.path } },
-      { node: 'nested-span-name', payload: { name: HomeRoute.name } },
+  describe.each([
+    { component: LinksAttachment, title: 'attachment' },
+    { component: LinksAction, title: 'action' },
+  ])('links $title', ({ component }) => {
+    describe('click', () => {
+      interface NodeParams {
+        node: string;
+        payload?: RouteNavigation;
+        options?: RouterNavigationOptions;
+        replace?: boolean;
+      }
 
-      // Navigate
-      { node: 'navigate-anchor-path', payload: { path: HomeRoute.path }, replace: true },
-      { node: 'navigate-span-path', payload: { path: HomeRoute.path }, replace: true },
-      { node: 'navigate-span-name', payload: { name: HomeRoute.name }, replace: true },
-      { node: 'navigate-nested-anchor-path', payload: { path: HomeRoute.path }, replace: true },
-      { node: 'navigate-nested-span-name', payload: { name: HomeRoute.name }, replace: true },
+      const activeNodes: NodeParams[] = [
+        // Default
+        { node: 'anchor-path', payload: { path: HomeRoute.path } },
+        { node: 'span-path', payload: { path: HomeRoute.path } },
+        { node: 'span-name', payload: { name: HomeRoute.name } },
+        { node: 'nested-anchor-path', payload: { path: HomeRoute.path } },
+        { node: 'nested-span-name', payload: { name: HomeRoute.name } },
 
-      // Apply
-      { node: 'apply-anchor-path', payload: { path: HomeRoute.path } },
-      { node: 'apply-span-path', payload: { path: HomeRoute.path } },
-      { node: 'apply-span-name', payload: { name: HomeRoute.name } },
-      { node: 'apply-nested-anchor-path', payload: { path: HomeRoute.path } },
-      { node: 'apply-nested-span-name', payload: { name: HomeRoute.name } },
+        // Navigate
+        { node: 'navigate-anchor-path', payload: { path: HomeRoute.path }, replace: true },
+        { node: 'navigate-span-path', payload: { path: HomeRoute.path }, replace: true },
+        { node: 'navigate-span-name', payload: { name: HomeRoute.name }, replace: true },
+        { node: 'navigate-nested-anchor-path', payload: { path: HomeRoute.path }, replace: true },
+        { node: 'navigate-nested-span-name', payload: { name: HomeRoute.name }, replace: true },
 
-      // Boundary
-      { node: 'boundary-nested-anchor-path', payload: { path: HomeRoute.path } },
-      { node: 'boundary-nested-span-name', payload: { name: HomeRoute.name } },
-    ];
+        // Apply
+        { node: 'apply-anchor-path', payload: { path: HomeRoute.path } },
+        { node: 'apply-span-path', payload: { path: HomeRoute.path } },
+        { node: 'apply-span-name', payload: { name: HomeRoute.name } },
+        { node: 'apply-nested-anchor-path', payload: { path: HomeRoute.path } },
+        { node: 'apply-nested-span-name', payload: { name: HomeRoute.name } },
 
-    const inactiveNodes: NodeParams[] = [
-      { node: 'boundary-anchor-path' },
-      { node: 'boundary-span-path' },
-      { node: 'boundary-span-name' },
-      { node: 'outside-boundary' },
+        // Boundary
+        { node: 'boundary-nested-anchor-path', payload: { path: HomeRoute.path } },
+        { node: 'boundary-nested-span-name', payload: { name: HomeRoute.name } },
+      ];
 
-      // Outside
-      { node: 'outside-anchor-path' },
-      { node: 'outside-span-path' },
-      { node: 'outside-span-name' },
-    ];
+      const inactiveNodes: NodeParams[] = [
+        { node: 'boundary-anchor-path' },
+        { node: 'boundary-span-path' },
+        { node: 'boundary-span-name' },
+        { node: 'outside-boundary' },
 
-    it.each(activeNodes)('should navigate to the link on click for `%s`', async ({ node, payload, options = {}, replace }) => {
-      expect.assertions(2);
+        // Outside
+        { node: 'outside-anchor-path' },
+        { node: 'outside-span-path' },
+        { node: 'outside-span-name' },
+      ];
 
-      const user = userEvent.setup();
-      render(Links, { router });
+      it.each(activeNodes)('should navigate to the link on click for `%s`', async ({ node, payload, options = {}, replace }) => {
+        expect.assertions(2);
 
-      const target = screen.getByTestId(node);
+        const user = userEvent.setup();
+        render(component, { router });
 
-      await user.click(target);
+        const target = screen.getByTestId(node);
 
-      expect(replace ? spyReplace : spyPush).toHaveBeenCalledWith(payload, { ...options });
-      expect(replace ? spyPush : spyReplace).not.toHaveBeenCalled();
+        await user.click(target);
+
+        expect(replace ? spyReplace : spyPush).toHaveBeenCalledWith(payload, { ...options });
+        expect(replace ? spyPush : spyReplace).not.toHaveBeenCalled();
+      });
+
+      it.each(inactiveNodes)('should not navigate on click for `%s`', async ({ node }) => {
+        expect.assertions(2);
+
+        const user = userEvent.setup();
+        render(component, { router });
+
+        const target = screen.getByTestId(node);
+
+        await user.click(target);
+
+        expect(spyPush).not.toHaveBeenCalled();
+        expect(spyReplace).not.toHaveBeenCalled();
+      });
     });
 
-    it.each(inactiveNodes)('should not navigate on click for `%s`', async ({ node }) => {
-      expect.assertions(2);
+    describe('resolve', () => {
+      const resolveFalse: { node: string }[] = [
+        { node: 'anchor-path' },
+        { node: 'span-path' },
+        { node: 'span-name' },
 
-      const user = userEvent.setup();
-      render(Links, { router });
+        // Outside
+        { node: 'nested-anchor-path' },
+        { node: 'nested-span-path' },
+        { node: 'nested-span-name' },
+      ];
 
-      const target = screen.getByTestId(node);
+      it.each(resolveFalse)('should not resolve route on hover for `%s`', async ({ node }) => {
+        expect.assertions(1);
 
-      await user.click(target);
+        const user = userEvent.setup();
+        render(component, { router });
 
-      expect(spyPush).not.toHaveBeenCalled();
-      expect(spyReplace).not.toHaveBeenCalled();
-    });
-  });
+        const target = screen.getByTestId(node);
+        await user.hover(target);
+        target.focus();
 
-  describe('resolve', () => {
-    const resolveFalse: { node: string }[] = [
-      { node: 'anchor-path' },
-      { node: 'span-path' },
-      { node: 'span-name' },
+        expect(spyResolve).not.toHaveBeenCalled();
+      });
 
-      // Outside
-      { node: 'nested-anchor-path' },
-      { node: 'nested-span-path' },
-      { node: 'nested-span-name' },
-    ];
+      const resolveTrue: { node: string; payload: { name: string } | { path: string } }[] = [
+        { node: 'resolve-anchor-path', payload: { path: '/home' } },
+        { node: 'resolve-span-path', payload: { path: '/home' } },
+        { node: 'resolve-span-name', payload: { name: 'home' } },
 
-    it.each(resolveFalse)('should not resolve route on hover for `%s`', async ({ node }) => {
-      expect.assertions(1);
+        // Outside
+        { node: 'resolve-nested-anchor-path', payload: { path: '/home' } },
+        { node: 'resolve-nested-span-path', payload: { path: '/home' } },
+        { node: 'resolve-nested-span-name', payload: { name: 'home' } },
+      ];
 
-      const user = userEvent.setup();
-      render(Links, { router });
+      it.each(resolveTrue)('should resolve route on hover for `%s`', async ({ node, payload }) => {
+        expect.assertions(2);
 
-      const target = screen.getByTestId(node);
-      await user.hover(target);
-      target.focus();
+        const user = userEvent.setup();
+        render(component, { router });
 
-      expect(spyResolve).not.toHaveBeenCalled();
-    });
+        const target = screen.getByTestId(node);
+        await user.hover(target);
 
-    const resolveTrue: { node: string; payload: { name: string } | { path: string } }[] = [
-      { node: 'resolve-anchor-path', payload: { path: '/home' } },
-      { node: 'resolve-span-path', payload: { path: '/home' } },
-      { node: 'resolve-span-name', payload: { name: 'home' } },
+        expect(spyResolve).toHaveBeenCalledTimes(1);
+        expect(spyResolve).toHaveBeenCalledWith(payload, {});
+      });
 
-      // Outside
-      { node: 'resolve-nested-anchor-path', payload: { path: '/home' } },
-      { node: 'resolve-nested-span-path', payload: { path: '/home' } },
-      { node: 'resolve-nested-span-name', payload: { name: 'home' } },
-    ];
+      it.each(resolveTrue)('should resolve route on focus for `%s`', async ({ node, payload }) => {
+        expect.assertions(2);
 
-    it.each(resolveTrue)('should resolve route on hover for `%s`', async ({ node, payload }) => {
-      expect.assertions(2);
+        render(component, { router });
+        screen.getByTestId(node)?.focus();
 
-      const user = userEvent.setup();
-      render(Links, { router });
-
-      const target = screen.getByTestId(node);
-      await user.hover(target);
-
-      expect(spyResolve).toHaveBeenCalledTimes(1);
-      expect(spyResolve).toHaveBeenCalledWith(payload, {});
-    });
-
-    it.each(resolveTrue)('should resolve route on focus for `%s`', async ({ node, payload }) => {
-      expect.assertions(2);
-
-      render(Links, { router });
-      screen.getByTestId(node)?.focus();
-
-      expect(spyResolve).toHaveBeenCalledTimes(1);
-      expect(spyResolve).toHaveBeenCalledWith(payload, {});
+        expect(spyResolve).toHaveBeenCalledTimes(1);
+        expect(spyResolve).toHaveBeenCalledWith(payload, {});
+      });
     });
   });
 });

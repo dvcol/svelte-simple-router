@@ -316,6 +316,25 @@ Note: The action requires the router context to be present in the component tree
 <button href='/path/:param' use:link="{ params: { param: 'value' } }">button link</button>
 ```
 
+#### Link attachment
+
+The `link attachment` intercepts click events on dom elements and triggers a router navigation instead.
+
+Similar to the `link action`, see the [link action](#link-action) for more information.
+
+```svelte
+<script lang="ts">
+  import { useLink } from '@dvcol/svelte-simple-router/attachment';
+</script>
+
+<a href="/path/:param?query=value" {@attach useLink()}>simple link</a>
+<a href='goodbye' name {@attach useLink()}>named link</a>
+<a href='/path/:param' data-query='{"query":"value"}' {@attach useLink()}>link with query</a>
+<a href='/path/:param' {@attach useLink({ params: { param: 'value' } })}>link with params</a>
+<div href='/path/:param' {@attach useLink({ params: { param: 'value' } })}>div link</div>
+<button href='/path/:param' {@attach useLink({ params: { param: 'value' } })}>button link</button>
+```
+
 #### Links action
 
 The `links action` intercepts click events on dom elements and upwardly navigate the dom tree until it reaches a link element and triggers a router navigation instead.
@@ -342,6 +361,27 @@ Note: Unlike use:link, use:links does not normalize link attributes (role, tabin
 </script>
 
 <div use:links>
+  <div>
+    <a href="/path/:param?query=value">simple link</a>
+  </div>
+  <div data-router-link data-name="Hello">
+    <span>simple span</span>
+  </div>
+</div>
+```
+
+#### Links attachment
+
+The `links attachment` intercepts click events on dom elements and upwardly navigate the dom tree until it reaches a link element and triggers a router navigation instead.
+
+Similar to the `links action`, see the [links action](#links-action) for more information.
+
+```svelte
+<script lang="ts">
+  import { useLinks } from '@dvcol/svelte-simple-router/attachment';
+</script>
+
+<div {@attach useLinks()}>
   <div>
     <a href="/path/:param?query=value">simple link</a>
   </div>

@@ -3,9 +3,9 @@
 
   import { NeoButton, NeoCard, NeoInput } from '@dvcol/neo-svelte';
 
-  import { active } from '~/action/active.action.svelte.js';
-  import { link } from '~/action/link.action.svelte.js';
-  import { links } from '~/action/links.action.svelte.js';
+  import { useActive } from '~/attachment/active.attachment.svelte.js';
+  import { useLink } from '~/attachment/link.attachment.svelte.js';
+  import { useLinks } from '~/attachment/links.attachment.svelte.js';
   import { NavigationCancelledError } from '~/models/error.model.js';
   import { useNavigate, useRouter } from '~/router/hooks.svelte.js';
 
@@ -77,7 +77,7 @@
 <NeoCard rounded>
   <div id="route-selector" class="container">
     <h4>Routes</h4>
-    <table class="routes" use:links>
+    <table class="routes" {@attach useLinks()}>
       <thead>
         <tr>
           <th>Name</th>
@@ -89,7 +89,7 @@
       </thead>
       <tbody>
         {#each routes as { name, path, redirect, meta } (name ?? path)}
-          <tr use:link={{ name, path, ...navOptions }} use:active={{ name, path, class: 'active', exact: true }}>
+          <tr {@attach useLink({ name, path, ...navOptions })} {@attach useActive({ name, path, class: 'active', exact: true })}>
             <td>{name}</td>
             <td>{path}</td>
             <td>{redirect?.name ?? redirect?.path ?? meta?.redirect ?? '-'}</td>

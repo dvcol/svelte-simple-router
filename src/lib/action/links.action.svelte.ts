@@ -1,60 +1,11 @@
-import type { Action } from 'svelte/action';
+import type { ActionReturn } from 'svelte/action';
 
-import type { RouteName } from '~/models/index.js';
-import type { LinkNavigateFunction, LinkNavigateOptions } from '~/models/link.model.js';
+import type { LinkNavigateFunction } from '~/models/link.model.js';
+import type { InternalLinksActionOptions, LinksActionOptions } from '~/models/links.model.js';
 
-import { ensureLinkRouter, getNavigateFunction, getResolveFunction, parseBooleanAttribute } from '~/models/link.model.js';
+import { ensureLinkRouter, getNavigateFunction, getResolveFunction } from '~/models/link.model.js';
+import { getNavigateHandler, getResolveHandler } from '~/models/links.model.js';
 import { getRouter } from '~/router/context.svelte.js';
-
-export type NodeConditionFn = (node: HTMLElement) => boolean;
-export interface LinksActionOptions<Name extends RouteName = RouteName, Path extends string = string> {
-  /**
-   * Whether the target node should be considered a link.
-   */
-  apply?: NodeConditionFn;
-  /**
-   * The element to act as a boundary for the upward link search.
-   */
-  boundary?: HTMLElement | NodeConditionFn;
-  /**
-   * The navigate options to use for the navigation.
-   */
-  navigate?: LinkNavigateOptions<Name, Path>;
-}
-
-function isLinkNode(node: HTMLElement, apply?: LinksActionOptions['apply']): boolean {
-  if (node instanceof HTMLAnchorElement) return true;
-  if (parseBooleanAttribute(node, 'router-link')) return true;
-  return apply?.(node) ?? false;
-}
-
-function isBoundaryNode(node: HTMLElement, boundary: HTMLElement | NodeConditionFn): boolean {
-  if (typeof boundary === 'function') return boundary(node);
-  return node === boundary;
-}
-
-function isWithinBoundary(node: HTMLElement, boundary: HTMLElement | NodeConditionFn): boolean {
-  if (isBoundaryNode(node, boundary)) return true;
-  let _node: HTMLElement = node;
-  while (_node?.parentElement) {
-    _node = _node.parentElement;
-    if (isBoundaryNode(_node, boundary)) return true;
-  }
-  return false;
-}
-
-type InternalLinksActionOptions = LinksActionOptions & { host: HTMLElement };
-function findLinkNode(node: HTMLElement, { apply, boundary, host }: InternalLinksActionOptions): HTMLElement | undefined {
-  if (boundary && !isWithinBoundary(node, boundary ?? host)) return;
-  if (isLinkNode(node, apply)) return node;
-  let link: HTMLElement = node;
-  while (link?.parentElement) {
-    link = link.parentElement;
-
-    if (isBoundaryNode(link, boundary ?? host)) return;
-    if (isLinkNode(link, apply)) return link;
-  }
-}
 
 /**
  * The `links action` intercepts click events on dom elements and upwardly navigate the dom tree until it reaches a link element and triggers a router navigation instead.
@@ -70,7 +21,7 @@ function findLinkNode(node: HTMLElement, { apply, boundary, host }: InternalLink
  * - The action requires either valid href or data-attributes to navigate.
  * - Once the action reaches the host element or the `boundary` element (or selector function), it will stop evaluating the dom tree.
  *
- * Note: The action requires the router context to be present in the component tree.
+ * Note: The action requires a router instance or the router context to be present in the component tree.
  * Note: Unlike use:link, use:links does not normalize link attributes (role, tabindex, href).
  *
  * @param node
@@ -88,36 +39,17 @@ function findLinkNode(node: HTMLElement, { apply, boundary, host }: InternalLink
  * </div>
  * ```
  */
-export const links: Action<HTMLElement, LinksActionOptions | undefined> = (node: HTMLElement, options: LinksActionOptions | undefined = {}) => {
+export function links(node: HTMLElement, options: LinksActionOptions | undefined = {}): ActionReturn<LinksActionOptions | undefined> {
   const router = options?.navigate?.router || getRouter();
   if (!ensureLinkRouter(node, router)) return {};
 
-  let _options: InternalLinksActionOptions = $state({ ...options, host: node });
+  let _options: InternalLinksActionOptions = $derived({ ...options, host: node });
 
   const navigate = $derived<LinkNavigateFunction | undefined>(getNavigateFunction(router, _options.navigate));
+  const navigateHandler = getNavigateHandler(_options, navigate);
 
-  const navigateHandler = async (event: MouseEvent | KeyboardEvent) => {
-    const { target } = event;
-    if (!(target instanceof HTMLElement)) return;
-    if (!navigate) return;
-
-    const nodeLink = findLinkNode(target, _options);
-    if (!nodeLink) return;
-    return navigate(event, nodeLink);
-  };
-
-  // Add resolve on hover option && view params
   const resolve = $derived(getResolveFunction(navigate, _options.navigate));
-
-  const resolveHandler = async (event: FocusEvent | PointerEvent) => {
-    const { target } = event;
-    if (!(target instanceof HTMLElement)) return;
-    if (!resolve) return;
-
-    const nodeLink = findLinkNode(target, _options);
-    if (!nodeLink) return;
-    return resolve(event, nodeLink);
-  };
+  const resolveHandler = getResolveHandler(_options, resolve);
 
   node.addEventListener('click', navigateHandler);
   node.addEventListener('keydown', navigateHandler);
