@@ -137,8 +137,8 @@ export function templateToParams(template: string) {
 }
 
 export interface PathParamsResult {
-  params: Record<string, string | number | boolean | undefined | null>;
-  wildcards: Record<string, string | number | boolean | undefined | null>;
+  params: Record<string, string | number | boolean | undefined>;
+  wildcards: Record<string, string | number | boolean | undefined>;
 }
 export interface IMatcher {
   /**

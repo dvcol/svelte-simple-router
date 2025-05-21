@@ -8,7 +8,7 @@ import { Matcher } from '~/models/index.js';
 import { getRouter } from '~/router/context.svelte.js';
 
 export function useActive(options: ActiveOptions): Attachment {
-  const router = getRouter();
+  const router = options?.router || getRouter();
 
   return (element) => {
     if (!ensureRouter(element, router)) return;

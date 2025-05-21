@@ -35,7 +35,7 @@
     Any: 'Any',
   } as const;
 
-  type Routes = (typeof RouteName)[keyof typeof RouteName] | string;
+  type Routes = (typeof RouteName)[keyof typeof RouteName] | (string & {});
 
   let beforeChecked = false;
 

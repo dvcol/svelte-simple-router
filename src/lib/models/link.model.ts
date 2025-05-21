@@ -1,5 +1,5 @@
 import type { CommonRouteNavigation, ResolvedRoute, RouteName, RouteNavigation } from '~/models/route.model.js';
-import type { ResolvedRouterLocationSnapshot, RouterNavigationOptions } from '~/models/router.model.js';
+import type { IRouter, ResolvedRouterLocationSnapshot, RouterNavigationOptions } from '~/models/router.model.js';
 
 import { resolveComponent } from '@dvcol/svelte-utils/component';
 
@@ -79,7 +79,7 @@ export type LinkNavigateFunction = <Action extends 'replace' | 'push' | 'resolve
  * @throws {MissingRouterContextError} - If the router context is not found
  */
 export function getLinkNavigateFunction(options: LinkNavigateOptions = {}): LinkNavigateFunction {
-  const router = getRouter();
+  const router = options?.router || getRouter();
   if (!router) throw new MissingRouterContextError();
 
   return async (event, node, action) => {
@@ -155,8 +155,13 @@ export function normalizeLinkAttributes(node: HTMLElement, options: LinkNavigate
   return { node, options };
 }
 
-export interface LinkNavigateOptions<Name extends RouteName = RouteName> extends CommonRouteNavigation,
+export interface LinkNavigateOptions<Name extends RouteName = RouteName, Path extends string = string> extends CommonRouteNavigation<Path>,
   RouterNavigationOptions {
+  /**
+   * Optional router instance to use for matching.
+   * If not provided, the router will be extracted from the context.
+   */
+  router?: IRouter<Name>;
   /**
    * Whether to resolve the link on hover or focus.
    * If a string is provided, it will be used as the name of the view to resolve instead of the link's target.
@@ -173,7 +178,7 @@ export interface LinkNavigateOptions<Name extends RouteName = RouteName> extends
   /**
    * The path of the route to navigate to.
    */
-  path?: string;
+  path?: Path;
   /**
    * Whether the link is disabled.
    */

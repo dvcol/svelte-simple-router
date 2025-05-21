@@ -26,7 +26,7 @@ export type HistoryState<Key extends string | number = string | number> = {
 type PrimitiveKey = string | number | symbol;
 export type RouteName = PrimitiveKey;
 export type RouteMeta<T = unknown> = Record<PrimitiveKey, T>;
-export type RouteParamValue = string | number | boolean | undefined | null;
+export type RouteParamValue = string | number | boolean | undefined;
 export type RouteQuery = Record<string, RouteParamValue>;
 export type RouteParams = Record<string, RouteParamValue>;
 export type RouteWildcards = Record<string, RouteParamValue>;
@@ -51,7 +51,7 @@ export interface RouteNavigationOptions {
   stripTrailingHash?: boolean;
 }
 
-export type CommonRouteNavigation = RouteNavigationOptions & {
+export type CommonRouteNavigation<Path extends string = string> = RouteNavigationOptions & {
   /**
    * Query parameters of the location.
    */
@@ -59,7 +59,7 @@ export type CommonRouteNavigation = RouteNavigationOptions & {
   /**
    * Params of the location.
    */
-  params?: RouteParams;
+  params?: ExtractPathParams<Path>;
   /**
    * State to save using the History API.
    * This cannot contain any reactive values and some primitives like Symbols are forbidden.
@@ -89,11 +89,11 @@ export type CommonRouteNavigation = RouteNavigationOptions & {
 /**
  * Record used to navigate to a new location.
  */
-export type RouteLocationNavigation = CommonRouteNavigation & {
+export type RouteLocationNavigation<Path extends string = string> = CommonRouteNavigation<Path> & {
   /**
    * Path of the location.
    */
-  path: string;
+  path: Path;
   /**
    * Name is forbidden in this case.
    */
@@ -111,7 +111,7 @@ export type RouteNameNavigation<Name extends RouteName = RouteName> = CommonRout
   path?: never;
 };
 
-export type RouteNavigation<Name extends RouteName = RouteName> = RouteLocationNavigation | RouteNameNavigation<Name>;
+export type RouteNavigation<Name extends RouteName = RouteName, Path extends string = string> = RouteLocationNavigation<Path> | RouteNameNavigation<Name>;
 
 export type ComponentProps = Record<PrimitiveKey, unknown>;
 
@@ -338,13 +338,13 @@ export function toBaseRoute<Name extends RouteName = RouteName, Path extends str
   };
 }
 
-export type ParsedRoute<Name extends RouteName = RouteName> = Route<Name> & { parent?: ParsedRoute<Name>; matcher: IMatcher };
+export type ParsedRoute<Name extends RouteName = RouteName, Path extends string = string> = Route<Name, Path> & { parent?: ParsedRoute<Name>; matcher: IMatcher };
 
-export interface ResolvedRoute<Name extends RouteName = RouteName> {
+export interface ResolvedRoute<Name extends RouteName = RouteName, Path extends string = string> {
   /**
    * Matched route record if any.
    */
-  route?: ParsedRoute<Name>;
+  route?: ParsedRoute<Name, Path>;
   /**
    * Name of the resolved route record.
    */
@@ -352,7 +352,7 @@ export interface ResolvedRoute<Name extends RouteName = RouteName> {
   /**
    * Resolved path with query and params.
    */
-  path: string;
+  path: Path;
   /**
    * Full matched path including parents and base.
    */
@@ -364,7 +364,7 @@ export interface ResolvedRoute<Name extends RouteName = RouteName> {
   /**
    * Params of the location.
    */
-  params: RouteParams;
+  params: ExtractPathParams<Path>;
   /**
    * Wildcards parsed from the path.
    */

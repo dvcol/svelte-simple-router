@@ -1,11 +1,12 @@
 import type { Action } from 'svelte/action';
 
+import type { RouteName } from '~/models/index.js';
 import type { LinkNavigateFunction, LinkNavigateOptions } from '~/models/link.model.js';
 
 import { getLinkNavigateFunction, getResolveFunction, normalizeLinkAttributes } from '~/models/link.model.js';
 import { Logger } from '~/utils/logger.utils.js';
 
-export type LinkActionOptions = LinkNavigateOptions;
+export type LinkActionOptions<Name extends RouteName = RouteName, Path extends string = string> = LinkNavigateOptions<Name, Path>;
 
 /**
  * A svelte action to add to an element to navigate to a new location using the router.

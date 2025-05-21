@@ -32,7 +32,7 @@ import { getRouter } from '~/router/context.svelte.js';
  * ```
  */
 export const active: Action<HTMLElement, ActiveOptions | undefined> = (node: HTMLElement, options: ActiveOptions | undefined = {}) => {
-  const router = getRouter();
+  const router = options?.router || getRouter();
   if (!ensureRouter(node, router)) return {};
 
   let _options = $state(options);

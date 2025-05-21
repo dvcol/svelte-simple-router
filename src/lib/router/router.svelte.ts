@@ -457,7 +457,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @throws {@link RouterNameConflictError} if a route with the same name already exists
    * @throws {@link RouterPathConflictError} if a route with the same path already exists
    */
-  addRoute(route: Route<Name>): Router<Name> {
+  addRoute <Path extends string = string>(route: Route<Name, Path>): Router<Name> {
     if (route.name && this.hasRouteName(route.name)) throw new RouterNameConflictError(route.name);
     if (route.path && this.hasRoutePath(route.path)) throw new RouterPathConflictError(route.path);
     const _route = cloneRoute(route) as ParsedRoute<Name>;
@@ -590,8 +590,8 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    *
    * @throws {@link NavigationNotFoundError} if the navigation is not found.
    */
-  async resolve(
-    to: RouteNavigation<Name>,
+  async resolve<Path extends string = string>(
+    to: RouteNavigation<Name, Path>,
     {
       from = this.#route,
       strict = this.options?.strict,
@@ -725,8 +725,8 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    *
    * @throws {@link NavigationFailure} if the navigation is aborted, cancelled, or not found.
    */
-  async #navigate(
-    to: ResolvedRoute<Name>,
+  async #navigate<Path extends string = string>(
+    to: ResolvedRoute<Name, Path>,
     options: RouterNavigationOptions = {},
     from: ResolvedRouterLocationSnapshot<Name> = this.snapshot,
   ): Promise<ResolvedRouterLocationSnapshot<Name>> {
@@ -854,9 +854,9 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    *
    * @private
    */
-  async #historyWrapper(
+  async #historyWrapper<Path extends string = string>(
     method: 'pushState' | 'replaceState',
-    to: RouteNavigation<Name>,
+    to: RouteNavigation<Name, Path>,
     options: RouterNavigationOptions,
   ): Promise<ResolvedRouterLocationSnapshot<Name>> {
     const resolved = await this.resolve(to, options);
@@ -884,7 +884,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @throws {@link NavigationAbortedError} if the navigation is aborted by a navigation guard.
    * @throws {@link ParsingError} if the URL cannot be parsed.
    */
-  async push(to: RouteNavigation<Name>, options: RouterNavigationOptions = {}): Promise<ResolvedRouterLocationSnapshot<Name>> {
+  async push<Path extends string = string>(to: RouteNavigation<Name, Path>, options: RouterNavigationOptions = {}): Promise<ResolvedRouterLocationSnapshot<Name>> {
     return this.#historyWrapper('pushState', to, { ...this.options, ...options });
   }
 
@@ -900,7 +900,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
    * @throws {@link ParsingError} if the URL cannot be parsed.
    *
    */
-  async replace(to: RouteNavigation<Name>, options: RouterNavigationOptions = {}): Promise<ResolvedRouterLocationSnapshot<Name>> {
+  async replace<Path extends string = string>(to: RouteNavigation<Name, Path>, options: RouterNavigationOptions = {}): Promise<ResolvedRouterLocationSnapshot<Name>> {
     return this.#historyWrapper('replaceState', to, { ...this.options, ...options });
   }
 

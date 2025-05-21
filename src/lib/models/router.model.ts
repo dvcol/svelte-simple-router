@@ -1,5 +1,7 @@
 /// <reference types="navigation-api-types" />
 
+import type { ExtractPathParams } from '@dvcol/common-utils/common/models';
+
 import type {
   INavigationEvent,
   NavigationEndListener,
@@ -17,7 +19,6 @@ import type {
   RouteName,
   RouteNavigation,
   RouteNavigationOptions,
-  RouteParams,
   RouteQuery,
   RouteWildcards,
 } from '~/models/route.model.js';
@@ -27,7 +28,7 @@ import { isShallowEqual } from '@dvcol/common-utils/common/object';
 
 import { isRouteEqual } from '~/models/route.model.js';
 
-export interface RouterLocation<Name extends RouteName = RouteName> {
+export interface RouterLocation<Name extends RouteName = RouteName, Path extends string = string> {
   /**
    * Origin of the location.
    */
@@ -43,7 +44,7 @@ export interface RouterLocation<Name extends RouteName = RouteName> {
   /**
    * Resolved path with query and params.
    */
-  path: string;
+  path: Path;
   /**
    * Full matched path including parents and base.
    */
@@ -55,7 +56,7 @@ export interface RouterLocation<Name extends RouteName = RouteName> {
   /**
    * Params of the location.
    */
-  params: RouteParams;
+  params: ExtractPathParams<Path>;
   /**
    * Wildcards parsed from the path.
    */
@@ -71,12 +72,12 @@ export interface RouterLocation<Name extends RouteName = RouteName> {
   title?: string;
 }
 
-export function isLocationEqual<Name extends RouteName = RouteName>(a?: RouterLocation<Name>, b?: RouterLocation<Name>): boolean {
+export function isLocationEqual<Name extends RouteName = RouteName, Path extends string = string>(a?: RouterLocation<Name, Path>, b?: RouterLocation<Name, Path>): boolean {
   return isShallowEqual(a, b, 2);
 }
 
-export type BasicRouterLocation<Name extends RouteName = RouteName> = Omit<RouterLocation<Name>, 'href'> & { href: string };
-export function toBasicRouterLocation<Name extends RouteName = RouteName>(loc?: RouterLocation<Name>): BasicRouterLocation<Name> | undefined {
+export type BasicRouterLocation<Name extends RouteName = RouteName, Path extends string = string> = Omit<RouterLocation<Name, Path>, 'href'> & { href: string };
+export function toBasicRouterLocation<Name extends RouteName = RouteName, Path extends string = string>(loc?: RouterLocation<Name, Path>): BasicRouterLocation<Name, Path> | undefined {
   if (!loc) return loc;
   return {
     origin: loc.origin,
@@ -92,14 +93,14 @@ export function toBasicRouterLocation<Name extends RouteName = RouteName>(loc?: 
   };
 }
 
-export interface ResolvedRouterLocation<Name extends RouteName = RouteName> {
-  route?: Route<Name>;
-  location?: RouterLocation<Name>;
+export interface ResolvedRouterLocation<Name extends RouteName = RouteName, Path extends string = string> {
+  route?: Route<Name, Path>;
+  location?: RouterLocation<Name, Path>;
 }
 
-export interface ResolvedRouterLocationSnapshot<Name extends RouteName = RouteName> {
-  route?: BaseRoute<Name>;
-  location?: BasicRouterLocation<Name>;
+export interface ResolvedRouterLocationSnapshot<Name extends RouteName = RouteName, Path extends string = string> {
+  route?: BaseRoute<Name, Path>;
+  location?: BasicRouterLocation<Name, Path>;
 }
 
 export function isResolvedLocationEqual<Name extends RouteName = RouteName>(a: ResolvedRouterLocation<Name>, b: ResolvedRouterLocation<Name>): boolean {
@@ -187,8 +188,8 @@ export interface RouterNavigationOptions {
   followGuardRedirects?: boolean;
 }
 
-export type ResolveRouteOptions<Name extends RouteName = RouteName> = Omit<RouterNavigationOptions, 'metaAsState' | 'nameAsTitle'> & {
-  from?: Route<Name>;
+export type ResolveRouteOptions<Name extends RouteName = RouteName, Path extends string = string> = Omit<RouterNavigationOptions, 'metaAsState' | 'nameAsTitle'> & {
+  from?: Route<Name, Path>;
 };
 
 export function RouterPathPriority<T extends Route<any> = Route>(a: T, b: T): number {
@@ -419,7 +420,7 @@ export interface IRouter<Name extends RouteName = RouteName> {
    * @throws {@link RouterNameConflictError} if a route with the same name already exists
    * @throws {@link RouterPathConflictError} if a route with the same path already exists
    */
-  addRoute: (route: Route<Name>) => IRouter<Name>;
+  addRoute: <Path extends string = string>(route: Route<Name, Path>) => IRouter<Name>;
 
   /**
    * Add multiple {@link Route} to the router.
@@ -499,7 +500,7 @@ export interface IRouter<Name extends RouteName = RouteName> {
    * @throws {@link NavigationNotFoundError} if the navigation is not found.
    * @throws {@link ParsingError} if the URL cannot be parsed.
    */
-  resolve: (to: RouteNavigation<Name>, options?: ResolveRouteOptions<Name>) => ResolvedRoute<Name> | Promise<ResolvedRoute<Name>>;
+  resolve: <Path extends string = string>(to: RouteNavigation<Name, Path>, options?: ResolveRouteOptions<Name>) => ResolvedRoute<Name> | Promise<ResolvedRoute<Name>>;
 
   /**
    * Programmatically navigate to a new URL by pushing an entry in the history stack.
@@ -512,8 +513,8 @@ export interface IRouter<Name extends RouteName = RouteName> {
    * @throws {@link NavigationAbortedError} if the navigation is aborted by a navigation guard.
    * @throws {@link ParsingError} if the URL cannot be parsed.
    */
-  push: (
-    to: RouteNavigation<Name>,
+  push: <Path extends string = string>(
+    to: RouteNavigation<Name, Path>,
     options?: RouterNavigationOptions,
   ) => ResolvedRouterLocationSnapshot<Name> | Promise<ResolvedRouterLocationSnapshot<Name>>;
 
@@ -528,8 +529,8 @@ export interface IRouter<Name extends RouteName = RouteName> {
    * @throws {@link NavigationAbortedError} if the navigation is aborted by a navigation guard.
    * @throws {@link ParsingError} if the URL cannot be parsed.
    */
-  replace: (
-    to: RouteNavigation<Name>,
+  replace: <Path extends string = string>(
+    to: RouteNavigation<Name, Path>,
     options?: RouterNavigationOptions,
   ) => ResolvedRouterLocationSnapshot<Name> | Promise<ResolvedRouterLocationSnapshot<Name>>;
 

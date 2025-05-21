@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@dvcol/common-utils':
-        specifier: ^1.31.1
-        version: 1.31.1
+        specifier: ^1.31.2
+        version: 1.31.2
       '@dvcol/svelte-utils':
         specifier: ^1.17.1
         version: 1.17.1(svelte@5.32.1)
@@ -421,8 +421,8 @@ packages:
   '@dual-bundle/import-meta-resolve@4.1.0':
     resolution: {integrity: sha512-+nxncfwHM5SgAtrVzgpzJOI1ol0PkumhVo469KCf9lUi21IGcY90G98VuHm9VRrUypmAzawAHO9bs6hqeADaVg==}
 
-  '@dvcol/common-utils@1.31.1':
-    resolution: {integrity: sha512-d2kBWAWZh9w38kzC031NNPmbf/xO6oZl48PRjdr/1+ah/iaXciZQs6y01c6JxEWM4eNubt5Mh/iCbnX1DGO7UQ==}
+  '@dvcol/common-utils@1.31.2':
+    resolution: {integrity: sha512-UHNVqH9LaFxp7H50cT3jrcixGhkNz+9Chysai5dgPWGHSa5FTRJq5qtPtMnczyVLkRt3MuVuMOgl4TQwouwkqA==}
     engines: {node: '>=20', pnpm: '>= 8'}
 
   '@dvcol/eslint-config@1.6.0':
@@ -5581,7 +5581,7 @@ snapshots:
 
   '@dual-bundle/import-meta-resolve@4.1.0': {}
 
-  '@dvcol/common-utils@1.31.1':
+  '@dvcol/common-utils@1.31.2':
     dependencies:
       pretty-bytes: 6.1.1
       uuid: 11.0.5
@@ -5617,7 +5617,7 @@ snapshots:
 
   '@dvcol/neo-svelte@1.1.1(svelte@5.32.1)':
     dependencies:
-      '@dvcol/common-utils': 1.31.1
+      '@dvcol/common-utils': 1.31.2
       '@dvcol/svelte-utils': 1.17.1(svelte@5.32.1)
       '@skeletonlabs/floating-ui-svelte': 0.3.9(svelte@5.32.1)
       svelte: 5.32.1
@@ -5648,7 +5648,7 @@ snapshots:
 
   '@dvcol/svelte-utils@1.17.1(svelte@5.32.1)':
     dependencies:
-      '@dvcol/common-utils': 1.31.1
+      '@dvcol/common-utils': 1.31.2
       svelte: 5.32.1
 
   '@emnapi/core@1.4.3':

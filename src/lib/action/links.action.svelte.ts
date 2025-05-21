@@ -1,12 +1,13 @@
 import type { Action } from 'svelte/action';
 
+import type { RouteName } from '~/models/index.js';
 import type { LinkNavigateFunction, LinkNavigateOptions } from '~/models/link.model.js';
 
 import { getLinkNavigateFunction, getResolveFunction, parseBooleanAttribute } from '~/models/link.model.js';
 import { Logger } from '~/utils/logger.utils.js';
 
 export type NodeConditionFn = (node: HTMLElement) => boolean;
-export interface LinksActionOptions {
+export interface LinksActionOptions<Name extends RouteName = RouteName, Path extends string = string> {
   /**
    * Whether the target node should be considered a link.
    */
@@ -18,7 +19,7 @@ export interface LinksActionOptions {
   /**
    * The navigate options to use for the navigation.
    */
-  navigate?: LinkNavigateOptions;
+  navigate?: LinkNavigateOptions<Name, Path>;
 }
 
 function isLinkNode(node: HTMLElement, apply?: LinksActionOptions['apply']): boolean {

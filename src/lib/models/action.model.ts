@@ -6,6 +6,11 @@ import { Logger } from '~/utils/logger.utils.js';
 
 export interface ActiveOptions<Name extends RouteName = RouteName> {
   /**
+   * Optional router instance to use for matching.
+   * If not provided, the router will be extracted from the context.
+   */
+  router?: IRouter<Name>;
+  /**
    * Route name to match against.
    * This takes precedence over the path option.
    */
