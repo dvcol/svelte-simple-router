@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.6.0](https://github.com/dvcol/svelte-simple-router/compare/v2.5.0...v2.6.0) (2025-05-24)
+
+
+### Features
+
+* **transition:** adds custom first transition ([f050ba3](https://github.com/dvcol/svelte-simple-router/commit/f050ba3114638156c9fec58c45b56ff1fad30d04))
+
 ## [2.5.0](https://github.com/dvcol/svelte-simple-router/compare/v2.4.1...v2.5.0) (2025-05-21)
 
 
