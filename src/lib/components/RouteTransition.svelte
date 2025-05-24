@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TransitionFunction } from '@dvcol/svelte-utils/transition';
+  import type { TransitionFunction, TransitionWithProps } from '@dvcol/svelte-utils/transition';
   import type { Snippet } from 'svelte';
 
   import type { TransitionProps } from '~/models/component.model.js';
@@ -10,15 +10,20 @@
   const { children, key, id, transition }: { children: Snippet; id: string; key: any | any[]; transition: TransitionProps } = $props();
 
   let firstRender = true;
-  const skipFirst = $derived<boolean>(transition?.skipFirst ?? true);
+  const skipFirst = $derived<TransitionProps['skipFirst']>(transition?.skipFirst ?? false);
   const skipTransition = (skip = skipFirst) => {
-    if (!firstRender || !skip) return false;
+    if (!firstRender) return false;
     firstRender = false;
-    return true;
+    return skip === true;
   };
+
+  const isTransitionFunction = (skip?: TransitionProps['skipFirst']): skip is TransitionFunction => typeof skip === 'function' && !!skip;
+  const isTransitionObject = (skip?: TransitionProps['skipFirst']): skip is TransitionWithProps => typeof skip === 'object' && !!skip?.use;
 
   const _in = $derived<TransitionFunction>(((node, props, options) => {
     if (skipTransition()) return;
+    if (firstRender && isTransitionFunction(skipFirst)) return skipFirst;
+    if (firstRender && isTransitionObject(skipFirst)) return skipFirst.use;
     return transition?.in?.(node, props, options);
   }) as TransitionFunction);
   const _out = $derived<TransitionFunction>(((node, props, options) => {
@@ -26,7 +31,10 @@
     return transition?.out?.(node, props, options);
   }) as TransitionFunction);
 
-  const _inParams = $derived(transition?.params?.in ?? {});
+  const _inParams = $derived.by(() => {
+    if (firstRender && isTransitionObject(skipFirst) && skipFirst.props) return skipFirst.props;
+    return transition?.params?.in ?? {};
+  });
   const _outParams = $derived(transition?.params?.out ?? {});
 
   const _containerProps = $derived(transition?.props?.container);

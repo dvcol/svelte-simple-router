@@ -8,5 +8,5 @@ export const transition: TransitionProps<{ in?: ScaleFreezeParams; out?: ScaleFr
   in: scaleFreeze,
   out: scaleFreeze,
   params: { in: { delay: 400 } },
-  skipFirst: true,
+  skipFirst: { use: scaleFreeze, props: { delay: 100 } },
 };

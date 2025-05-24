@@ -1,5 +1,5 @@
 import type { Values } from '@dvcol/common-utils/common/class';
-import type { TransitionFunction } from '@dvcol/svelte-utils/transition';
+import type { TransitionFunction, TransitionProps as TransitionParams, TransitionWithProps } from '@dvcol/svelte-utils/transition';
 import type { Snippet } from 'svelte';
 import type { HTMLAttributes } from 'svelte/elements';
 
@@ -30,14 +30,14 @@ export interface RouterContextProps<Name extends RouteName = any> {
 export type TransitionDiscardFunction = (entry: MutationRecord, index: number, entries: MutationRecord[]) => boolean;
 
 export interface TransitionProps<
-  T extends { in?: Record<string, any>; out?: Record<string, any> } = { in?: Record<string, any>; out?: Record<string, any> },
+  T extends { in?: TransitionParams; out?: TransitionParams; first?: TransitionParams } = { in?: TransitionParams; out?: TransitionParams; first?: TransitionParams },
 > {
   /**
    * Skip the first enter transition.
    * This is useful when the first route load is fast and the transition is not needed.
-   * @default true
+   * @default false
    */
-  skipFirst?: boolean;
+  skipFirst?: boolean | TransitionFunction<T['first']> | TransitionWithProps<TransitionParams>;
   /**
    * If `true`, the transition will be updated on any route change.
    * By default, the transition is only triggered when the component changes to avoid unnecessary mounting and unmounting.
