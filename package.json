@@ -1,7 +1,7 @@
 {
   "name": "@dvcol/svelte-simple-router",
   "type": "module",
-  "version": "2.7.0",
+  "version": "2.7.1",
   "packageManager": "pnpm@10.11.0",
   "description": "Simple svelte 5 client side router",
   "author": "dvcol",

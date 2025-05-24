@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.7.1](https://github.com/dvcol/svelte-simple-router/compare/v2.7.0...v2.7.1) (2025-05-24)
+
+
+### Bug Fixes
+
+* **router:** optimize initialisation to prevent blinking ([11b2580](https://github.com/dvcol/svelte-simple-router/commit/11b258080a4c66ce40a87d3b0b6aed4544addb65))
+* **transition:** fix reactive state to prevent jumping ([168fc41](https://github.com/dvcol/svelte-simple-router/commit/168fc41c9852dea7fe2752151ef2f58042330d3e))
+
 ## [2.7.0](https://github.com/dvcol/svelte-simple-router/compare/v2.6.0...v2.7.0) (2025-05-24)
 
 
