@@ -33,12 +33,6 @@ export interface TransitionProps<
   T extends { in?: TransitionParams; out?: TransitionParams; first?: TransitionParams } = { in?: TransitionParams; out?: TransitionParams; first?: TransitionParams },
 > {
   /**
-   * Skip the first enter transition.
-   * This is useful when the first route load is fast and the transition is not needed.
-   * @default false
-   */
-  skipFirst?: boolean | TransitionFunction<T['first']> | TransitionWithProps<TransitionParams>;
-  /**
    * If `true`, the transition will be updated on any route change.
    * By default, the transition is only triggered when the component changes to avoid unnecessary mounting and unmounting.
    *
@@ -58,6 +52,18 @@ export interface TransitionProps<
    * Transition to use when navigating away from the current route.
    */
   out?: TransitionFunction<T['out']>;
+  /**
+   * The enter transition to use when the route is first loaded.
+   * This is useful when the first route load is fast and the transition is not needed.
+   *
+   * If `false`, no transition will be applied on the first route load.
+   * If `true`, the transition will be applied.
+   * If a function is provided, it will be called with the `in` transition parameters.
+   * If a transition object is provided, it will be used as the transition function and parameters.
+   *
+   * @default true
+   */
+  first?: boolean | TransitionFunction<T['first']> | TransitionWithProps<TransitionParams>;
   /**
    * Transition parameters to be passed to the transition functions.
    */

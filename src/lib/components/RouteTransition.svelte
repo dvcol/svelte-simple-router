@@ -9,30 +9,30 @@
 
   const { children, key, id, transition }: { children: Snippet; id: string; key: any | any[]; transition: TransitionProps } = $props();
 
-  let firstRender = true;
-  const skipFirst = $derived<TransitionProps['skipFirst']>(transition?.skipFirst ?? false);
-  const skipTransition = (skip = skipFirst) => {
+  let firstRender = $state(true);
+  const first = $derived<TransitionProps['first']>(transition?.first ?? true);
+  const skipTransition = () => {
     if (!firstRender) return false;
     firstRender = false;
-    return skip === true;
+    return first === false;
   };
 
-  const isTransitionFunction = (skip?: TransitionProps['skipFirst']): skip is TransitionFunction => typeof skip === 'function' && !!skip;
-  const isTransitionObject = (skip?: TransitionProps['skipFirst']): skip is TransitionWithProps => typeof skip === 'object' && !!skip?.use;
+  const isTransitionFunction = (skip?: TransitionProps['first']): skip is TransitionFunction => typeof skip === 'function' && !!skip;
+  const isTransitionObject = (skip?: TransitionProps['first']): skip is TransitionWithProps => typeof skip === 'object' && !!skip?.use;
 
   const _in = $derived<TransitionFunction>(((node, props, options) => {
     if (skipTransition()) return;
-    if (firstRender && isTransitionFunction(skipFirst)) return skipFirst;
-    if (firstRender && isTransitionObject(skipFirst)) return skipFirst.use;
+    if (firstRender && isTransitionFunction(first)) return first;
+    if (firstRender && isTransitionObject(first)) return first.use;
     return transition?.in?.(node, props, options);
   }) as TransitionFunction);
   const _out = $derived<TransitionFunction>(((node, props, options) => {
-    if (firstRender && skipFirst) return;
+    if (firstRender && first) return;
     return transition?.out?.(node, props, options);
   }) as TransitionFunction);
 
   const _inParams = $derived.by(() => {
-    if (firstRender && isTransitionObject(skipFirst) && skipFirst.props) return skipFirst.props;
+    if (firstRender && isTransitionObject(first) && first.props) return first.props;
     return transition?.params?.in ?? {};
   });
   const _outParams = $derived(transition?.params?.out ?? {});
