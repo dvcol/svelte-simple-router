@@ -144,7 +144,7 @@
   });
 
   // Trigger component resolution on route change
-  $effect(() => {
+  $effect.pre(() => {
     resolveComponent(component, listeners);
   });
 </script>

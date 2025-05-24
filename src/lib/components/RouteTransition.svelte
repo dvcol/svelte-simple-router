@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { TransitionFunction, TransitionWithProps } from '@dvcol/svelte-utils/transition';
+  import type { TransitionFunction } from '@dvcol/svelte-utils/transition';
   import type { Snippet } from 'svelte';
 
   import type { TransitionProps } from '~/models/component.model.js';
@@ -7,34 +7,33 @@
   import { toStyle } from '@dvcol/common-utils/common/class';
   import { mutation } from '@dvcol/svelte-utils/mutation';
 
+  import { isTransitionFunction, isTransitionObject } from '~/models/component.model.js';
+
   const { children, key, id, transition }: { children: Snippet; id: string; key: any | any[]; transition: TransitionProps } = $props();
 
   let firstRender = $state(true);
-  const first = $derived<TransitionProps['first']>(transition?.first ?? true);
-  const skipTransition = () => {
-    if (!firstRender) return false;
-    firstRender = false;
-    return first === false;
-  };
-
-  const isTransitionFunction = (skip?: TransitionProps['first']): skip is TransitionFunction => typeof skip === 'function' && !!skip;
-  const isTransitionObject = (skip?: TransitionProps['first']): skip is TransitionWithProps => typeof skip === 'object' && !!skip?.use;
+  const first = transition?.first ?? true;
 
   const _in = $derived<TransitionFunction>(((node, props, options) => {
-    if (skipTransition()) return;
-    if (firstRender && isTransitionFunction(first)) return first;
-    if (firstRender && isTransitionObject(first)) return first.use;
+    if (firstRender) {
+      firstRender = false;
+      if (first === false) return;
+      if (isTransitionFunction(first)) return first(node, props, options);
+      if (isTransitionObject(first)) return first.use(node, props ?? {}, options);
+    }
     return transition?.in?.(node, props, options);
-  }) as TransitionFunction);
-  const _out = $derived<TransitionFunction>(((node, props, options) => {
-    if (firstRender && first) return;
-    return transition?.out?.(node, props, options);
   }) as TransitionFunction);
 
   const _inParams = $derived.by(() => {
     if (firstRender && isTransitionObject(first) && first.props) return first.props;
     return transition?.params?.in ?? {};
   });
+
+  const _out = $derived<TransitionFunction>(((node, props, options) => {
+    if (firstRender && first === false) return;
+    return transition?.out?.(node, props, options);
+  }) as TransitionFunction);
+
   const _outParams = $derived(transition?.params?.out ?? {});
 
   const _containerProps = $derived(transition?.props?.container);

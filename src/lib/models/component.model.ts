@@ -183,3 +183,10 @@ export type RouteViewProps<Name extends RouteName = any> = Pick<RouterViewProps<
    */
   children?: Snippet;
 } & Partial<Record<Name, Route<Name>['component']>>;
+
+export function isTransitionFunction(skip?: TransitionProps['first']): skip is TransitionFunction {
+  return typeof skip === 'function' && !!skip;
+};
+export function isTransitionObject(skip?: TransitionProps['first']): skip is TransitionWithProps {
+  return typeof skip === 'object' && !!skip?.use;
+};
