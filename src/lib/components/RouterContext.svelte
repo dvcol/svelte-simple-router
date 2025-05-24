@@ -2,7 +2,7 @@
   import type { RouterContextProps } from '~/models/component.model.js';
   import type { IRouter } from '~/models/router.model.js';
 
-  import { onDestroy, onMount } from 'svelte';
+  import { onDestroy } from 'svelte';
 
   import { getRouter, setRouter } from '~/router/context.svelte.js';
   import { Logger, LoggerKey } from '~/utils/logger.utils.js';
@@ -18,16 +18,10 @@
     });
   }
 
-  const resolveRouter = () => {
-    if (outerRouter) return outerRouter;
-    const _router = setRouter(router, options);
-    Logger.debug(`[${LoggerKey} Context]`, 'Router Context set:', _router);
-    return _router;
-  };
+  const resolvedRouter: IRouter = outerRouter ?? setRouter(router, options);
+  if (!outerRouter) Logger.debug(`[${LoggerKey} Context]`, 'Router Context set:', resolvedRouter);
 
-  const resolvedRouter: IRouter = resolveRouter();
-
-  onMount(() => {
+  $effect.pre(() => {
     if (resolvedRouter?.ready) return;
     resolvedRouter?.init();
   });

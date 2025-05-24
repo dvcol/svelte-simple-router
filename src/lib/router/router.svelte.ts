@@ -373,7 +373,7 @@ export class Router<Name extends RouteName = RouteName> implements IRouter<Name>
     if (this.ready) return this;
 
     try {
-      await this.sync();
+      await this.#sync();
     } catch (error) {
       if (error instanceof NavigationCancelledError) {
         Logger.warn(this.#log, 'Failed to sync, navigation cancelled', error);
