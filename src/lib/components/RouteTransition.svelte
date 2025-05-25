@@ -30,7 +30,7 @@
   });
 
   const _out = $derived<TransitionFunction>(((node, props, options) => {
-    if (firstRender && first === false) return;
+    if (firstRender) return;
     return transition?.out?.(node, props, options);
   }) as TransitionFunction);
 
