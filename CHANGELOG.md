@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.7.2](https://github.com/dvcol/svelte-simple-router/compare/v2.7.1...v2.7.2) (2025-05-25)
+
+
+### Bug Fixes
+
+* **transition:** nullify out transition on first render ([88d47e3](https://github.com/dvcol/svelte-simple-router/commit/88d47e3389b952389fea70a264d1cef3d50e2257))
+
 ### [2.7.1](https://github.com/dvcol/svelte-simple-router/compare/v2.7.0...v2.7.1) (2025-05-24)
 
 
