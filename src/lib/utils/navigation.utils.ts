@@ -85,9 +85,9 @@ export function resolveNewHref(target: string, {
     const strSearch = search.toString();
     if (strSearch) href.hash += `?${strSearch}`;
     if (trailingHash?.length && !stripTrailingHash) href.hash += `#${trailingHash}`;
-    if (base) href.pathname = toPathSegment(base, true);
+    if (base) href.pathname = toPathSegment(base, false);
     if (href.search && !href.search?.endsWith('/')) href.search += '/';
-    if (!href.search?.length && !href.pathname?.endsWith('/')) href.pathname += '/';
+    // if (!href.search?.length && !href.pathname?.endsWith('/')) href.pathname += '/';
   } else {
     href.pathname = [base, _target]
       .filter(Boolean)
