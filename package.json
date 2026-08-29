@@ -159,7 +159,7 @@
     "prettier-plugin-svelte": "^3.4.0",
     "publint": "^0.3.12",
     "sass": "^1.86.3",
-    "standard-version": "^9.5.0",
+    "commit-and-tag-version": "^9.5.0",
     "stylelint": "^16.18.0",
     "svelte-check": "^4.2.1",
     "svelte-preprocess": "^6.0.3",
