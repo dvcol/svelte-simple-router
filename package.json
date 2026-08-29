@@ -139,7 +139,7 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/svelte": "^5.2.8",
     "@testing-library/user-event": "^14.6.1",
-    "@tsconfig/node22": "^22.0.1",
+    "@tsconfig/node24": "^24.0.0",
     "@tsconfig/svelte": "^5.0.4",
     "@types/dom-view-transitions": "^1.0.6",
     "@types/node": "^22.14.1",
